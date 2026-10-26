@@ -30,7 +30,7 @@ Never put the service-role key in the frontend or in git. Only `.env.local` is u
 ## Supabase
 
 - Hosted project: `online-store` (`wdbelxrhvkikrncsgshg`, Tokyo).
-- `001_schema.sql` is already applied to the hosted project. The copy in `supabase/migrations/` is the versioned baseline.
+- `001_schema.sql`, `002_auto_approve_stores.sql`, and `003_store_commission.sql` are applied to the hosted project. The copies in `supabase/migrations/` are the versioned baseline.
 - Auth: **email confirmation is disabled** (Supabase Dashboard → Auth → Providers → Email → turn off "Confirm email"), so sign-up returns a session immediately.
 - New users are always `store_owner`. Promote the first admin once, after that user signs up:
 
@@ -54,6 +54,15 @@ where id = (select id from auth.users where email = 'you@example.com');
 - The admin can suspend and reactivate stores at `/admin`; only `active` stores load at `/s/<slug>`.
 - The store link (`slug`) is permanent. Name, description, province, and delivery fees stay editable.
 - To require approval again, add an `auto_approve_stores` setting or change the `status` default and insert policy in a new migration.
+
+### Categories and products
+
+- Super admins manage categories at `/admin/categories`: add, rename in Khmer/English, reorder, hide, and choose parent/child and `requires_size`.
+- Store owners manage products at `/store/products/*`: category, description, draft/active/hidden status, variants (label, price, stock, SKU, active), and photos.
+- The database enforces ownership through RLS. Draft and hidden products are excluded from the public catalog.
+- Photos go to the public `product-images` bucket at `<store_id>/<product_id>/<uuid>.<ext>`. JPEG, PNG, or WebP only, 5 MB max. The client compresses images before upload.
+- The payout preview calls the owner-only `get_store_commission_percent()` function from migration `003`. It returns the current commission to store owners only; anonymous callers are denied.
+- The category seed contains `Clothes` (`requires_size = true`), so new stores can create a product immediately.
 
 Regenerate types after every migration:
 

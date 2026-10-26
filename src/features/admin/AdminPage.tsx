@@ -93,6 +93,15 @@ export function AdminPage() {
       </h1>
       <p className="mt-2 text-slate-600">{t('admin.welcome')}</p>
 
+      <div className="mt-4">
+        <Link
+          to="/admin/categories"
+          className="inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
+        >
+          {t('admin.manageCategories')}
+        </Link>
+      </div>
+
       {actionError ? (
         <p
           role="alert"

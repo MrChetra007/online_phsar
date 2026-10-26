@@ -10,6 +10,7 @@ import { useAuth } from '../auth/context'
 import { StoreDetailsForm } from './StoreDetailsForm'
 import { StoreOnboardingForm } from './StoreOnboardingForm'
 import { StorePrivateForm } from './StorePrivateForm'
+import { StoreProductsSection } from './StoreProductsSection'
 
 const bannerStyles = {
   pending: 'border-amber-200 bg-amber-50 text-amber-900',
@@ -127,6 +128,8 @@ export function StoreDashboardPage() {
               <StoreStatusBanner store={store} />
             </div>
           </div>
+
+          <StoreProductsSection store={store} />
 
           <StoreDetailsForm
             store={store}

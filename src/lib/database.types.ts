@@ -971,6 +971,7 @@ export type Database = {
         }[]
       }
       get_store_balance: { Args: { p_store_id: string }; Returns: number }
+      get_store_commission_percent: { Args: never; Returns: number }
       is_super_admin: { Args: never; Returns: boolean }
       link_telegram_chat: {
         Args: { p_chat_id: number; p_code: string }
