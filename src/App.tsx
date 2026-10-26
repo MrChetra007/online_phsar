@@ -8,12 +8,16 @@ import { RequireRole } from './features/auth/RequireRole'
 import { SignUpPage } from './features/auth/SignUpPage'
 import { ProductEditorPage } from './features/store-dashboard/ProductEditorPage'
 import { StoreDashboardPage } from './features/store-dashboard/StoreDashboardPage'
+import { CheckoutPage } from './features/checkout/CheckoutPage'
+import { CartPage } from './pages/CartPage'
 import { CategoryPage } from './pages/CategoryPage'
 import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { OrderConfirmationPage } from './pages/OrderConfirmationPage'
 import { ProductPage } from './pages/ProductPage'
 import { PublicStorePage } from './pages/PublicStorePage'
 import { SearchPage } from './pages/SearchPage'
+import { TrackingPage } from './pages/TrackingPage'
 
 function App() {
   return (
@@ -23,6 +27,10 @@ function App() {
         <Route path="login" element={<LoginPage />} />
         <Route path="signup" element={<SignUpPage />} />
         <Route path="search" element={<SearchPage />} />
+        <Route path="cart" element={<CartPage />} />
+        <Route path="checkout" element={<CheckoutPage />} />
+        <Route path="order/:orderCode" element={<OrderConfirmationPage />} />
+        <Route path="track" element={<TrackingPage />} />
         <Route path="c/:slug" element={<CategoryPage />} />
         <Route path="p/:productId" element={<ProductPage />} />
         <Route path="s/:slug" element={<PublicStorePage />} />

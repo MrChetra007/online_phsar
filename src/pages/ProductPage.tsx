@@ -1,9 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getPublicProduct, type PublicProduct } from '../api/catalog'
+import { Button } from '../components/Button'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { ErrorState } from '../components/ErrorState'
+import { QuantityStepper } from '../components/QuantityStepper'
 import { Skeleton } from '../components/Skeleton'
+import { useCart } from '../features/cart'
 import { categoryName } from '../lib/categories'
+import type { CartItemInput, CartStore } from '../lib/cart'
+import { getErrorMessage } from '../lib/errors'
 import { useI18n } from '../lib/i18n'
 import { formatMoney } from '../lib/money'
 import { priceRange } from '../lib/products'
@@ -14,14 +20,24 @@ type ProductState = {
   product: PublicProduct | null
 }
 
+type PendingAdd = {
+  store: CartStore
+  item: CartItemInput
+  quantity: number
+}
+
 export function ProductPage() {
   const { t, language } = useI18n()
+  const { cart, addItem, replaceWithItem } = useCart()
   const { productId } = useParams<{ productId: string }>()
   const [version, setVersion] = useState(0)
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     null,
   )
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null)
+  const [quantity, setQuantity] = useState(1)
+  const [addStatus, setAddStatus] = useState<'added' | 'sold_out' | null>(null)
+  const [pendingAdd, setPendingAdd] = useState<PendingAdd | null>(null)
   const [state, setState] = useState<ProductState>({
     requestKey: '',
     status: 'ready',
@@ -38,6 +54,11 @@ export function ProductPage() {
       .then((product) => {
         if (active) {
           setState({ requestKey, status: 'ready', product })
+          setSelectedVariantId(null)
+          setSelectedImageId(null)
+          setQuantity(1)
+          setAddStatus(null)
+          setPendingAdd(null)
         }
       })
       .catch(() => {
@@ -108,6 +129,64 @@ export function ProductPage() {
     null
   const range = priceRange(product.variants.map((variant) => variant.price))
   const inStock = (selectedVariant?.stock ?? 0) > 0
+  const maxQuantity = Math.max(1, Math.min(99, selectedVariant?.stock ?? 1))
+  const safeQuantity = Math.min(Math.max(1, quantity), maxQuantity)
+  const canAdd = Boolean(
+    selectedVariant && selectedVariant.stock > 0 && product.store,
+  )
+
+  function buildPendingAdd(): PendingAdd | null {
+    if (!selectedVariant || !product.store || selectedVariant.stock <= 0) {
+      return null
+    }
+
+    return {
+      store: {
+        id: product.store_id,
+        slug: product.store.slug,
+        name: product.store.name,
+      },
+      item: {
+        variantId: selectedVariant.id,
+        productId: product.id,
+        productName: product.name,
+        variantLabel: selectedVariant.label,
+        unitPrice: selectedVariant.price,
+        imageUrl: product.images[0]?.url ?? null,
+        stock: selectedVariant.stock,
+      },
+      quantity: safeQuantity,
+    }
+  }
+
+  function handleAddToCart() {
+    const pending = buildPendingAdd()
+    if (!pending) {
+      setAddStatus('sold_out')
+      return
+    }
+
+    const outcome = addItem(pending.store, pending.item, pending.quantity)
+
+    if (outcome === 'different_store') {
+      setPendingAdd(pending)
+      return
+    }
+
+    setAddStatus(outcome)
+  }
+
+  function handleReplaceCart() {
+    if (!pendingAdd) return
+
+    const outcome = replaceWithItem(
+      pendingAdd.store,
+      pendingAdd.item,
+      pendingAdd.quantity,
+    )
+    setPendingAdd(null)
+    setAddStatus(outcome === 'added' ? 'added' : 'sold_out')
+  }
 
   return (
     <section>
@@ -230,7 +309,11 @@ export function ProductPage() {
                       type="button"
                       disabled={unavailable}
                       aria-pressed={isSelected}
-                      onClick={() => setSelectedVariantId(variant.id)}
+                      onClick={() => {
+                        setSelectedVariantId(variant.id)
+                        setQuantity(1)
+                        setAddStatus(null)
+                      }}
                       className={[
                         'flex flex-wrap items-center justify-between gap-x-2 gap-y-1 rounded-xl border px-3 py-2.5 text-left text-sm transition',
                         unavailable
@@ -259,6 +342,47 @@ export function ProductPage() {
               </div>
             </div>
           ) : null}
+
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">
+                  {t('cart.quantity')}
+                </p>
+                <QuantityStepper
+                  value={safeQuantity}
+                  max={maxQuantity}
+                  onChange={(next) => {
+                    setQuantity(next)
+                    setAddStatus(null)
+                  }}
+                  className="mt-2"
+                />
+              </div>
+              <Button
+                onClick={handleAddToCart}
+                disabled={!canAdd}
+                className="w-full sm:flex-1"
+              >
+                {t('cart.addToCart')}
+              </Button>
+            </div>
+
+            {addStatus === 'added' ? (
+              <p role="status" className="mt-3 text-sm text-emerald-700">
+                {t('cart.added')}{' '}
+                <Link to="/cart" className="font-semibold underline">
+                  {t('nav.cart')}
+                </Link>
+              </p>
+            ) : null}
+
+            {addStatus === 'sold_out' ? (
+              <p role="alert" className="mt-3 text-sm text-red-600">
+                {getErrorMessage('SOLD_OUT', language)}
+              </p>
+            ) : null}
+          </div>
 
           <div className="mt-6">
             <h2 className="text-sm font-semibold text-slate-900">
@@ -289,6 +413,24 @@ export function ProductPage() {
           ) : null}
         </div>
       </div>
+
+      {pendingAdd ? (
+        <ConfirmDialog
+          title={t('cart.differentStoreTitle')}
+          confirmLabel={t('cart.clearAndAdd')}
+          cancelLabel={t('cart.keepCart')}
+          onConfirm={handleReplaceCart}
+          onCancel={() => setPendingAdd(null)}
+          danger
+        >
+          <p>{t('cart.differentStoreText')}</p>
+          {cart ? (
+            <p className="mt-2 font-medium text-slate-800">
+              {cart.name} · {pendingAdd.store.name}
+            </p>
+          ) : null}
+        </ConfirmDialog>
+      ) : null}
     </section>
   )
 }

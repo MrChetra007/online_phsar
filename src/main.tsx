@@ -8,15 +8,18 @@ import '@fontsource/noto-sans-khmer/700.css'
 import './index.css'
 import App from './App.tsx'
 import { AuthProvider } from './features/auth'
+import { CartProvider } from './features/cart'
 import { I18nProvider } from './lib/i18n'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <I18nProvider>
       <AuthProvider>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+        <CartProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </CartProvider>
       </AuthProvider>
     </I18nProvider>
   </StrictMode>,

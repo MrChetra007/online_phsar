@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react'
 
-type Variant = 'primary' | 'secondary' | 'ghost'
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 type Size = 'md' | 'sm'
 
 const base =
@@ -11,6 +11,7 @@ const variants: Record<Variant, string> = {
   secondary:
     'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50',
   ghost: 'text-emerald-700 hover:bg-emerald-50',
+  danger: 'bg-red-600 text-white hover:bg-red-700',
 }
 
 const sizes: Record<Size, string> = {

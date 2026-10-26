@@ -2,6 +2,7 @@ import { Link, Outlet, useNavigate } from 'react-router-dom'
 import { useI18n } from '../lib/i18n'
 import { homeForRole } from '../lib/roles'
 import { useAuth } from '../features/auth/context'
+import { useCart } from '../features/cart'
 import { LanguageSwitcher } from './LanguageSwitcher'
 
 const currentYear = new Date().getFullYear()
@@ -9,6 +10,7 @@ const currentYear = new Date().getFullYear()
 export function AppShell() {
   const { t } = useI18n()
   const { profile, logout } = useAuth()
+  const { itemCount } = useCart()
   const navigate = useNavigate()
 
   async function handleLogout() {
@@ -48,6 +50,24 @@ export function AppShell() {
           </Link>
 
           <div className="flex flex-wrap items-center gap-2">
+            <Link
+              to="/cart"
+              aria-label={
+                itemCount > 0 ? `${t('nav.cart')}, ${itemCount}` : t('nav.cart')
+              }
+              className="inline-flex items-center rounded-lg px-2.5 py-1 text-sm font-medium text-slate-700 hover:bg-slate-100"
+            >
+              {t('nav.cart')}
+              {itemCount > 0 ? (
+                <span
+                  aria-hidden="true"
+                  className="ml-1 rounded-full bg-emerald-600 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white"
+                >
+                  {itemCount > 99 ? '99+' : itemCount}
+                </span>
+              ) : null}
+            </Link>
+
             {dashboardPath ? (
               <>
                 <Link

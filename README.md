@@ -74,6 +74,15 @@ where id = (select id from auth.users where email = 'you@example.com');
 - Only active products from active stores are returned. Out-of-stock variants are shown but cannot be selected.
 - Entering through `/s/<slug>` stores `store_link` in the browser session for the order `source`; all other entries default to `platform`. The rate is unchanged.
 
+### Cart and COD checkout
+
+- Cart `/cart`: one store only, persisted in `localStorage`, with quantity controls and a clear-cart confirmation. Adding an item from another store asks before replacing the cart.
+- Checkout `/checkout`: name, Cambodian phone, address, province, and cash on delivery. KHQR is shown as coming soon until the payment step.
+- Delivery is an estimate: the checkout shows both local and other-province fees, because the final fee is chosen by `create_order` from the province setting.
+- `create_order` rechecks maintenance, COD availability, store status, stock, and rate limits. Errors such as `SOLD_OUT`, `RATE_LIMITED`, and `MAINTENANCE` are shown in the customer's language.
+- Confirmation `/order/<code>` shows the order code and a tracking link. The tracking page is a temporary placeholder until the tracking step.
+- A successful order uses the session `store_link` attribution when present and clears it afterward.
+
 Regenerate types after every migration:
 
 ```bash
