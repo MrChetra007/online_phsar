@@ -14,6 +14,7 @@ import { CategoryPage } from './pages/CategoryPage'
 import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage'
+import { PaymentPage } from './pages/PaymentPage'
 import { ProductPage } from './pages/ProductPage'
 import { PublicStorePage } from './pages/PublicStorePage'
 import { SearchPage } from './pages/SearchPage'
@@ -30,6 +31,7 @@ function App() {
         <Route path="cart" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />
         <Route path="order/:orderCode" element={<OrderConfirmationPage />} />
+        <Route path="pay/:orderCode" element={<PaymentPage />} />
         <Route path="track" element={<TrackingPage />} />
         <Route path="c/:slug" element={<CategoryPage />} />
         <Route path="p/:productId" element={<ProductPage />} />

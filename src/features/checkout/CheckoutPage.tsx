@@ -17,7 +17,8 @@ import { errorCodeFrom, getErrorMessage } from '../../lib/errors'
 import { useI18n } from '../../lib/i18n'
 import { formatMoney } from '../../lib/money'
 import { isValidKhmerPhone } from '../../lib/phone'
-import type { OrderConfirmationState } from './types'
+import { savePaymentState } from './paymentContext'
+import type { KhqrPaymentState, OrderConfirmationState } from './types'
 
 type CheckoutLoadState = {
   requestKey: string
@@ -71,6 +72,7 @@ export function CheckoutPage() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [failure, setFailure] = useState<FormFailure | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'khqr'>('cod')
 
   const cartId = cart?.id
   const cartSlug = cart?.slug
@@ -148,11 +150,10 @@ export function CheckoutPage() {
 
   const store = loadState.store
   const settings = loadState.settings
+  const selectedPaymentMethod = settings.codEnabled ? paymentMethod : 'khqr'
   const blockedMessage = settings.maintenance
     ? getErrorMessage('MAINTENANCE', language)
-    : !settings.codEnabled
-      ? getErrorMessage('COD_DISABLED', language)
-      : null
+    : null
 
   if (blockedMessage) {
     return (
@@ -222,9 +223,30 @@ export function CheckoutPage() {
         customerPhone: values.phone.trim(),
         address: values.address.trim(),
         province: values.province.trim(),
-        paymentMethod: 'cod',
+        paymentMethod: selectedPaymentMethod,
         source: getOrderSource(),
       })
+
+      if (result.paymentMethod === 'khqr') {
+        const payment: KhqrPaymentState = {
+          orderId: result.orderId,
+          orderCode: result.orderCode,
+          storeName: cart.name,
+          storeSlug: cart.slug,
+          customerPhone: values.phone.trim(),
+          totalAmount: result.totalAmount,
+          qrExpiresAt: result.qrExpiresAt,
+        }
+
+        savePaymentState(payment)
+        clearCart()
+        clearOrderSource()
+        navigate(`/pay/${encodeURIComponent(result.orderCode)}`, {
+          replace: true,
+          state: payment,
+        })
+        return
+      }
 
       const confirmation: OrderConfirmationState = {
         orderCode: result.orderCode,
@@ -346,41 +368,78 @@ export function CheckoutPage() {
               {t('checkout.paymentTitle')}
             </h2>
 
-            <label className="mt-4 flex cursor-default gap-3 rounded-xl border border-emerald-600 bg-emerald-50 p-3">
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="cod"
-                checked
-                readOnly
-                className="mt-1 size-4 accent-emerald-600"
-              />
-              <span>
-                <span className="block text-sm font-semibold text-emerald-900">
-                  {t('checkout.cod')}
-                </span>
-                <span className="mt-0.5 block text-sm text-emerald-800">
-                  {t('checkout.codHint')}
-                </span>
-              </span>
-            </label>
-
-            <div className="mt-2 flex gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 opacity-70">
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="khqr"
-                disabled
-                className="mt-1 size-4"
-              />
-              <span>
-                <span className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-700">
-                  {t('checkout.khqr')}
-                  <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">
-                    {t('checkout.comingSoon')}
+            <div className="mt-4 space-y-2">
+              <label
+                className={[
+                  'flex gap-3 rounded-xl border p-3',
+                  selectedPaymentMethod === 'cod'
+                    ? 'border-emerald-600 bg-emerald-50'
+                    : 'border-slate-200 bg-white',
+                  settings.codEnabled
+                    ? 'cursor-pointer'
+                    : 'cursor-not-allowed opacity-60',
+                ].join(' ')}
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="cod"
+                  checked={selectedPaymentMethod === 'cod'}
+                  onChange={() => setPaymentMethod('cod')}
+                  disabled={!settings.codEnabled}
+                  className="mt-1 size-4 accent-emerald-600"
+                />
+                <span>
+                  <span
+                    className={[
+                      'block text-sm font-semibold',
+                      selectedPaymentMethod === 'cod'
+                        ? 'text-emerald-900'
+                        : 'text-slate-800',
+                    ].join(' ')}
+                  >
+                    {t('checkout.cod')}
+                  </span>
+                  <span className="mt-0.5 block text-sm text-slate-600">
+                    {settings.codEnabled
+                      ? t('checkout.codHint')
+                      : getErrorMessage('COD_DISABLED', language)}
                   </span>
                 </span>
-              </span>
+              </label>
+
+              <label
+                className={[
+                  'flex cursor-pointer gap-3 rounded-xl border p-3',
+                  selectedPaymentMethod === 'khqr'
+                    ? 'border-emerald-600 bg-emerald-50'
+                    : 'border-slate-200 bg-white',
+                ].join(' ')}
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="khqr"
+                  checked={selectedPaymentMethod === 'khqr'}
+                  onChange={() => setPaymentMethod('khqr')}
+                  className="mt-1 size-4 accent-emerald-600"
+                />
+                <span>
+                  <span
+                    className={[
+                      'block text-sm font-semibold',
+                      selectedPaymentMethod === 'khqr'
+                        ? 'text-emerald-900'
+                        : 'text-slate-800',
+                    ].join(' ')}
+                  >
+                    {t('checkout.khqr')}
+                  </span>
+                  <span className="mt-0.5 block text-sm text-slate-600">
+                    {t('checkout.khqrHint')}
+                  </span>
+                </span>
+              </label>
             </div>
           </div>
         </div>

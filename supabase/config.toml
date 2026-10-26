@@ -1,0 +1,10 @@
+project_id = "wdbelxrhvkikrncsgshg"
+
+[functions.generate_khqr]
+verify_jwt = true
+
+[functions.khqr_webhook]
+verify_jwt = false
+
+[functions.verify_khqr_payment]
+verify_jwt = true

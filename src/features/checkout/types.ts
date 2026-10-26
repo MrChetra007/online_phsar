@@ -9,3 +9,13 @@ export type OrderConfirmationState = {
   deliveryFee: number
   totalAmount: number
 }
+
+export type KhqrPaymentState = {
+  orderId: string
+  orderCode: string
+  storeName: string
+  storeSlug: string
+  customerPhone: string
+  totalAmount: number
+  qrExpiresAt: string | null
+}

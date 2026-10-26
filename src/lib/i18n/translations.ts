@@ -300,7 +300,7 @@ export const en = {
   'checkout.cod': 'Cash on delivery',
   'checkout.codHint': 'Pay the courier when your order arrives.',
   'checkout.khqr': 'KHQR',
-  'checkout.comingSoon': 'Coming soon',
+  'checkout.khqrHint': 'Scan a KHQR code with your banking app.',
   'checkout.summary': 'Order summary',
   'checkout.subtotal': 'Items subtotal',
   'checkout.deliveryEstimate': 'Delivery estimate',
@@ -332,6 +332,44 @@ export const en = {
   'order.missingTitle': 'Order confirmation unavailable',
   'order.missingText':
     'Use order tracking with your order code and phone number.',
+  'payment.title': 'Pay with KHQR',
+  'payment.subtitle': 'Scan the code below with your banking app.',
+  'payment.amount': 'Amount to pay',
+  'payment.loadingQr': 'Creating your KHQR code…',
+  'payment.qrAlt': 'KHQR payment code',
+  'payment.expiresIn': 'Expires in',
+  'payment.waiting':
+    'This page updates automatically after you complete the payment.',
+  'payment.expiredShort': 'QR expired',
+  'payment.expiredTitle': 'This KHQR code has expired',
+  'payment.newQr': 'Get a new QR',
+  'payment.reopening': 'Creating a new QR…',
+  'payment.saveCode':
+    'Save your order code. You will need it to track your order.',
+  'payment.checkDelayed':
+    'Still checking. Your banking app may show the payment before this page updates.',
+  'payment.tryAgain': 'Try again',
+  'payment.paidTitle': 'Payment received',
+  'payment.paidText':
+    'Your payment was successful. The shop will continue with your order.',
+  'payment.flaggedTitle': 'Payment needs review',
+  'payment.flaggedText':
+    'We received a payment, but the amount does not match this order. Track the order or contact the shop.',
+  'payment.cancelledTitle': 'Order cancelled',
+  'payment.cancelledText': 'This order can no longer be paid.',
+  'payment.missingTitle': 'Payment details unavailable',
+  'payment.missingText':
+    'Open this page from checkout, or use your order code and phone number to track the order.',
+  'payment.errorExpired':
+    'The payment window has expired. Get a new QR to continue.',
+  'payment.errorRateLimited': 'Too many requests. Wait a moment and try again.',
+  'payment.errorUnavailable':
+    'KHQR payment is temporarily unavailable. Please try again later.',
+  'payment.errorAmount':
+    'The order amount is invalid. Please return to your cart.',
+  'payment.errorSoldOut':
+    'Some items are no longer available, so this order cannot be reopened.',
+  'payment.errorGeneric': 'We could not update this payment. Please try again.',
   'tracking.title': 'Track your order',
   'tracking.subtitle':
     'Enter your order code and the phone number you used at checkout.',
@@ -700,7 +738,7 @@ export const km: Record<TranslationKey, string> = {
   'checkout.cod': 'បង់ប្រាក់ពេលទទួលទំនិញ',
   'checkout.codHint': 'បង់ប្រាក់ទៅអ្នកដឹកជញ្ជូនពេលទំនិញមកដល់។',
   'checkout.khqr': 'KHQR',
-  'checkout.comingSoon': 'នឹងមកដល់ឆាប់ៗនេះ',
+  'checkout.khqrHint': 'ស្កេនកូដ KHQR ដោយប្រើកម្មវិធីធនាគាររបស់អ្នក។',
   'checkout.summary': 'សេចក្តីសង្ខេបការបញ្ជាទិញ',
   'checkout.subtotal': 'សរុបទំនិញ',
   'checkout.deliveryEstimate': 'ថ្លៃដឹកជញ្ជូនប៉ាន់ស្មាន',
@@ -733,6 +771,44 @@ export const km: Record<TranslationKey, string> = {
   'order.missingTitle': 'មិនអាចបង្ហាញការបញ្ជាក់ការបញ្ជាទិញ',
   'order.missingText':
     'សូមប្រើការតាមដានការបញ្ជាទិញ ជាមួយលេខកូដ និងលេខទូរសព្ទរបស់អ្នក។',
+  'payment.title': 'បង់ប្រាក់ដោយ KHQR',
+  'payment.subtitle': 'ស្កេនកូដខាងក្រោមដោយប្រើកម្មវិធីធនាគាររបស់អ្នក។',
+  'payment.amount': 'ចំនួនទឹកប្រាក់ត្រូវបង់',
+  'payment.loadingQr': 'កំពុងបង្កើតកូដ KHQR…',
+  'payment.qrAlt': 'កូដ KHQR សម្រាប់ការបង់ប្រាក់',
+  'payment.expiresIn': 'ផុតកំណត់ក្នុង',
+  'payment.waiting':
+    'ទំព័រនេះនឹងធ្វើបច្ចុប្បន្នភាពដោយស្វ័យប្រវត្តិ បន្ទាប់ពីអ្នកបង់ប្រាក់រួច។',
+  'payment.expiredShort': 'កូដបានផុតកំណត់',
+  'payment.expiredTitle': 'កូដ KHQR នេះបានផុតកំណត់',
+  'payment.newQr': 'បង្កើតកូដ KHQR ថ្មី',
+  'payment.reopening': 'កំពុងបង្កើតកូដថ្មី…',
+  'payment.saveCode': 'សូមរក្សាទុកលេខកូដការបញ្ជាទិញ ដើម្បីតាមដានការដឹកជញ្ជូន។',
+  'payment.checkDelayed':
+    'កំពុងពិនិត្យ… កម្មវិធីធនាគាររបស់អ្នកអាចបង្ហាញការបង់ប្រាក់ មុនពេលទំព័រនេះធ្វើបច្ចុប្បន្នភាព។',
+  'payment.tryAgain': 'ព្យាយាមម្តងទៀត',
+  'payment.paidTitle': 'បានទទួលការបង់ប្រាក់',
+  'payment.paidText':
+    'ការបង់ប្រាក់របស់អ្នកបានជោគជ័យ។ ហាងនឹងបន្តការបញ្ជាទិញរបស់អ្នក។',
+  'payment.flaggedTitle': 'ការបង់ប្រាក់ត្រូវការពិនិត្យ',
+  'payment.flaggedText':
+    'យើងបានទទួលការបង់ប្រាក់ ប៉ុន្តែចំនួនទឹកប្រាក់មិនត្រូវគ្នានឹងការបញ្ជាទិញនេះ។ សូមតាមដានការបញ្ជាទិញ ឬទាក់ទងហាង។',
+  'payment.cancelledTitle': 'ការបញ្ជាទិញត្រូវបានបោះបង់',
+  'payment.cancelledText': 'ការបញ្ជាទិញនេះលែងអាចបង់ប្រាក់បានទៀតហើយ។',
+  'payment.missingTitle': 'មិនអាចបង្ហាញព័ត៌មានបង់ប្រាក់',
+  'payment.missingText':
+    'សូមបើកទំព័រនេះពីការបង់ប្រាក់ ឬប្រើលេខកូដ និងលេខទូរសព្ទ ដើម្បីតាមដានការបញ្ជាទិញ។',
+  'payment.errorExpired':
+    'ពេលវេលាបង់ប្រាក់បានផុតកំណត់។ សូមបង្កើតកូដថ្មីដើម្បីបន្ត។',
+  'payment.errorRateLimited':
+    'មានសំណើច្រើនពេក។ សូមរង់ចាំបន្តិច ហើយព្យាយាមម្តងទៀត។',
+  'payment.errorUnavailable':
+    'សេវាបង់ប្រាក់ KHQR មិនអាចប្រើបានជាបណ្តោះអាសន្ន។ សូមព្យាយាមម្តងទៀតនៅពេលក្រោយ។',
+  'payment.errorAmount': 'ចំនួនទឹកប្រាក់មិនត្រឹមត្រូវ។ សូមត្រឡប់ទៅកន្ត្រកវិញ។',
+  'payment.errorSoldOut':
+    'ទំនិញមួយចំនួនលែងមានក្នុងស្តុក ដូច្នេះមិនអាចបើកការបញ្ជាទិញនេះឡើងវិញបានទេ។',
+  'payment.errorGeneric':
+    'មិនអាចធ្វើបច្ចុប្បន្នភាពការបង់ប្រាក់បានទេ។ សូមព្យាយាមម្តងទៀត។',
   'tracking.title': 'តាមដានការបញ្ជាទិញ',
   'tracking.subtitle':
     'សូមបញ្ចូលលេខកូដការបញ្ជាទិញ និងលេខទូរសព្ទដែលអ្នកបានប្រើពេលបញ្ជាទិញ។',

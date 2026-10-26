@@ -31,6 +31,7 @@ Never put the service-role key in the frontend or in git. Only `.env.local` is u
 
 - Hosted project: `online-store` (`wdbelxrhvkikrncsgshg`, Tokyo).
 - `001_schema.sql`, `002_auto_approve_stores.sql`, and `003_store_commission.sql` are applied to the hosted project. The copies in `supabase/migrations/` are the versioned baseline.
+- `004_khqr_payments.sql` adds the KHQR payment fields and `set_order_khqr`; apply it before deploying the payment functions.
 - Auth: **email confirmation is disabled** (Supabase Dashboard → Auth → Providers → Email → turn off "Confirm email"), so sign-up returns a session immediately.
 - New users are always `store_owner`. Promote the first admin once, after that user signs up:
 
@@ -74,14 +75,39 @@ where id = (select id from auth.users where email = 'you@example.com');
 - Only active products from active stores are returned. Out-of-stock variants are shown but cannot be selected.
 - Entering through `/s/<slug>` stores `store_link` in the browser session for the order `source`; all other entries default to `platform`. The rate is unchanged.
 
-### Cart and COD checkout
+### Cart and checkout
 
 - Cart `/cart`: one store only, persisted in `localStorage`, with quantity controls and a clear-cart confirmation. Adding an item from another store asks before replacing the cart.
-- Checkout `/checkout`: name, Cambodian phone, address, province, and cash on delivery. KHQR is shown as coming soon until the payment step.
+- Checkout `/checkout`: name, Cambodian phone, address, province, and payment method. Cash on delivery and KHQR are available.
 - Delivery is an estimate: the checkout shows both local and other-province fees, because the final fee is chosen by `create_order` from the province setting.
 - `create_order` rechecks maintenance, COD availability, store status, stock, and rate limits. Errors such as `SOLD_OUT`, `RATE_LIMITED`, and `MAINTENANCE` are shown in the customer's language.
-- Confirmation `/order/<code>` shows the order code and a tracking link.
+- A COD order goes to confirmation `/order/<code>`, which shows the order code and a tracking link.
+- A KHQR order goes to `/pay/<code>`, which shows the QR code, amount, expiry, and automatic payment checks.
 - A successful order uses the session `store_link` attribution when present and clears it afterward.
+
+### KHQR payments
+
+- The platform uses one KHQR.dev merchant account for all stores. Orders are matched by the generated KHQR `md5`, so each QR must carry the correct order amount.
+- `generate_khqr` creates or reuses the order QR; the QR expires after at most 10 minutes. `verify_khqr_payment` polls the provider, and the signed `khqr_webhook` is the authoritative payment notification.
+- A correct payment marks the order paid. A payment with a different amount marks it `flagged` for manual review. Duplicate webhooks are ignored.
+- An unpaid QR can expire and release stock. The payment page and tracking page can reopen it with the same order code and phone, which reserves stock again and creates a fresh QR.
+- The payment page checks every 5 seconds through `verify_khqr_payment`; it does not use the rate-limited tracking lookup for polling.
+- Configure the Edge Function secrets before deploying:
+  - `KHQRDEV_TOKEN` (required)
+  - `KHQRDEV_WEBHOOK_SECRET` (required)
+  - `KHQRDEV_CURRENCY` (`USD` or `KHR`, default `USD`)
+  - `KHQRDEV_KHR_PER_USD` (required when using `KHR`)
+  - `KHQRDEV_BASE_URL` (optional, default `https://api.khqr.dev/v1`)
+- Deploy with:
+
+```bash
+supabase functions deploy generate_khqr --project-ref wdbelxrhvkikrncsgshg
+supabase functions deploy verify_khqr_payment --project-ref wdbelxrhvkikrncsgshg
+supabase functions deploy khqr_webhook --no-verify-jwt --project-ref wdbelxrhvkikrncsgshg
+```
+
+- Set the KHQR.dev webhook to `https://wdbelxrhvkikrncsgshg.supabase.co/functions/v1/khqr_webhook`.
+- Never put the KHQR.dev token or webhook secret in the frontend or in git.
 
 ### Order tracking
 
@@ -119,6 +145,7 @@ src/
   lib/          # money, phone, errors, i18n, database.types.ts
   pages/        # routed screens
 supabase/
+  functions/    # Edge Functions for KHQR generation, polling, and webhooks
   migrations/   # numbered SQL files; never edit an applied migration
 doc/            # plan, build guide, schema
 ```
