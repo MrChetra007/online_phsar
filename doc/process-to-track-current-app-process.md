@@ -108,6 +108,7 @@ Implemented routes:
 | `/admin/orders/:orderId`      | Admin order detail and actions           |
 | `/admin/payments`             | Flagged and refund-due payments          |
 | `/admin/disputes`             | Open customer disputes                   |
+| `/admin/settlements`          | Weekly settlement and balance actions    |
 | `/admin/settings`             | Platform settings editor                 |
 | `/admin/categories`           | Category management                      |
 
@@ -126,6 +127,8 @@ Implemented behavior:
 - Telegram link-code generation from the store dashboard.
 - Admin panel with all-orders filtering, required-note status changes, payment
   review, dispute resolution, store approvals, and platform settings.
+- Weekly settlement page with eligible-order selection, payout/carry-forward
+  confirmation, store transfers, deductions, ledger, and settlement history.
 - English and Khmer strings for all current customer flows.
 
 ---
@@ -145,7 +148,7 @@ Implemented behavior:
 | 8    | KHQR payments                  | Implemented locally; live acceptance pending |
 | 9    | Store dashboard orders         | Implemented locally; live acceptance pending |
 | 10   | Admin panel                    | Implemented locally; live acceptance pending |
-| 11   | Settlement                     | Not started                                 |
+| 11   | Settlement                     | Implemented locally; live acceptance pending |
 | 12   | Telegram notifications         | Not started                                 |
 | 13   | Scheduled jobs                 | Not started                                 |
 | 14   | Hardening, tests, deploy       | Not started                                 |
@@ -384,6 +387,68 @@ Last run: 2026-10-27
 
 ---
 
+## 6c. Step 11 settlement details
+
+### What was built
+
+API:
+
+- `src/api/settlement.ts`: settlement summary from `get_settlement_summary`,
+  eligible-order loading, store settlement data (orders, ledger, history, order
+  choices), `create_settlement`, `record_commission_settled`, and
+  `record_deduction`.
+- `src/lib/ledger.ts`: shared ledger-type labels for the store and admin views.
+
+UI:
+
+- `src/features/admin/AdminSettlementsPage.tsx`:
+  - summary table with eligible orders, KHQR payable, COD commission owed,
+    current balance, and estimated net;
+  - store detail with the same metrics plus eligible orders and checkboxes;
+  - projected net for the selected orders with a confirmation dialog;
+  - bank reference required only when the settlement pays the store;
+  - negative net shown as "store owes the platform" and carried forward;
+  - forms to record a store transfer and an order deduction;
+  - balance ledger and past settlements with direction, reference, and note.
+- `src/features/admin/AdminNav.tsx`: added the settlements link.
+- `src/App.tsx`: added `/admin/settlements`.
+
+### Security and settlement rules
+
+- Route guard `RequireRole role="super_admin"` plus `is_super_admin()` inside
+  every settlement RPC.
+- The database rejects ineligible orders, requires a reference for payouts,
+  and records an audit trail in `ledger_entries` and `settlements`.
+- `settlement_orders.order_id` is unique, so the same order cannot be settled
+  twice; the UI also hides already-settled orders.
+- The UI never edits or deletes ledger rows. The database is append-only.
+- Eligibility uses `payout_hold_days` and `delivered_at` in the browser for the
+  preview, but `create_settlement` rechecks everything before writing.
+- Only stores returned by `get_settlement_summary` are listed, so stores with
+  no eligible orders and a zero balance are omitted.
+- No new migration was needed, and `database.types.ts` already contained the
+  settlement RPCs.
+
+### Local verification
+
+Last run: 2026-10-27
+
+- `npm run typecheck`: passed
+- `npm run lint`: passed with no warnings
+- `npm run test`: 14 files, 65 tests passed
+- `npm run format:check`: passed
+- `npm run build`: passed, with the existing Vite chunk-size warning
+
+### Acceptance status
+
+| Acceptance check                                            | Status                                 |
+| ----------------------------------------------------------- | -------------------------------------- |
+| Positive-net store produces a payout record with reference  | UI/DB path ready; live pending         |
+| COD-only store carries a negative balance, later cleared    | Transfer path ready; live pending      |
+| The same order cannot be settled twice                      | Unique constraint ready; live pending  |
+
+---
+
 ## 7. Remote and environment state
 
 Last known Supabase project:
@@ -422,8 +487,17 @@ These values may have changed. Verify before relying on them.
 
 ### Preferred next action
 
-Step 10 is implemented locally. Run its acceptance checks before starting Step
-11:
+Step 11 is implemented locally. Run its acceptance checks before starting Step
+12:
+
+1. Create a positive-net store with an eligible KHQR order, settle it, and
+   confirm the payout record and reference.
+2. Create a COD-only store with a negative balance, settle it, confirm the debt
+   carries forward, then record a transfer and confirm the balance clears.
+3. Try to settle the same order twice and confirm the database rejects it.
+4. Update this document with the results.
+
+Step 10 acceptance is still pending:
 
 1. Sign in as a store owner and confirm `/admin` and the admin API calls are
    blocked.
@@ -470,6 +544,13 @@ supabase functions deploy khqr_webhook --no-verify-jwt --project-ref wdbelxrhvki
 - Step 9 acceptance is pending; the RLS and UI paths are implemented.
 - Step 10 acceptance is pending; the admin routes, RPC calls, settings editor,
   and notes are implemented locally.
+- Step 11 acceptance is pending; the settlement page, payouts, transfers, and
+  deductions are implemented locally.
+- Step 11 needed no new migration and no regenerated `database.types.ts`.
+- Settlement eligibility is previewed in the browser using `payout_hold_days`
+  and `delivered_at`; `create_settlement` rechecks it server-side.
+- The settlement page only lists stores returned by `get_settlement_summary`;
+  a store with no eligible orders and a zero balance is omitted.
 - Step 10 needed no new migration and no regenerated `database.types.ts`.
 - The admin order list loads up to 500 orders and filters in the browser; add
   server-side paging if order volume grows.
@@ -510,6 +591,15 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
 
 ### 2026-10-27
 
+- Committed Steps 9 and 10 as `392c3ce`.
+- Implemented Step 11 settlement: summary table, eligible-order selection,
+  payout/carry-forward confirmation, store transfers, deductions, ledger, and
+  settlement history.
+- Added `/admin/settlements` and the settlements admin navigation link.
+- No new migration was needed; existing settlement RPCs already enforce
+  eligibility, references, and one-settlement-per-order.
+- Passed typecheck, lint, 65 tests, Prettier, and build.
+- Step 11 live acceptance is now pending.
 - Implemented Step 10 admin panel: all orders with filters, order detail actions
   with required notes, payment review, open disputes, and platform settings.
 - Added `/admin/orders`, `/admin/orders/:orderId`, `/admin/payments`,

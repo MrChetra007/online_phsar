@@ -7,6 +7,7 @@ import { AdminOrdersPage } from './features/admin/AdminOrdersPage'
 import { AdminPage } from './features/admin/AdminPage'
 import { AdminPaymentsPage } from './features/admin/AdminPaymentsPage'
 import { AdminSettingsPage } from './features/admin/AdminSettingsPage'
+import { AdminSettlementsPage } from './features/admin/AdminSettlementsPage'
 import { LoginPage } from './features/auth/LoginPage'
 import { RequireAuth } from './features/auth/RequireAuth'
 import { RequireRole } from './features/auth/RequireRole'
@@ -69,6 +70,10 @@ function App() {
             />
             <Route path="admin/payments" element={<AdminPaymentsPage />} />
             <Route path="admin/disputes" element={<AdminDisputesPage />} />
+            <Route
+              path="admin/settlements"
+              element={<AdminSettlementsPage />}
+            />
             <Route path="admin/settings" element={<AdminSettingsPage />} />
             <Route path="admin/categories" element={<AdminCategoriesPage />} />
           </Route>

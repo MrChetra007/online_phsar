@@ -7,6 +7,7 @@ const links: { to: string; labelKey: TranslationKey; end?: boolean }[] = [
   { to: '/admin/orders', labelKey: 'admin.manageOrders' },
   { to: '/admin/payments', labelKey: 'admin.managePayments' },
   { to: '/admin/disputes', labelKey: 'admin.manageDisputes' },
+  { to: '/admin/settlements', labelKey: 'admin.manageSettlements' },
   { to: '/admin/settings', labelKey: 'admin.settings' },
   { to: '/admin/categories', labelKey: 'admin.manageCategories' },
 ]
