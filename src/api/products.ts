@@ -24,27 +24,9 @@ export type ProductWithDetails = Product & {
   category: CategoryLabel | null
 }
 
-export type PublicProduct = Pick<
-  Product,
-  'id' | 'name' | 'description' | 'category_id' | 'created_at'
-> & {
-  variants: Pick<
-    ProductVariant,
-    'id' | 'label' | 'price' | 'stock' | 'is_active'
-  >[]
-  images: Pick<ProductImage, 'id' | 'url' | 'sort_order'>[]
-  category: CategoryLabel | null
-}
-
 type ProductRow = Product & {
   product_variants: ProductVariant[] | null
   product_images: ProductImage[] | null
-  categories: CategoryLabel | null
-}
-
-type PublicProductRow = PublicProduct & {
-  product_variants: PublicProduct['variants'] | null
-  product_images: PublicProduct['images'] | null
   categories: CategoryLabel | null
 }
 
@@ -67,9 +49,6 @@ export type VariantInput = {
 const PRODUCT_SELECT =
   '*, product_variants(*), product_images(*), categories(name_km, name_en)'
 
-const PUBLIC_PRODUCT_SELECT =
-  'id, name, description, category_id, created_at, categories(name_km, name_en), product_variants(id, label, price, stock, is_active), product_images(id, url, sort_order)'
-
 function mapProduct(row: ProductRow): ProductWithDetails {
   return {
     id: row.id,
@@ -82,23 +61,6 @@ function mapProduct(row: ProductRow): ProductWithDetails {
     updated_at: row.updated_at,
     variants: [...(row.product_variants ?? [])].sort((a, b) =>
       a.created_at.localeCompare(b.created_at),
-    ),
-    images: [...(row.product_images ?? [])].sort(
-      (a, b) => a.sort_order - b.sort_order,
-    ),
-    category: row.categories,
-  }
-}
-
-function mapPublicProduct(row: PublicProductRow): PublicProduct {
-  return {
-    id: row.id,
-    name: row.name,
-    description: row.description,
-    category_id: row.category_id,
-    created_at: row.created_at,
-    variants: (row.product_variants ?? []).filter(
-      (variant) => variant.is_active,
     ),
     images: [...(row.product_images ?? [])].sort(
       (a, b) => a.sort_order - b.sort_order,
@@ -131,22 +93,6 @@ export async function getMyProduct(
 
   if (error) throw error
   return data ? mapProduct(data as unknown as ProductRow) : null
-}
-
-export async function listActiveProductsForStore(
-  storeId: string,
-): Promise<PublicProduct[]> {
-  const { data, error } = await supabase
-    .from('products')
-    .select(PUBLIC_PRODUCT_SELECT)
-    .eq('store_id', storeId)
-    .eq('status', 'active')
-    .order('created_at', { ascending: false })
-
-  if (error) throw error
-  return ((data ?? []) as unknown as PublicProductRow[])
-    .map(mapPublicProduct)
-    .filter((product) => product.variants.length > 0)
 }
 
 export async function createProduct(input: ProductInput): Promise<Product> {

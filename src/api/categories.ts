@@ -30,6 +30,20 @@ export async function listActiveCategories(): Promise<Category[]> {
   return data
 }
 
+export async function getActiveCategoryBySlug(
+  slug: string,
+): Promise<Category | null> {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('slug', slug)
+    .eq('is_active', true)
+    .maybeSingle()
+
+  if (error) throw error
+  return data
+}
+
 export async function listAllCategories(): Promise<Category[]> {
   const { data, error } = await supabase
     .from('categories')

@@ -8,9 +8,12 @@ import { RequireRole } from './features/auth/RequireRole'
 import { SignUpPage } from './features/auth/SignUpPage'
 import { ProductEditorPage } from './features/store-dashboard/ProductEditorPage'
 import { StoreDashboardPage } from './features/store-dashboard/StoreDashboardPage'
+import { CategoryPage } from './pages/CategoryPage'
 import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { ProductPage } from './pages/ProductPage'
 import { PublicStorePage } from './pages/PublicStorePage'
+import { SearchPage } from './pages/SearchPage'
 
 function App() {
   return (
@@ -19,6 +22,9 @@ function App() {
         <Route index element={<HomePage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="signup" element={<SignUpPage />} />
+        <Route path="search" element={<SearchPage />} />
+        <Route path="c/:slug" element={<CategoryPage />} />
+        <Route path="p/:productId" element={<ProductPage />} />
         <Route path="s/:slug" element={<PublicStorePage />} />
 
         <Route element={<RequireAuth />}>

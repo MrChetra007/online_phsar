@@ -64,6 +64,16 @@ where id = (select id from auth.users where email = 'you@example.com');
 - The payout preview calls the owner-only `get_store_commission_percent()` function from migration `003`. It returns the current commission to store owners only; anonymous callers are denied.
 - The category seed contains `Clothes` (`requires_size = true`), so new stores can create a product immediately.
 
+### Public catalog
+
+- Home `/`: category grid, newest active products as "Featured", and a name search.
+- Category `/c/<slug>`: products in the category and all of its child categories.
+- Search `/search?q=<term>`: simple name search across active products.
+- Product `/p/<id>`: photos, active variants, per-variant price and stock, and store link.
+- Store `/s/<slug>`: public store page and its active products.
+- Only active products from active stores are returned. Out-of-stock variants are shown but cannot be selected.
+- Entering through `/s/<slug>` stores `store_link` in the browser session for the order `source`; all other entries default to `platform`. The rate is unchanged.
+
 Regenerate types after every migration:
 
 ```bash

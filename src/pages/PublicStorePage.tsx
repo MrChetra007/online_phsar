@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { listActiveProductsForStore, type PublicProduct } from '../api/products'
+import { listPublicProducts, type PublicProduct } from '../api/catalog'
 import { getActiveStoreBySlug, type PublicStore } from '../api/stores'
+import { EmptyState } from '../components/EmptyState'
 import { ErrorState } from '../components/ErrorState'
-import { LoadingState } from '../components/LoadingState'
-import { categoryName } from '../lib/categories'
+import { ProductGrid, ProductGridSkeleton } from '../components/ProductGrid'
+import { Skeleton } from '../components/Skeleton'
+import { rememberStoreLinkSource } from '../lib/attribution'
 import { useI18n } from '../lib/i18n'
 import { formatMoney } from '../lib/money'
-import { priceRange } from '../lib/products'
 
 export function PublicStorePage() {
-  const { t, language } = useI18n()
+  const { t } = useI18n()
   const { slug } = useParams<{ slug: string }>()
 
   const [store, setStore] = useState<PublicStore | null>(null)
@@ -49,11 +50,15 @@ export function PublicStorePage() {
   }, [slug, version])
 
   useEffect(() => {
+    if (store) rememberStoreLinkSource()
+  }, [store])
+
+  useEffect(() => {
     if (!store) return
 
     let active = true
 
-    void listActiveProductsForStore(store.id)
+    void listPublicProducts({ storeId: store.id })
       .then((items) => {
         if (active) {
           setProductsState({ storeId: store.id, status: 'ready', items })
@@ -71,7 +76,23 @@ export function PublicStorePage() {
   }, [store, productsVersion])
 
   if (!slug) return null
-  if (loading || loadedSlug !== slug) return <LoadingState />
+
+  if (loading || loadedSlug !== slug) {
+    return (
+      <div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+          <Skeleton className="h-4 w-24 rounded" />
+          <Skeleton className="mt-3 h-9 w-2/3 rounded" />
+          <Skeleton className="mt-3 h-4 w-1/3 rounded" />
+          <Skeleton className="mt-6 h-20 w-full rounded-xl" />
+        </div>
+        <div className="mt-5">
+          <ProductGridSkeleton count={6} />
+        </div>
+      </div>
+    )
+  }
+
   if (failed) {
     return (
       <ErrorState
@@ -120,22 +141,35 @@ export function PublicStorePage() {
   ]
 
   return (
-    <section className="mx-auto max-w-3xl">
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-semibold text-emerald-700">
-          {t('publicStore.localStore')}
-        </p>
-        <h1 className="mt-2 text-3xl font-bold text-slate-900">{store.name}</h1>
-        {store.province ? (
-          <p className="mt-2 text-slate-600">{store.province}</p>
-        ) : null}
+    <section className="mx-auto max-w-5xl">
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+        <div className="flex flex-wrap items-start gap-4">
+          {store.logo_url ? (
+            <img
+              src={store.logo_url}
+              alt=""
+              className="size-16 shrink-0 rounded-2xl object-cover"
+            />
+          ) : null}
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-emerald-700">
+              {t('publicStore.localStore')}
+            </p>
+            <h1 className="mt-2 break-words text-2xl font-bold text-slate-900 sm:text-3xl">
+              {store.name}
+            </h1>
+            {store.province ? (
+              <p className="mt-2 text-slate-600">{store.province}</p>
+            ) : null}
+          </div>
+        </div>
 
         {store.description ? (
           <div className="mt-6">
             <h2 className="text-sm font-semibold text-slate-900">
               {t('publicStore.about')}
             </h2>
-            <p className="mt-2 whitespace-pre-line text-slate-700">
+            <p className="mt-2 whitespace-pre-line break-words text-slate-700">
               {store.description}
             </p>
           </div>
@@ -167,97 +201,28 @@ export function PublicStorePage() {
 
       <div className="mt-5">
         {productsLoading ? (
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-600">
-            {t('common.loading')}
-          </div>
+          <ProductGridSkeleton count={6} />
         ) : productsFailed ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
-            <p>{t('publicStore.productsError')}</p>
-            <button
-              type="button"
-              className="mt-2 font-semibold underline"
-              onClick={() => {
-                setProductsState({
-                  storeId: store.id,
-                  status: 'loading',
-                  items: [],
-                })
-                setProductsVersion((current) => current + 1)
-              }}
-            >
-              {t('common.retry')}
-            </button>
-          </div>
+          <ErrorState
+            message={t('publicStore.productsError')}
+            onRetry={() => {
+              setProductsState({
+                storeId: store.id,
+                status: 'loading',
+                items: [],
+              })
+              setProductsVersion((current) => current + 1)
+            }}
+          />
         ) : products.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
-            {t('publicStore.productsSoon')}
-          </div>
+          <EmptyState>{t('publicStore.productsSoon')}</EmptyState>
         ) : (
           <>
             <h2 className="text-xl font-bold text-slate-900">
               {t('publicStore.productsTitle')}
             </h2>
-            <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {products.map((product) => {
-                const range = priceRange(
-                  product.variants.map((variant) => variant.price),
-                )
-                const stock = product.variants.reduce(
-                  (total, variant) => total + variant.stock,
-                  0,
-                )
-                const image = product.images[0]
-
-                return (
-                  <article
-                    key={product.id}
-                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
-                  >
-                    <div className="aspect-square bg-slate-100">
-                      {image ? (
-                        <img
-                          src={image.url}
-                          alt=""
-                          loading="lazy"
-                          className="size-full object-cover"
-                        />
-                      ) : (
-                        <div className="grid size-full place-items-center text-3xl font-semibold text-slate-400">
-                          {product.name.slice(0, 1).toUpperCase()}
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      {product.category ? (
-                        <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
-                          {categoryName(product.category, language)}
-                        </p>
-                      ) : null}
-                      <h3 className="mt-1 font-semibold text-slate-900">
-                        {product.name}
-                      </h3>
-                      <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                        {range ? (
-                          <p className="font-semibold text-slate-900">
-                            {range.min === range.max
-                              ? formatMoney(range.min)
-                              : `${formatMoney(range.min)} – ${formatMoney(range.max)}`}
-                          </p>
-                        ) : null}
-                        <p
-                          className={`text-xs font-medium ${
-                            stock > 0 ? 'text-emerald-700' : 'text-red-600'
-                          }`}
-                        >
-                          {stock > 0
-                            ? t('product.inStock')
-                            : t('product.outOfStock')}
-                        </p>
-                      </div>
-                    </div>
-                  </article>
-                )
-              })}
+            <div className="mt-3">
+              <ProductGrid products={products} />
             </div>
           </>
         )}
