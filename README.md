@@ -4,6 +4,7 @@ React + TypeScript + Vite + Tailwind v4 + Supabase.
 Business rules: [`doc/project_plan_v1.md`](doc/project_plan_v1.md).
 Build contract: [`doc/AI_BUILD_GUIDE.md`](doc/AI_BUILD_GUIDE.md).
 Database: [`doc/schema/001_schema.sql`](doc/schema/001_schema.sql) (applied copy in `supabase/migrations/`).
+Current progress: [`doc/process-to-track-current-app-process.md`](doc/process-to-track-current-app-process.md).
 
 ## Requirements
 
