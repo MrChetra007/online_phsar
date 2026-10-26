@@ -9,6 +9,7 @@ type ConfirmDialogProps = {
   onConfirm: () => void
   onCancel: () => void
   danger?: boolean
+  confirmDisabled?: boolean
 }
 
 export function ConfirmDialog({
@@ -19,6 +20,7 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
   danger = false,
+  confirmDisabled = false,
 }: ConfirmDialogProps) {
   const titleId = useId()
   const descriptionId = useId()
@@ -64,6 +66,7 @@ export function ConfirmDialog({
           <Button
             variant={danger ? 'danger' : 'primary'}
             onClick={onConfirm}
+            disabled={confirmDisabled}
             className="w-full sm:w-auto"
           >
             {confirmLabel}

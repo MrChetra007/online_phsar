@@ -80,8 +80,16 @@ where id = (select id from auth.users where email = 'you@example.com');
 - Checkout `/checkout`: name, Cambodian phone, address, province, and cash on delivery. KHQR is shown as coming soon until the payment step.
 - Delivery is an estimate: the checkout shows both local and other-province fees, because the final fee is chosen by `create_order` from the province setting.
 - `create_order` rechecks maintenance, COD availability, store status, stock, and rate limits. Errors such as `SOLD_OUT`, `RATE_LIMITED`, and `MAINTENANCE` are shown in the customer's language.
-- Confirmation `/order/<code>` shows the order code and a tracking link. The tracking page is a temporary placeholder until the tracking step.
+- Confirmation `/order/<code>` shows the order code and a tracking link.
 - A successful order uses the session `store_link` attribution when present and clears it afterward.
+
+### Order tracking
+
+- `/track` looks up an order with its code and the phone number used at checkout; the code is pre-filled from the confirmation link.
+- `track_order` requires both values. A wrong phone returns the same neutral not-found message as an unknown code.
+- The page shows the status timeline, items, totals, delivery details, courier name, and tracking note.
+- Cancel, confirm-received, report-problem, and reopen buttons are driven by the `can_*` flags returned by `track_order`. Successful actions refresh the order.
+- `RATE_LIMITED` is shown in the customer's language with a retry message.
 
 Regenerate types after every migration:
 
