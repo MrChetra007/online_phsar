@@ -2,7 +2,7 @@
 
 Last updated: 2026-10-27
 Branch: `main`
-Latest commit: `83dcf8b feat: add weekly settlements`
+Latest commit: `410ad24 feat: add telegram notifications`
 
 This is the working handoff document. Read it first when resuming the project.
 Update it at the end of every build step, commit, deployment, or blocker.
@@ -74,6 +74,7 @@ Known recent commits:
 
 | Commit    | Scope                              |
 | --------- | ---------------------------------- |
+| `410ad24` | Telegram notifications             |
 | `83dcf8b` | Weekly settlements                 |
 | `392c3ce` | Store dashboard and admin panel    |
 | `8a7816e` | Project process tracker            |
@@ -133,6 +134,8 @@ Implemented behavior:
   review, dispute resolution, store approvals, and platform settings.
 - Weekly settlement page with eligible-order selection, payout/carry-forward
   confirmation, store transfers, deductions, ledger, and settlement history.
+- Scheduled database jobs for unpaid QR expiry, order completion, shipping
+  reminders, cleanup, and Telegram notification dispatch.
 - English and Khmer strings for all current customer flows.
 
 ---
@@ -154,7 +157,7 @@ Implemented behavior:
 | 10   | Admin panel                    | Implemented locally; live acceptance pending |
 | 11   | Settlement                     | Implemented locally; live acceptance pending |
 | 12   | Telegram notifications         | Implemented locally; live acceptance pending |
-| 13   | Scheduled jobs                 | Not started                                 |
+| 13   | Scheduled jobs                 | Implemented locally; live acceptance pending |
 | 14   | Hardening, tests, deploy       | Not started                                 |
 
 ---
@@ -541,6 +544,71 @@ registration, and notify trigger do not exist yet.
 
 ---
 
+## 6e. Step 13 scheduled job details
+
+### What was built
+
+- `supabase/migrations/005_scheduled_jobs.sql` enables `pg_cron`, `pg_net`, and
+  Supabase Vault.
+- `public.invoke_notify()` reads the project URL and legacy service-role JWT
+  from Vault and posts to `/functions/v1/notify` through `pg_net`.
+- The migration is idempotent: it removes same-named jobs before recreating
+  them.
+- No frontend or `database.types.ts` change was needed.
+
+Scheduled jobs:
+
+| Job name             | Schedule      | Action                           |
+| -------------------- | ------------- | -------------------------------- |
+| `expire-unpaid-orders` | `* * * * *`   | `expire_unpaid_orders()`         |
+| `complete-due-orders`  | `0 * * * *`   | `complete_due_orders()`          |
+| `shipping-reminders`   | `*/30 * * * *` | `enqueue_shipping_reminders()`   |
+| `cleanup`              | `30 3 * * *`  | `cleanup_rate_limits()`          |
+| `telegram-notify`      | `* * * * *`   | `invoke_notify()`                |
+
+`pg_cron` schedules are UTC; the 03:30 cleanup is 10:30 in Cambodia.
+
+### Vault setup required before notify runs
+
+Create these once in the SQL editor; the job skips safely while either is
+missing:
+
+```sql
+select vault.create_secret('https://wdbelxrhvkikrncsgshg.supabase.co', 'project_url');
+select vault.create_secret('<legacy service_role JWT>', 'notify_service_role_key');
+```
+
+- Use the legacy service-role JWT, because `notify` verifies the JWT role.
+- Do not put the service-role key in git, the frontend, or a migration.
+- `pg_net` keeps the decrypted key in its request queue until the request is
+  sent, so restrict database login access as usual.
+- Deploy `notify` before relying on the job.
+
+### Local verification
+
+Last run: 2026-10-27
+
+- `npm run typecheck`: passed
+- `npm run lint`: passed with no warnings
+- `npm run test`: 14 files, 65 tests passed
+- `npm run format:check`: passed
+- `npm run build`: passed, with the existing Vite chunk-size warning
+
+The SQL migration was reviewed but not executed locally: there is no local
+Supabase database, and the Docker daemon is not running. Remote job behavior
+has not been tested.
+
+### Acceptance status
+
+| Acceptance check                                                | Status                                |
+| --------------------------------------------------------------- | ------------------------------------- |
+| Expired unpaid KHQR order is cancelled and stock returns        | Function path ready; live pending     |
+| Delivered orders complete after the return window               | Function path ready; live pending     |
+| Shipping reminder is sent once per order                        | Dedupe path ready; live pending       |
+| Telegram notify runs on schedule                                | Vault/deploy pending                  |
+
+---
+
 ## 7. Remote and environment state
 
 Last known Supabase project:
@@ -555,15 +623,19 @@ Last known Supabase project:
 
 Last known remote status:
 
-- Migration `004_khqr_payments.sql`: not applied.
+- Migration `004_khqr_payments.sql` and `005_scheduled_jobs.sql`: not applied.
 - Edge Functions: not deployed.
 - KHQR secrets: not configured.
 - Telegram bot token, webhook secret, webhook registration, and notify trigger:
   not configured.
+- `pg_cron`/`pg_net`/Vault and the `telegram-notify` job: not configured or
+  verified remotely.
 - CLI can list projects, but `db push`/`migration list` still need the database
   password or a working link.
 - `deno` is not installed globally, but `npx -y deno check` works and the Step
   12 functions pass it.
+- The Docker daemon is not running, so local Supabase migrations cannot be
+  executed yet.
 - Do not apply remote changes without owner approval.
 
 Last known test data:
@@ -582,20 +654,33 @@ These values may have changed. Verify before relying on them.
 
 ### Preferred next action
 
-Step 12 is implemented locally. Live acceptance is blocked on the bot token,
-function deployment, webhook registration, and a notify trigger:
+Step 13 is implemented locally. Live acceptance is blocked on applying the
+migration, enabling the extensions, creating Vault secrets, and deploying
+`notify`:
+
+1. Apply `005_scheduled_jobs.sql` to the Supabase project.
+2. Create Vault secrets `project_url` and `notify_service_role_key`.
+3. Deploy the `notify` Edge Function.
+4. Confirm the five rows exist in `cron.job` and inspect `cron.job_run_details`.
+5. Test QR expiry with stock return, completion after the return window, a
+   single shipping reminder, and the notify dispatch.
+6. Update this document with the results.
+
+If those credentials and remote access are not available, the next local step
+is Step 14 hardening, tests, and deploy preparation. Do not mark Step 13
+complete until the cron runs are observed.
+
+Step 12 live acceptance remains pending:
 
 1. Create the bot with `@BotFather`; set `TELEGRAM_BOT_TOKEN` and
    `TELEGRAM_WEBHOOK_SECRET`.
 2. Deploy `telegram_webhook` and `notify`.
 3. Register the webhook URL and secret with Telegram.
 4. Set `admin_telegram_chat_id` in `/admin/settings`.
-5. Configure a Database Webhook or the Step 13 schedule for `notify`.
+5. Confirm the Step 13 `telegram-notify` job or a Database Webhook invokes
+   `notify`.
 6. Test a COD order, a paid KHQR order, and a forced failed send.
 7. Update this document with the results.
-
-If those credentials and remote access are not available, the next local step
-is Step 13 scheduled jobs; it can also schedule `notify`.
 
 Step 11 acceptance is still pending:
 
@@ -660,8 +745,14 @@ supabase functions deploy khqr_webhook --no-verify-jwt --project-ref wdbelxrhvki
   implemented locally.
 - Step 12 needs `TELEGRAM_BOT_TOKEN` and, preferably,
   `TELEGRAM_WEBHOOK_SECRET`; neither is configured remotely.
-- `notify` must be triggered by a dashboard Database Webhook or the Step 13
-  schedule; no trigger is configured yet.
+- Step 13 migration schedules `notify`, but it is not applied yet. Until then,
+  use a dashboard Database Webhook or call `notify` manually.
+- Step 13 acceptance is pending; `005_scheduled_jobs.sql` adds the five cron
+  jobs and the Vault-backed `invoke_notify()` function.
+- Migration 005 was reviewed but not executed locally because no local Supabase
+  database is running and the Docker daemon is off.
+- Step 13 needs Vault secrets `project_url` and `notify_service_role_key`; the
+  second must be the legacy service-role JWT.
 - Failed Telegram notifications retry until 5 attempts, then stay `failed`.
 - Step 12 needed no new migration and no regenerated `database.types.ts`.
 - The store dashboard does not show the bot username yet. Tell owners the bot
@@ -711,6 +802,16 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
 
 ### 2026-10-27
 
+- Committed Step 12 as `410ad24`.
+- Implemented Step 13 scheduling: migration 005 enables `pg_cron`, `pg_net`, and
+  Vault, schedules the four maintenance jobs, and adds `invoke_notify()` every
+  minute.
+- Added idempotent job replacement and safe skipping until the two Vault
+  secrets exist.
+- Passed typecheck, lint, 65 tests, Prettier, and build. Migration SQL was
+  reviewed but not executed locally because Docker is unavailable.
+- Step 13 live acceptance is pending on applying the migration, Vault secrets,
+  and `notify` deployment.
 - Implemented Step 12 Telegram: `telegram_webhook` links private chats with
   one-time codes; `notify` sends Khmer-first order, payment, dispute, reminder,
   and payout messages and records attempts/errors.
