@@ -168,3 +168,16 @@ export async function setStoreStatus(
 
   if (error) throw error
 }
+
+export async function createTelegramLinkCode(storeId: string): Promise<string> {
+  const { data, error } = await supabase.rpc('create_telegram_link_code', {
+    p_store_id: storeId,
+  })
+
+  if (error) throw error
+  if (typeof data !== 'string' || data.length === 0) {
+    throw new Error('INVALID_TELEGRAM_LINK_CODE')
+  }
+
+  return data
+}

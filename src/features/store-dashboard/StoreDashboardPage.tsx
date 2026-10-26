@@ -11,6 +11,7 @@ import { StoreDetailsForm } from './StoreDetailsForm'
 import { StoreOnboardingForm } from './StoreOnboardingForm'
 import { StorePrivateForm } from './StorePrivateForm'
 import { StoreProductsSection } from './StoreProductsSection'
+import { TelegramConnectSection } from './TelegramConnectSection'
 
 const bannerStyles = {
   pending: 'border-amber-200 bg-amber-50 text-amber-900',
@@ -129,6 +130,31 @@ export function StoreDashboardPage() {
             </div>
           </div>
 
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Link
+              to="/store/orders"
+              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-emerald-300 hover:bg-emerald-50/30"
+            >
+              <p className="font-semibold text-slate-900">
+                {t('store.manageOrders')}
+              </p>
+              <p className="mt-1 text-sm text-slate-600">
+                {t('storeOrders.subtitle')}
+              </p>
+            </Link>
+            <Link
+              to="/store/statement"
+              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-emerald-300 hover:bg-emerald-50/30"
+            >
+              <p className="font-semibold text-slate-900">
+                {t('store.statement')}
+              </p>
+              <p className="mt-1 text-sm text-slate-600">
+                {t('storeStatement.subtitle')}
+              </p>
+            </Link>
+          </div>
+
           <StoreProductsSection store={store} />
 
           <StoreDetailsForm
@@ -150,6 +176,8 @@ export function StoreDashboardPage() {
               )
             }
           />
+
+          <TelegramConnectSection storeId={store.id} />
         </div>
       )}
     </section>

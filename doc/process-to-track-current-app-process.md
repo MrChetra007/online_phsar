@@ -1,8 +1,8 @@
 # Process Tracker: Current App State
 
-Last updated: 2026-10-26
+Last updated: 2026-10-27
 Branch: `main`
-Latest commit: `ecf9ab8 feat: add KHQR payments`
+Latest commit: `8a7816e docs: add project process tracker`
 
 This is the working handoff document. Read it first when resuming the project.
 Update it at the end of every build step, commit, deployment, or blocker.
@@ -74,6 +74,7 @@ Known recent commits:
 
 | Commit    | Scope                              |
 | --------- | ---------------------------------- |
+| `8a7816e` | Project process tracker            |
 | `ecf9ab8` | KHQR payments                      |
 | `697871e` | Guest order tracking               |
 | `e2b5130` | Cart and COD checkout              |
@@ -97,9 +98,17 @@ Implemented routes:
 | `/p/:productId`               | Product page                             |
 | `/s/:slug`                    | Public store page                        |
 | `/store`                      | Store dashboard                           |
-| `/store/products/new`         | Create product                           |
+| `/store/orders`               | Store order list and status tabs          |
+| `/store/orders/:orderId`      | Store order detail and actions            |
+| `/store/statement`            | Store balance, ledger, and settlements    |
+| `/store/products/new`         | Create product                            |
 | `/store/products/:productId`  | Edit product                             |
-| `/admin`                      | Admin panel                              |
+| `/admin`                      | Admin panel and store approvals          |
+| `/admin/orders`               | All orders with status/payment/store filters |
+| `/admin/orders/:orderId`      | Admin order detail and actions           |
+| `/admin/payments`             | Flagged and refund-due payments          |
+| `/admin/disputes`             | Open customer disputes                   |
+| `/admin/settings`             | Platform settings editor                 |
 | `/admin/categories`           | Category management                      |
 
 Implemented behavior:
@@ -110,6 +119,13 @@ Implemented behavior:
 - Guest tracking with cancel, confirm received, report problem, and reopen.
 - KHQR checkout selection, QR generation, polling, signed webhook, and
   payment-status UI.
+- Store order list with tabs, order detail, allowed status actions, restock, and
+  translated errors.
+- Store statement with balance, ledger, past settlements, and COD commission
+  owed.
+- Telegram link-code generation from the store dashboard.
+- Admin panel with all-orders filtering, required-note status changes, payment
+  review, dispute resolution, store approvals, and platform settings.
 - English and Khmer strings for all current customer flows.
 
 ---
@@ -127,8 +143,8 @@ Implemented behavior:
 | 6    | Cart and COD checkout          | Complete                                    |
 | 7    | Guest order tracking           | Complete                                    |
 | 8    | KHQR payments                  | Implemented locally; live acceptance pending |
-| 9    | Store dashboard orders         | Not started                                 |
-| 10   | Admin panel                    | Not started                                 |
+| 9    | Store dashboard orders         | Implemented locally; live acceptance pending |
+| 10   | Admin panel                    | Implemented locally; live acceptance pending |
 | 11   | Settlement                     | Not started                                 |
 | 12   | Telegram notifications         | Not started                                 |
 | 13   | Scheduled jobs                 | Not started                                 |
@@ -224,6 +240,150 @@ provider.
 
 ---
 
+## 6a. Step 9 store dashboard details
+
+### What was built
+
+API:
+
+- `src/api/storeOrders.ts`: list store orders, load one order with items and
+  history, change status through `set_order_status`, and restock through
+  `restock_order`.
+- `src/api/statement.ts`: `get_store_balance`, ledger rows, past settlements,
+  and COD commission owed from delivered/completed COD orders.
+- `src/api/stores.ts`: `createTelegramLinkCode` wrapper.
+
+UI:
+
+- `src/features/store-dashboard/StoreOrdersPage.tsx`: status tabs (all, pending,
+  confirmed, shipped, delivered, returns, closed), customer summary, totals, and
+  links to detail.
+- `src/features/store-dashboard/StoreOrderDetailPage.tsx`: customer contact
+  data, items, commission and payout preview, delivery details, history
+  timeline, allowed actions only, restock, translated errors, and explicit COD
+  cash wording when marking delivered.
+- `src/features/store-dashboard/StoreStatementPage.tsx`: balance with
+  positive/negative explanation, COD commission owed, ledger rows with
+  info-only markers, and past settlements.
+- `src/features/store-dashboard/TelegramConnectSection.tsx`: one-time code and
+  instructions on the store dashboard.
+- `src/lib/orderStatus.ts`: shared order and payment badge labels/tones.
+- `src/lib/datetime.ts`: shared date formatting.
+
+Routes added:
+
+- `/store/orders`
+- `/store/orders/:orderId`
+- `/store/statement`
+
+### Security and visibility
+
+- Orders are read through the existing RLS policies; no new migration was
+  needed.
+- Unpaid KHQR orders stay hidden because `orders_read` and
+  `store_can_see_order` only expose COD or paid KHQR orders.
+- Store A cannot read Store B's order detail because the detail query is limited
+  by the same RLS policy.
+- Status actions are limited by `set_order_status` and `_transition_allowed`;
+  the UI only shows the next allowed actions.
+- The browser still cannot mark payments paid, edit ledger rows, or change
+  balances.
+
+### Local verification
+
+Last run: 2026-10-27
+
+- `npm run typecheck`: passed
+- `npm run lint`: passed with no warnings
+- `npm run test`: 14 files, 65 tests passed
+- `npm run format:check`: passed
+- `npm run build`: passed, with the existing Vite chunk-size warning
+
+### Acceptance status
+
+| Acceptance check                           | Status                                      |
+| ------------------------------------------ | ------------------------------------------- |
+| Store A cannot see Store B's orders        | RLS path ready; live acceptance pending     |
+| An unpaid KHQR order never appears         | RLS path ready; live acceptance pending     |
+| Invalid actions show the translated error  | UI path ready; live acceptance pending      |
+
+---
+
+## 6b. Step 10 admin panel details
+
+### What was built
+
+API:
+
+- `src/api/admin.ts`: all-order list and detail (items, history, store name),
+  payment review list, open-dispute list, admin status changes through
+  `set_order_status`, `confirm_payment_manually`, `mark_payment_refunded`,
+  `resolve_dispute`, and platform settings read/update.
+- `src/components/OrderStatusBadge.tsx`: shared order/payment badges, moved out
+  of the store-dashboard feature so both dashboards reuse it.
+
+UI:
+
+- `src/features/admin/AdminNav.tsx`: shared admin navigation.
+- `src/features/admin/AdminOrdersPage.tsx`: all orders with status, payment
+  status, and store filters.
+- `src/features/admin/AdminOrderDetailPage.tsx`: customer, store, items,
+  commission and payout, payment reference, delivery, history timeline, admin
+  status transitions with a required note, optional courier/tracking fields when
+  shipping, manual payment confirmation, refund marking, and dispute resolution.
+- `src/features/admin/AdminPaymentsPage.tsx`: flagged and refund-due payments
+  with confirm/refund dialogs.
+- `src/features/admin/AdminDisputesPage.tsx`: open disputes with the customer's
+  problem note and a resolve dialog.
+- `src/features/admin/AdminSettingsPage.tsx`: grouped editor for commission,
+  payout hold, return window, ship deadline, unpaid QR expiry, COD toggle, local
+  delivery province, shop name/contact, admin Telegram chat ID, and maintenance
+  mode. It validates numeric ranges and warns that a new commission rate only
+  affects new orders.
+- `src/features/admin/AdminPage.tsx`: store approvals now share the admin nav.
+
+Routes added:
+
+- `/admin/orders`
+- `/admin/orders/:orderId`
+- `/admin/payments`
+- `/admin/disputes`
+- `/admin/settings`
+
+### Security and visibility
+
+- `RequireRole role="super_admin"` guards every route, and the database still
+  enforces `is_super_admin()` in RLS and inside each admin RPC.
+- Store owners cannot reach the pages or call the admin functions through RLS
+  and function checks.
+- Every admin status change sends a note through `set_order_status`; the
+  database saves it in `order_status_history`.
+- The settings editor updates only `platform_settings.value`; RLS keeps writes
+  admin-only. `create_order` copies the current commission into
+  `orders.commission_percent`, so a new rate affects only new orders.
+- No new migration was needed, and `database.types.ts` already contained the
+  admin RPCs and settings columns.
+
+### Local verification
+
+Last run: 2026-10-27
+
+- `npm run typecheck`: passed
+- `npm run lint`: passed with no warnings
+- `npm run test`: 14 files, 65 tests passed
+- `npm run format:check`: passed
+- `npm run build`: passed, with the existing Vite chunk-size warning
+
+### Acceptance status
+
+| Acceptance check                                    | Status                                       |
+| --------------------------------------------------- | -------------------------------------------- |
+| Store owner cannot reach admin screens or functions | Route + RLS/RPC path ready; live pending     |
+| A commission change affects only new orders         | Snapshot path ready; live acceptance pending |
+| Every admin status change has a note in history     | UI path ready; live acceptance pending       |
+
+---
+
 ## 7. Remote and environment state
 
 Last known Supabase project:
@@ -262,7 +422,28 @@ These values may have changed. Verify before relying on them.
 
 ### Preferred next action
 
-Finish Step 8 live acceptance when credentials and approval are available:
+Step 10 is implemented locally. Run its acceptance checks before starting Step
+11:
+
+1. Sign in as a store owner and confirm `/admin` and the admin API calls are
+   blocked.
+2. Change `commission_percent`, create a new order, and confirm the new rate is
+   used; confirm an older order keeps its original rate.
+3. Change an order status as admin and confirm the note appears in the history.
+4. Update this document with the results.
+
+Step 9 acceptance is still pending and was deferred at the owner's request:
+
+1. Sign in as two different store owners and confirm Store A cannot see Store
+   B's orders.
+2. Create an unpaid KHQR order and confirm it never appears in the store order
+   list or statement.
+3. Attempt an invalid status change and confirm the translated error appears.
+4. Update this document with the results.
+
+### Step 8 live acceptance (still blocked)
+
+Finish when credentials and approval are available:
 
 1. Apply migration 004 to the Supabase project.
 2. Set `KHQRDEV_TOKEN` and `KHQRDEV_WEBHOOK_SECRET`; set `KHQRDEV_CURRENCY` and
@@ -280,37 +461,21 @@ supabase functions deploy verify_khqr_payment --project-ref wdbelxrhvkikrncsgshg
 supabase functions deploy khqr_webhook --no-verify-jwt --project-ref wdbelxrhvkikrncsgshg
 ```
 
-### If the owner accepts local Step 8 validation
-
-Start Step 9: Store dashboard orders.
-
-Read `doc/AI_BUILD_GUIDE.md` Step 9 before coding. Required scope:
-
-- Store order list with status tabs.
-- Order detail with items and customer contact data.
-- Actions through `set_order_status`: confirm, reject, ship, deliver, refuse,
-  return.
-- Show only the next allowed actions.
-- `restock_order` for returned items.
-- Statement page with `get_store_balance`, ledger rows, past settlements, and
-  COD commission owed.
-- Telegram link code from `create_telegram_link_code`.
-- Unpaid KHQR orders must never appear for the store.
-
-Acceptance:
-
-- Store A cannot see Store B's orders.
-- An unpaid KHQR order never appears.
-- Invalid actions show the translated error.
-
-Do not start Step 10 until Step 9 acceptance passes.
-
 ---
 
 ## 9. Known open items
 
 - Live KHQR acceptance is blocked by missing remote migration, secrets, and
   function deployment.
+- Step 9 acceptance is pending; the RLS and UI paths are implemented.
+- Step 10 acceptance is pending; the admin routes, RPC calls, settings editor,
+  and notes are implemented locally.
+- Step 10 needed no new migration and no regenerated `database.types.ts`.
+- The admin order list loads up to 500 orders and filters in the browser; add
+  server-side paging if order volume grows.
+- The Telegram link code can be generated, but the bot and
+  `telegram_webhook` that consume it are not built until Step 12.
+- Step 9 needed no new migration and no regenerated `database.types.ts`.
 - Remote DB migration needs the database password or an approved Management API
   path.
 - Edge Functions cannot be Deno-typechecked locally until `deno` is installed.
@@ -342,6 +507,27 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
 ---
 
 ## 11. Update log
+
+### 2026-10-27
+
+- Implemented Step 10 admin panel: all orders with filters, order detail actions
+  with required notes, payment review, open disputes, and platform settings.
+- Added `/admin/orders`, `/admin/orders/:orderId`, `/admin/payments`,
+  `/admin/disputes`, and `/admin/settings`, plus shared admin navigation.
+- Moved order/payment badges to `src/components/OrderStatusBadge.tsx` for reuse.
+- No new migration was needed; admin RPCs and settings already exist with
+  `is_super_admin()` checks.
+- Passed typecheck, lint, 65 tests, Prettier, and build.
+- Step 9 acceptance remains pending and was deferred at the owner's request;
+  Step 10 live acceptance is now pending.
+- Implemented Step 9 store dashboard orders, statement, and Telegram link code.
+- Added `/store/orders`, `/store/orders/:orderId`, and `/store/statement`.
+- Added API wrappers for order status actions, restock, balance, ledger, and
+  settlements.
+- No new migration was needed; RLS already hides unpaid KHQR orders and other
+  stores' orders.
+- Passed typecheck, lint, 65 tests, Prettier, and build.
+- Step 9 live acceptance remains pending.
 
 ### 2026-10-26
 

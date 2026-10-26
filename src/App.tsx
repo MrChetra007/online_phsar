@@ -1,13 +1,21 @@
 import { Route, Routes } from 'react-router-dom'
 import { AppShell } from './components/AppShell'
 import { AdminCategoriesPage } from './features/admin/AdminCategoriesPage'
+import { AdminDisputesPage } from './features/admin/AdminDisputesPage'
+import { AdminOrderDetailPage } from './features/admin/AdminOrderDetailPage'
+import { AdminOrdersPage } from './features/admin/AdminOrdersPage'
 import { AdminPage } from './features/admin/AdminPage'
+import { AdminPaymentsPage } from './features/admin/AdminPaymentsPage'
+import { AdminSettingsPage } from './features/admin/AdminSettingsPage'
 import { LoginPage } from './features/auth/LoginPage'
 import { RequireAuth } from './features/auth/RequireAuth'
 import { RequireRole } from './features/auth/RequireRole'
 import { SignUpPage } from './features/auth/SignUpPage'
 import { ProductEditorPage } from './features/store-dashboard/ProductEditorPage'
 import { StoreDashboardPage } from './features/store-dashboard/StoreDashboardPage'
+import { StoreOrderDetailPage } from './features/store-dashboard/StoreOrderDetailPage'
+import { StoreOrdersPage } from './features/store-dashboard/StoreOrdersPage'
+import { StoreStatementPage } from './features/store-dashboard/StoreStatementPage'
 import { CheckoutPage } from './features/checkout/CheckoutPage'
 import { CartPage } from './pages/CartPage'
 import { CategoryPage } from './pages/CategoryPage'
@@ -40,6 +48,12 @@ function App() {
         <Route element={<RequireAuth />}>
           <Route element={<RequireRole role="store_owner" />}>
             <Route path="store" element={<StoreDashboardPage />} />
+            <Route path="store/orders" element={<StoreOrdersPage />} />
+            <Route
+              path="store/orders/:orderId"
+              element={<StoreOrderDetailPage />}
+            />
+            <Route path="store/statement" element={<StoreStatementPage />} />
             <Route path="store/products/new" element={<ProductEditorPage />} />
             <Route
               path="store/products/:productId"
@@ -48,6 +62,14 @@ function App() {
           </Route>
           <Route element={<RequireRole role="super_admin" />}>
             <Route path="admin" element={<AdminPage />} />
+            <Route path="admin/orders" element={<AdminOrdersPage />} />
+            <Route
+              path="admin/orders/:orderId"
+              element={<AdminOrderDetailPage />}
+            />
+            <Route path="admin/payments" element={<AdminPaymentsPage />} />
+            <Route path="admin/disputes" element={<AdminDisputesPage />} />
+            <Route path="admin/settings" element={<AdminSettingsPage />} />
             <Route path="admin/categories" element={<AdminCategoriesPage />} />
           </Route>
         </Route>

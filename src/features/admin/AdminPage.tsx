@@ -12,6 +12,7 @@ import { LoadingState } from '../../components/LoadingState'
 import { StoreStatusBadge } from '../../components/StoreStatusBadge'
 import { useI18n } from '../../lib/i18n'
 import type { TranslationKey } from '../../lib/i18n/translations'
+import { AdminNav } from './AdminNav'
 
 const sections: { status: StoreStatus; title: TranslationKey }[] = [
   { status: 'pending', title: 'admin.pending' },
@@ -93,14 +94,7 @@ export function AdminPage() {
       </h1>
       <p className="mt-2 text-slate-600">{t('admin.welcome')}</p>
 
-      <div className="mt-4">
-        <Link
-          to="/admin/categories"
-          className="inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
-        >
-          {t('admin.manageCategories')}
-        </Link>
-      </div>
+      <AdminNav />
 
       {actionError ? (
         <p
