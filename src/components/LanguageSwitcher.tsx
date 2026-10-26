@@ -21,7 +21,7 @@ export function LanguageSwitcher() {
           className={[
             'rounded-md px-2.5 py-1 transition-colors',
             language === value
-              ? 'bg-emerald-600 font-medium text-white'
+              ? 'bg-emerald-700 font-medium text-white'
               : 'text-slate-600 hover:bg-slate-100',
           ].join(' ')}
         >

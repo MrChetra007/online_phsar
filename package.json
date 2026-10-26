@@ -11,6 +11,7 @@
     "test": "vitest run",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "security:check": "node --env-file=.env.local scripts/security-check.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -47,7 +47,7 @@ export function OrderConfirmationPage() {
           {orderCode ? (
             <Link
               to={`/track?code=${encodeURIComponent(orderCode)}`}
-              className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+              className="inline-flex items-center justify-center rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800"
             >
               {t('order.track')}
             </Link>
@@ -147,7 +147,7 @@ export function OrderConfirmationPage() {
         <div className="mt-6 flex flex-col gap-2 sm:flex-row">
           <Link
             to={`/track?code=${encodeURIComponent(confirmation.orderCode)}`}
-            className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+            className="inline-flex items-center justify-center rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800"
           >
             {t('order.track')}
           </Link>

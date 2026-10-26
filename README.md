@@ -5,6 +5,7 @@ Business rules: [`doc/project_plan_v1.md`](doc/project_plan_v1.md).
 Build contract: [`doc/AI_BUILD_GUIDE.md`](doc/AI_BUILD_GUIDE.md).
 Database: [`doc/schema/001_schema.sql`](doc/schema/001_schema.sql) (applied copy in `supabase/migrations/`).
 Current progress: [`doc/process-to-track-current-app-process.md`](doc/process-to-track-current-app-process.md).
+Deploy and recovery: [`doc/runbook.md`](doc/runbook.md).
 
 ## Requirements
 
@@ -33,6 +34,7 @@ Never put the service-role key in the frontend or in git. Only `.env.local` is u
 - Hosted project: `online-store` (`wdbelxrhvkikrncsgshg`, Tokyo).
 - `001_schema.sql`, `002_auto_approve_stores.sql`, and `003_store_commission.sql` are applied to the hosted project. The copies in `supabase/migrations/` are the versioned baseline.
 - `004_khqr_payments.sql` adds the KHQR payment fields and `set_order_khqr`; apply it before deploying the payment functions.
+- `005_scheduled_jobs.sql` enables `pg_cron`/`pg_net`/Vault and schedules the maintenance jobs plus Telegram notify; apply it after 004.
 - Auth: **email confirmation is disabled** (Supabase Dashboard → Auth → Providers → Email → turn off "Confirm email"), so sign-up returns a session immediately.
 - New users are always `store_owner`. Promote the first admin once, after that user signs up:
 
@@ -126,15 +128,16 @@ supabase gen types typescript --project-id wdbelxrhvkikrncsgshg > src/lib/databa
 
 ## Scripts
 
-| Command             | What it does                        |
-| ------------------- | ----------------------------------- |
-| `npm run dev`       | Start the Vite dev server           |
-| `npm run build`     | Type-check and build for production |
-| `npm run typecheck` | Type-check only (`tsc -b`)          |
-| `npm run lint`      | Run Oxlint                          |
-| `npm run test`      | Run unit tests with Vitest          |
-| `npm run format`    | Format with Prettier                |
-| `npm run preview`   | Preview the production build        |
+| Command                  | What it does                                  |
+| ------------------------ | --------------------------------------------- |
+| `npm run dev`            | Start the Vite dev server                     |
+| `npm run build`          | Type-check and build for production           |
+| `npm run typecheck`      | Type-check only (`tsc -b`)                    |
+| `npm run lint`           | Run Oxlint                                    |
+| `npm run test`           | Run unit tests with Vitest                    |
+| `npm run security:check` | Verify anon permission walls and public reads |
+| `npm run format`         | Format with Prettier                          |
+| `npm run preview`        | Preview the production build                  |
 
 ## Structure
 
@@ -145,6 +148,7 @@ src/
   features/     # feature screens (added per build step)
   lib/          # money, phone, errors, i18n, database.types.ts
   pages/        # routed screens
+scripts/        # read-only anon permission probe
 supabase/
   functions/    # Edge Functions for KHQR generation, polling, and webhooks
   migrations/   # numbered SQL files; never edit an applied migration

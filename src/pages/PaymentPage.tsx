@@ -268,7 +268,7 @@ export function PaymentPage() {
           {orderCode ? (
             <Link
               to={`/track?code=${encodeURIComponent(orderCode)}`}
-              className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+              className="inline-flex items-center justify-center rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800"
             >
               {t('order.track')}
             </Link>
@@ -299,7 +299,7 @@ export function PaymentPage() {
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center sm:p-8">
           <span
             aria-hidden="true"
-            className="mx-auto grid size-14 place-items-center rounded-full bg-emerald-600 text-white"
+            className="mx-auto grid size-14 place-items-center rounded-full bg-emerald-700 text-white"
           >
             <svg
               viewBox="0 0 24 24"
@@ -327,7 +327,7 @@ export function PaymentPage() {
           <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
             <Link
               to={trackLink}
-              className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+              className="inline-flex items-center justify-center rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800"
             >
               {t('order.track')}
             </Link>
@@ -381,7 +381,7 @@ export function PaymentPage() {
           </p>
           <Link
             to={trackLink}
-            className="mt-6 inline-flex items-center justify-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+            className="mt-6 inline-flex items-center justify-center rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800"
           >
             {t('order.track')}
           </Link>

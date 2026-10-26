@@ -2,7 +2,7 @@
 
 Last updated: 2026-10-27
 Branch: `main`
-Latest commit: `410ad24 feat: add telegram notifications`
+Latest commit: `4fe2607 feat: add scheduled jobs`
 
 This is the working handoff document. Read it first when resuming the project.
 Update it at the end of every build step, commit, deployment, or blocker.
@@ -74,6 +74,7 @@ Known recent commits:
 
 | Commit    | Scope                              |
 | --------- | ---------------------------------- |
+| `4fe2607` | Scheduled jobs                     |
 | `410ad24` | Telegram notifications             |
 | `83dcf8b` | Weekly settlements                 |
 | `392c3ce` | Store dashboard and admin panel    |
@@ -158,7 +159,7 @@ Implemented behavior:
 | 11   | Settlement                     | Implemented locally; live acceptance pending |
 | 12   | Telegram notifications         | Implemented locally; live acceptance pending |
 | 13   | Scheduled jobs                 | Implemented locally; live acceptance pending |
-| 14   | Hardening, tests, deploy       | Not started                                 |
+| 14   | Hardening, tests, deploy       | In progress; integration/deploy pending    |
 
 ---
 
@@ -609,6 +610,55 @@ has not been tested.
 
 ---
 
+## 6f. Step 14 hardening details
+
+### Completed locally
+
+- Unit tests now cover 18 files and 74 tests. Added datetime, order-status,
+  ledger-label, and translation-completeness tests.
+- `npm run security:check` probes the hosted project with the public anon key:
+  it confirmed 12 protected tables and `get_settlement_summary` are blocked,
+  while the six public catalog tables remain readable.
+- Reviewed the frontend source: no service-role or provider secrets. A scan of
+  the production bundle found only the `sb_secret_` key-prefix detector inside
+  the Supabase client; it found no literal `service_role` key.
+- Reviewed RLS and grants: `orders`, `order_items`, `order_status_history`,
+  `stock_movements`, `ledger_entries`, `settlements`, `settlement_orders`, and
+  `store_private` are authenticated-only with owner/admin checks. Webhook
+  handlers verify the KHQR HMAC and timestamp and the Telegram secret header.
+- Lighthouse mobile run against the production preview:
+  - Home: performance 89, accessibility 100, best practices 100, SEO 100.
+  - Checkout: performance 90, accessibility 100, best practices 100, SEO 63.
+    The SEO failure is the intentional `robots.txt` block on private routes.
+  - Only remaining audit is a non-scored source-map warning.
+- Added `doc/runbook.md` for deploy, key rotation, scheduled-job checks, flagged
+  payments, rollback, and post-deploy smoke tests.
+- Added a meta description, `robots.txt`, darker primary-button colors, and
+  removed the duplicate home-link `aria-label`.
+
+### Still pending
+
+- Integration tests against local Supabase for create-order, stock race, KHQR
+  webhook variants, settlement netting, and permission walls. Docker Desktop is
+  not running and no local database exists.
+- Supabase security/performance advisors and the remote deploy need the database
+  password or dashboard access.
+- Frontend host deployment and the full two-store end-to-end acceptance run.
+
+### Acceptance status
+
+| Acceptance check                                       | Status                                 |
+| ------------------------------------------------------ | -------------------------------------- |
+| Helper unit tests                                      | Passed                                 |
+| Anonymous protected-table and admin-RPC checks         | Passed against hosted project          |
+| Webhook authenticity review                            | Passed by code review                  |
+| Lighthouse catalog and checkout                        | Passed; checkout SEO intentionally low |
+| Supabase advisors                                       | Blocked on remote access               |
+| Local integration suite                                 | Blocked on Docker/local DB             |
+| Deployed happy path with two stores through settlement | Blocked on deployment                  |
+
+---
+
 ## 7. Remote and environment state
 
 Last known Supabase project:
@@ -636,6 +686,10 @@ Last known remote status:
   12 functions pass it.
 - The Docker daemon is not running, so local Supabase migrations cannot be
   executed yet.
+- Anon permission probes on 2026-10-27 blocked `orders`, `ledger_entries`,
+  `store_private`, and the other protected tables, and blocked
+  `get_settlement_summary`.
+- No frontend host is configured; the production build is only local.
 - Do not apply remote changes without owner approval.
 
 Last known test data:
@@ -654,9 +708,20 @@ These values may have changed. Verify before relying on them.
 
 ### Preferred next action
 
-Step 13 is implemented locally. Live acceptance is blocked on applying the
-migration, enabling the extensions, creating Vault secrets, and deploying
-`notify`:
+Step 14 hardening is partly complete locally. Remaining work:
+
+1. Start Docker Desktop, run local Supabase, and execute the critical-flow
+   integration tests.
+2. Apply migrations 004/005 and run the Supabase security and performance
+   advisors; fix findings.
+3. Set secrets/Vault values, deploy the functions, register both webhooks, and
+   deploy the frontend.
+4. Run the full two-store happy path through settlement.
+5. Update this document with the results.
+
+Do not mark Step 14 complete until the deployed acceptance run passes.
+
+Step 13 live acceptance remains pending:
 
 1. Apply `005_scheduled_jobs.sql` to the Supabase project.
 2. Create Vault secrets `project_url` and `notify_service_role_key`.
@@ -665,10 +730,6 @@ migration, enabling the extensions, creating Vault secrets, and deploying
 5. Test QR expiry with stock return, completion after the return window, a
    single shipping reminder, and the notify dispatch.
 6. Update this document with the results.
-
-If those credentials and remote access are not available, the next local step
-is Step 14 hardening, tests, and deploy preparation. Do not mark Step 13
-complete until the cron runs are observed.
 
 Step 12 live acceptance remains pending:
 
@@ -753,6 +814,16 @@ supabase functions deploy khqr_webhook --no-verify-jwt --project-ref wdbelxrhvki
   database is running and the Docker daemon is off.
 - Step 13 needs Vault secrets `project_url` and `notify_service_role_key`; the
   second must be the legacy service-role JWT.
+- Step 14 added 9 tests for datetime, status metadata, ledger labels, and
+  translation completeness; the suite is now 18 files and 74 tests.
+- `npm run security:check` is a read-only anon probe using `.env.local`; it does
+  not replace the Supabase advisors.
+- Lighthouse mobile scored home 89/100/100/100 and checkout 90/100/100/63.
+  Checkout SEO is intentionally low because private routes are disallowed in
+  `robots.txt`.
+- Step 14 integration tests, advisors, and deployment are still pending.
+- `doc/runbook.md` was added but its deploy and recovery steps are not executed.
+- Step 14 needed no new migration and no regenerated `database.types.ts`.
 - Failed Telegram notifications retry until 5 attempts, then stay `failed`.
 - Step 12 needed no new migration and no regenerated `database.types.ts`.
 - The store dashboard does not show the bot username yet. Tell owners the bot
@@ -788,6 +859,7 @@ npm run dev
 npm run typecheck
 npm run lint
 npm run test
+npm run security:check
 npm run format:check
 npm run build
 
@@ -802,6 +874,18 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
 
 ### 2026-10-27
 
+- Committed Step 13 as `4fe2607`.
+- Started Step 14: added 9 helper/translation tests, bringing the suite to 18
+  files and 74 tests.
+- Added `npm run security:check`; it confirmed anon access is blocked for 12
+  protected tables and the settlement summary RPC.
+- Added `doc/runbook.md` for deploy, key rotation, scheduled jobs, flagged
+  payments, rollback, and smoke tests.
+- Fixed Lighthouse findings: meta description, `robots.txt`, darker primary
+  colors, and the duplicate home-link label.
+- Lighthouse mobile: home 89/100/100/100; checkout 90/100/100/63 (intentional
+  private-route SEO block).
+- Step 14 integration tests, Supabase advisors, and deployment remain pending.
 - Committed Step 12 as `410ad24`.
 - Implemented Step 13 scheduling: migration 005 enables `pg_cron`, `pg_net`, and
   Vault, schedules the four maintenance jobs, and adds `invoke_notify()` every

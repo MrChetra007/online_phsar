@@ -35,14 +35,10 @@ export function AppShell() {
 
       <header className="sticky top-0 z-10 border-b border-slate-200/80 bg-white/90 backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
-          <Link
-            to="/"
-            className="flex items-center gap-2.5 text-slate-900"
-            aria-label={t('app.name')}
-          >
+          <Link to="/" className="flex items-center gap-2.5 text-slate-900">
             <span
               aria-hidden="true"
-              className="grid size-9 place-items-center rounded-xl bg-emerald-600 text-base font-bold text-white"
+              className="grid size-9 place-items-center rounded-xl bg-emerald-700 text-base font-bold text-white"
             >
               K
             </span>
@@ -61,7 +57,7 @@ export function AppShell() {
               {itemCount > 0 ? (
                 <span
                   aria-hidden="true"
-                  className="ml-1 rounded-full bg-emerald-600 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white"
+                  className="ml-1 rounded-full bg-emerald-700 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white"
                 >
                   {itemCount > 99 ? '99+' : itemCount}
                 </span>
@@ -94,7 +90,7 @@ export function AppShell() {
                 </Link>
                 <Link
                   to="/signup"
-                  className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+                  className="rounded-lg bg-emerald-700 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800"
                 >
                   {t('nav.signup')}
                 </Link>

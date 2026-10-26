@@ -546,7 +546,7 @@ export function ProductEditorPage() {
         </h1>
         <Link
           to="/store"
-          className="mt-5 inline-flex rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+          className="mt-5 inline-flex rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-800"
         >
           {t('store.backToDashboard')}
         </Link>

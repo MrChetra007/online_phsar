@@ -7,7 +7,7 @@ const base =
   'inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-colors disabled:pointer-events-none disabled:opacity-50'
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-emerald-600 text-white hover:bg-emerald-700',
+  primary: 'bg-emerald-700 text-white hover:bg-emerald-800',
   secondary:
     'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50',
   ghost: 'text-emerald-700 hover:bg-emerald-50',

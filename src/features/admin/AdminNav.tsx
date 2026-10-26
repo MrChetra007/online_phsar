@@ -26,7 +26,7 @@ export function AdminNav() {
             [
               'rounded-xl px-3.5 py-2 text-sm font-medium transition-colors',
               isActive
-                ? 'bg-emerald-600 text-white'
+                ? 'bg-emerald-700 text-white'
                 : 'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50',
             ].join(' ')
           }

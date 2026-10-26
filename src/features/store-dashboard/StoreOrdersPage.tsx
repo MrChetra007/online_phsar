@@ -159,7 +159,7 @@ export function StoreOrdersPage() {
             className={[
               'rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
               activeTab === tab.key
-                ? 'bg-emerald-600 text-white'
+                ? 'bg-emerald-700 text-white'
                 : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50',
             ].join(' ')}
           >
