@@ -2,7 +2,7 @@
 
 Last updated: 2026-10-27
 Branch: `main`
-Latest commit: `8a7816e docs: add project process tracker`
+Latest commit: `83dcf8b feat: add weekly settlements`
 
 This is the working handoff document. Read it first when resuming the project.
 Update it at the end of every build step, commit, deployment, or blocker.
@@ -74,6 +74,8 @@ Known recent commits:
 
 | Commit    | Scope                              |
 | --------- | ---------------------------------- |
+| `83dcf8b` | Weekly settlements                 |
+| `392c3ce` | Store dashboard and admin panel    |
 | `8a7816e` | Project process tracker            |
 | `ecf9ab8` | KHQR payments                      |
 | `697871e` | Guest order tracking               |
@@ -125,6 +127,8 @@ Implemented behavior:
 - Store statement with balance, ledger, past settlements, and COD commission
   owed.
 - Telegram link-code generation from the store dashboard.
+- Telegram bot linking for store chats and Khmer-first order, payment, dispute,
+  reminder, and payout alerts with retry tracking.
 - Admin panel with all-orders filtering, required-note status changes, payment
   review, dispute resolution, store approvals, and platform settings.
 - Weekly settlement page with eligible-order selection, payout/carry-forward
@@ -149,7 +153,7 @@ Implemented behavior:
 | 9    | Store dashboard orders         | Implemented locally; live acceptance pending |
 | 10   | Admin panel                    | Implemented locally; live acceptance pending |
 | 11   | Settlement                     | Implemented locally; live acceptance pending |
-| 12   | Telegram notifications         | Not started                                 |
+| 12   | Telegram notifications         | Implemented locally; live acceptance pending |
 | 13   | Scheduled jobs                 | Not started                                 |
 | 14   | Hardening, tests, deploy       | Not started                                 |
 
@@ -449,6 +453,94 @@ Last run: 2026-10-27
 
 ---
 
+## 6d. Step 12 Telegram notification details
+
+### What was built
+
+- `supabase/functions/telegram_webhook/index.ts`: receives Telegram updates,
+  accepts store link codes in private chats, calls `link_telegram_chat`, and
+  replies in Khmer and English.
+- `supabase/functions/notify/index.ts`: reads pending and failed notifications,
+  loads the order and store details with the service role, formats Khmer-first
+  messages, sends them through the Telegram Bot API, and records
+  `sent`/`failed`, `attempts`, and `last_error`.
+- `supabase/functions/_shared/telegram.ts`: shared escaping, money/date
+  formatting, constant-time secret comparison, message truncation, and the
+  Telegram send call.
+- `supabase/config.toml`: `telegram_webhook` has JWT verification disabled;
+  `notify` keeps JWT verification enabled and also requires a `service_role`
+  token.
+
+No frontend or database migration change was needed during Step 12.
+
+### Behavior and security
+
+- The webhook only links private chats. Codes are single-use and expire after
+  15 minutes in the existing database function.
+- The webhook validates `X-Telegram-Bot-Api-Secret-Token` when
+  `TELEGRAM_WEBHOOK_SECRET` is configured.
+- `notify` rejects callers whose verified JWT role is not `service_role`.
+- The bot reads pending rows and retries failed rows until `attempts = 5`.
+- Customer name, phone, and address are included only in messages to the
+  owning store chat and the admin chat.
+- Every notification event has a Khmer-first message: new order, payment
+  flagged, cancelled/refused/returned, failed delivery, customer problem,
+  payout sent, shipping reminder, and late shipment.
+- Order data remains visible in the store and admin dashboards, so Telegram is
+  not the only source of truth.
+- An unpaid KHQR order notifies the admin immediately, but the store is only
+  notified after the existing payment trigger marks it paid.
+
+### Required setup before live acceptance
+
+1. Create the bot with `@BotFather` and obtain the bot token.
+2. Set the function secrets. Keep them out of git and the frontend.
+3. Deploy `telegram_webhook` and `notify`.
+4. Register the webhook URL and the same secret token with Telegram.
+5. Set `admin_telegram_chat_id` in `/admin/settings` to a private admin chat,
+   not a group.
+6. Configure a notify trigger: either a dashboard Database Webhook on
+   `notifications` insert, or the Step 13 cron/pg_net schedule.
+
+Commands use placeholders; replace the token and secret locally:
+
+```bash
+npx supabase secrets set TELEGRAM_BOT_TOKEN=<token> TELEGRAM_WEBHOOK_SECRET=<secret> --project-ref wdbelxrhvkikrncsgshg
+npx supabase functions deploy telegram_webhook notify --project-ref wdbelxrhvkikrncsgshg
+curl "https://api.telegram.org/bot<token>/setWebhook" \
+  -d "url=https://wdbelxrhvkikrncsgshg.supabase.co/functions/v1/telegram_webhook" \
+  -d "secret_token=<secret>"
+```
+
+A dashboard Database Webhook must send `Authorization: Bearer <service-role-key>`
+to the `notify` endpoint. Store that key only in server-side configuration.
+
+### Local verification
+
+Last run: 2026-10-27
+
+- `npx -y deno check` on `_shared/telegram.ts`, `telegram_webhook`, and
+  `notify`: passed
+- `npm run typecheck`: passed
+- `npm run lint`: passed with no warnings
+- `npm run test`: 14 files, 65 tests passed
+- `npm run format:check`: passed
+- `npm run build`: passed, with the existing Vite chunk-size warning
+
+No live Telegram message was sent because the bot token, deployment, webhook
+registration, and notify trigger do not exist yet.
+
+### Acceptance status
+
+| Acceptance check                                         | Status                                  |
+| -------------------------------------------------------- | --------------------------------------- |
+| New COD order messages the store and admin               | Code path ready; live pending           |
+| KHQR order messages the store only after payment         | Trigger path ready; live pending        |
+| Failed send is retried later and recorded                | Retry metadata ready; live pending      |
+| Customer contact goes only to the store and admin chats  | Enforced in code; live pending          |
+
+---
+
 ## 7. Remote and environment state
 
 Last known Supabase project:
@@ -466,9 +558,12 @@ Last known remote status:
 - Migration `004_khqr_payments.sql`: not applied.
 - Edge Functions: not deployed.
 - KHQR secrets: not configured.
+- Telegram bot token, webhook secret, webhook registration, and notify trigger:
+  not configured.
 - CLI can list projects, but `db push`/`migration list` still need the database
   password or a working link.
-- `deno` is not installed, so Edge Functions have not been Deno-typechecked.
+- `deno` is not installed globally, but `npx -y deno check` works and the Step
+  12 functions pass it.
 - Do not apply remote changes without owner approval.
 
 Last known test data:
@@ -487,8 +582,22 @@ These values may have changed. Verify before relying on them.
 
 ### Preferred next action
 
-Step 11 is implemented locally. Run its acceptance checks before starting Step
-12:
+Step 12 is implemented locally. Live acceptance is blocked on the bot token,
+function deployment, webhook registration, and a notify trigger:
+
+1. Create the bot with `@BotFather`; set `TELEGRAM_BOT_TOKEN` and
+   `TELEGRAM_WEBHOOK_SECRET`.
+2. Deploy `telegram_webhook` and `notify`.
+3. Register the webhook URL and secret with Telegram.
+4. Set `admin_telegram_chat_id` in `/admin/settings`.
+5. Configure a Database Webhook or the Step 13 schedule for `notify`.
+6. Test a COD order, a paid KHQR order, and a forced failed send.
+7. Update this document with the results.
+
+If those credentials and remote access are not available, the next local step
+is Step 13 scheduled jobs; it can also schedule `notify`.
+
+Step 11 acceptance is still pending:
 
 1. Create a positive-net store with an eligible KHQR order, settle it, and
    confirm the payout record and reference.
@@ -547,6 +656,16 @@ supabase functions deploy khqr_webhook --no-verify-jwt --project-ref wdbelxrhvki
 - Step 11 acceptance is pending; the settlement page, payouts, transfers, and
   deductions are implemented locally.
 - Step 11 needed no new migration and no regenerated `database.types.ts`.
+- Step 12 acceptance is pending; the bot webhook and notification sender are
+  implemented locally.
+- Step 12 needs `TELEGRAM_BOT_TOKEN` and, preferably,
+  `TELEGRAM_WEBHOOK_SECRET`; neither is configured remotely.
+- `notify` must be triggered by a dashboard Database Webhook or the Step 13
+  schedule; no trigger is configured yet.
+- Failed Telegram notifications retry until 5 attempts, then stay `failed`.
+- Step 12 needed no new migration and no regenerated `database.types.ts`.
+- The store dashboard does not show the bot username yet. Tell owners the bot
+  username or add a public setting/link after the bot is created.
 - Settlement eligibility is previewed in the browser using `payout_hold_days`
   and `delivered_at`; `create_settlement` rechecks it server-side.
 - The settlement page only lists stores returned by `get_settlement_summary`;
@@ -554,12 +673,13 @@ supabase functions deploy khqr_webhook --no-verify-jwt --project-ref wdbelxrhvki
 - Step 10 needed no new migration and no regenerated `database.types.ts`.
 - The admin order list loads up to 500 orders and filters in the browser; add
   server-side paging if order volume grows.
-- The Telegram link code can be generated, but the bot and
-  `telegram_webhook` that consume it are not built until Step 12.
+- The Telegram link code can now be consumed by `telegram_webhook`; live
+  linking still needs the bot token and deployed functions.
 - Step 9 needed no new migration and no regenerated `database.types.ts`.
 - Remote DB migration needs the database password or an approved Management API
   path.
-- Edge Functions cannot be Deno-typechecked locally until `deno` is installed.
+- `npx -y deno check` works even though `deno` is not installed globally; use it
+  for Edge Function type checks.
 - `src/lib/database.types.ts` has not been regenerated after migration 004.
 - The Vite build reports an existing chunk larger than 500 kB.
 - `doc/khqr_platform_guide.md` and
@@ -591,7 +711,16 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
 
 ### 2026-10-27
 
-- Committed Steps 9 and 10 as `392c3ce`.
+- Implemented Step 12 Telegram: `telegram_webhook` links private chats with
+  one-time codes; `notify` sends Khmer-first order, payment, dispute, reminder,
+  and payout messages and records attempts/errors.
+- Added shared Telegram formatting/send helpers and function config. No
+  migration or frontend change was needed.
+- Passed Deno check on the new functions, plus typecheck, lint, 65 tests,
+  Prettier, and build.
+- Step 12 live acceptance is pending on the bot token, deployment, webhook
+  registration, admin chat ID, and a notify trigger.
+- Committed Step 11 as `83dcf8b`.
 - Implemented Step 11 settlement: summary table, eligible-order selection,
   payout/carry-forward confirmation, store transfers, deductions, ledger, and
   settlement history.
@@ -600,6 +729,7 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
   eligibility, references, and one-settlement-per-order.
 - Passed typecheck, lint, 65 tests, Prettier, and build.
 - Step 11 live acceptance is now pending.
+- Committed Steps 9 and 10 as `392c3ce`.
 - Implemented Step 10 admin panel: all orders with filters, order detail actions
   with required notes, payment review, open disputes, and platform settings.
 - Added `/admin/orders`, `/admin/orders/:orderId`, `/admin/payments`,

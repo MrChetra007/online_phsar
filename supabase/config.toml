@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.verify_khqr_payment]
 verify_jwt = true
+
+[functions.telegram_webhook]
+verify_jwt = false
+
+[functions.notify]
+verify_jwt = true
