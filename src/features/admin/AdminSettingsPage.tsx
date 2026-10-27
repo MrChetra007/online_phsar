@@ -107,6 +107,20 @@ const sections: SettingSection[] = [
         hintKey: 'setting.contactHint',
         default: '',
       },
+      {
+        key: 'shop_facebook_url',
+        kind: 'text',
+        labelKey: 'setting.shop_facebook_url',
+        hintKey: 'setting.facebookHint',
+        default: '',
+      },
+      {
+        key: 'shop_telegram_username',
+        kind: 'text',
+        labelKey: 'setting.shop_telegram_username',
+        hintKey: 'setting.telegramUsernameHint',
+        default: '',
+      },
     ],
   },
   {

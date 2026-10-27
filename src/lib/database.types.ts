@@ -739,6 +739,8 @@ export type Database = {
           delivery_fee_local: number
           delivery_fee_other: number
           description: string | null
+          facebook_url: string | null
+          telegram_username: string | null
           id: string
           logo_url: string | null
           name: string
@@ -753,6 +755,8 @@ export type Database = {
           delivery_fee_local?: number
           delivery_fee_other?: number
           description?: string | null
+          facebook_url?: string | null
+          telegram_username?: string | null
           id?: string
           logo_url?: string | null
           name: string
@@ -767,6 +771,8 @@ export type Database = {
           delivery_fee_local?: number
           delivery_fee_other?: number
           description?: string | null
+          facebook_url?: string | null
+          telegram_username?: string | null
           id?: string
           logo_url?: string | null
           name?: string

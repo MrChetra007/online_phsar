@@ -15,6 +15,8 @@ export type PublicStore = Pick<
   | 'province'
   | 'delivery_fee_local'
   | 'delivery_fee_other'
+  | 'facebook_url'
+  | 'telegram_username'
 >
 
 export type StoreWithPrivate = {
@@ -28,6 +30,8 @@ export type StoreDetailsInput = {
   province: string
   deliveryFeeLocal: number
   deliveryFeeOther: number
+  facebookUrl: string
+  telegramUsername: string
 }
 
 export type StoreCreateInput = StoreDetailsInput & {
@@ -100,6 +104,8 @@ export async function updateStore(
       province: input.province || null,
       delivery_fee_local: input.deliveryFeeLocal,
       delivery_fee_other: input.deliveryFeeOther,
+      facebook_url: input.facebookUrl || null,
+      telegram_username: input.telegramUsername || null,
     })
     .eq('id', storeId)
     .select('*')
@@ -136,7 +142,7 @@ export async function getActiveStoreBySlug(
   const { data, error } = await supabase
     .from('stores')
     .select(
-      'id, name, slug, description, logo_url, province, delivery_fee_local, delivery_fee_other',
+      'id, name, slug, description, logo_url, province, delivery_fee_local, delivery_fee_other, facebook_url, telegram_username',
     )
     .eq('slug', slug)
     .eq('status', 'active')

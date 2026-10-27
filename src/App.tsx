@@ -135,6 +135,11 @@ const PrivacyPage = lazy(() =>
     default: module.PrivacyPage,
   })),
 )
+const ContactPage = lazy(() =>
+  import('./pages/ContactPage').then((module) => ({
+    default: module.ContactPage,
+  })),
+)
 const ProductPage = lazy(() =>
   import('./pages/ProductPage').then((module) => ({
     default: module.ProductPage,
@@ -179,6 +184,7 @@ function App() {
         <Route path="s/:slug" element={<PublicStorePage />} />
         <Route path="privacy" element={<PrivacyPage />} />
         <Route path="terms" element={<TermsPage />} />
+        <Route path="contact" element={<ContactPage />} />
 
         <Route path="*" element={<NotFoundPage />} />
       </Route>

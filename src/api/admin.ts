@@ -372,3 +372,23 @@ export async function updatePlatformSetting(
 
   if (error) throw error
 }
+
+/** Reads only is_public=true rows — safe to call from anon/public pages */
+export async function getPublicSettings(): Promise<Record<string, string>> {
+  const { data, error } = await supabase
+    .from('platform_settings')
+    .select('key, value')
+    .eq('is_public', true)
+
+  if (error) throw error
+
+  const out: Record<string, string> = {}
+  for (const row of data ?? []) {
+    if (typeof row.value === 'string') {
+      out[row.key] = row.value
+    } else if (row.value !== null && row.value !== undefined) {
+      out[row.key] = String(row.value)
+    }
+  }
+  return out
+}

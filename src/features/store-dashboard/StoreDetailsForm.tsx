@@ -10,7 +10,7 @@ import { centsToInput, parseMoneyToCents } from '../../lib/money'
 import { storeSaveErrorKey } from '../../lib/store'
 
 type Field =
-  'name' | 'description' | 'province' | 'deliveryFeeLocal' | 'deliveryFeeOther'
+  'name' | 'description' | 'province' | 'deliveryFeeLocal' | 'deliveryFeeOther' | 'facebookUrl' | 'telegramUsername'
 
 type FieldErrors = Partial<Record<Field, string>>
 
@@ -35,6 +35,8 @@ export function StoreDetailsForm({
   const [deliveryFeeOther, setDeliveryFeeOther] = useState(
     centsToInput(store.delivery_fee_other),
   )
+  const [facebookUrl, setFacebookUrl] = useState(store.facebook_url ?? '')
+  const [telegramUsername, setTelegramUsername] = useState(store.telegram_username ?? '')
   const [errors, setErrors] = useState<FieldErrors>({})
   const [formError, setFormError] = useState<TranslationKey | null>(null)
   const [saving, setSaving] = useState(false)
@@ -79,6 +81,8 @@ export function StoreDetailsForm({
         province: trimmedProvince,
         deliveryFeeLocal: localCents ?? 0,
         deliveryFeeOther: otherCents ?? 0,
+        facebookUrl: facebookUrl.trim(),
+        telegramUsername: telegramUsername.trim(),
       })
       onUpdated(updated)
       showToast(t('store.saved'), { tone: 'success' })
@@ -191,6 +195,43 @@ export function StoreDetailsForm({
             inputMode="decimal"
             disabled={disabled}
           />
+        </div>
+
+        <div className="border-t border-slate-100 pt-4">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-500">
+            {t('store.socialTitle')}
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input
+              label={t('store.facebookUrl')}
+              name="storeFacebookUrl"
+              type="url"
+              value={facebookUrl}
+              onChange={(event) => {
+                setFacebookUrl(event.target.value)
+                setFormError(null)
+                setErrors((current) => ({ ...current, facebookUrl: undefined }))
+              }}
+              error={errors.facebookUrl}
+              hint={t('store.facebookHint')}
+              placeholder="https://facebook.com/yourpage"
+              disabled={disabled}
+            />
+            <Input
+              label={t('store.telegramUsername')}
+              name="storeTelegramUsername"
+              value={telegramUsername}
+              onChange={(event) => {
+                setTelegramUsername(event.target.value)
+                setFormError(null)
+                setErrors((current) => ({ ...current, telegramUsername: undefined }))
+              }}
+              error={errors.telegramUsername}
+              hint={t('store.telegramUsernameHint')}
+              placeholder="@yourstore"
+              disabled={disabled}
+            />
+          </div>
         </div>
 
         {formError ? (

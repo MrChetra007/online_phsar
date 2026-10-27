@@ -292,6 +292,11 @@ export function AppShell() {
                   {t('footer.terms')}
                 </Link>
               </li>
+              <li>
+                <Link to="/contact" className="hover:text-emerald-700">
+                  {t('footer.contact')}
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
