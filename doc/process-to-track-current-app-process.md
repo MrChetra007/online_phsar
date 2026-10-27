@@ -2,7 +2,7 @@
 
 Last updated: 2026-10-27
 Branch: `main`
-Latest feature commit: `4cb62c7 feat: add toast notifications and refresh admin overview`
+Latest feature commit: `105ec95 feat: add product images to order details`
 
 This is the working handoff document. Read it first when resuming the project.
 Update it at the end of every build step, commit, deployment, or blocker.
@@ -897,8 +897,9 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
   loaded through the order item variant/product relation with a branded
   initial fallback when an image is unavailable.
 - Also normalized the store order quantity label to match the admin detail view.
-- Order-detail image changes are uncommitted. Passed typecheck, lint, 74 tests,
-  Prettier, and production build.
+- Order-detail image changes committed as `105ec95 feat: add product images to
+  order details`. Passed typecheck, lint, 74 tests, Prettier, and production
+  build.
 - Committed toast notifications, admin overview refresh, and related store/admin
   success flows as `4cb62c7 feat: add toast notifications and refresh admin
   overview`.
