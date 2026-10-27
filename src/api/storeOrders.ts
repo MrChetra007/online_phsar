@@ -14,6 +14,7 @@ export type StoreOrderItem = {
   variant: string | null
   unitPrice: number
   quantity: number
+  imageUrl: string | null
 }
 
 export type StoreOrderHistoryEntry = {
@@ -59,12 +60,26 @@ export type StoreOrderStatusChange = {
   trackingNote?: string
 }
 
+type RawProductImage = {
+  url: string
+  sort_order: number
+}
+
+type RawProduct = {
+  product_images?: RawProductImage[] | null
+}
+
+type RawVariant = {
+  products?: RawProduct | RawProduct[] | null
+}
+
 type RawOrderItem = {
   id: string
   name_snapshot: string
   variant_label_snapshot: string | null
   unit_price: number
   quantity: number
+  product_variants?: RawVariant | RawVariant[] | null
 }
 
 type RawHistoryEntry = {
@@ -132,10 +147,22 @@ const ORDER_COLUMNS = [
 ].join(', ')
 
 const ITEMS_EMBED =
-  'order_items ( id, name_snapshot, variant_label_snapshot, unit_price, quantity )'
+  'order_items ( id, name_snapshot, variant_label_snapshot, unit_price, quantity, product_variants ( products ( product_images ( url, sort_order ) ) ) )'
 
 const HISTORY_EMBED =
   'order_status_history ( id, old_status, new_status, note, created_at )'
+
+function firstItemImage(row: RawOrderItem): string | null {
+  const variant = Array.isArray(row.product_variants)
+    ? row.product_variants[0]
+    : row.product_variants
+  const product = Array.isArray(variant?.products)
+    ? variant.products[0]
+    : variant?.products
+  const images = [...(product?.product_images ?? [])]
+  images.sort((a, b) => a.sort_order - b.sort_order)
+  return images[0]?.url ?? null
+}
 
 function mapItem(row: RawOrderItem): StoreOrderItem {
   return {
@@ -144,6 +171,7 @@ function mapItem(row: RawOrderItem): StoreOrderItem {
     variant: row.variant_label_snapshot,
     unitPrice: row.unit_price,
     quantity: row.quantity,
+    imageUrl: firstItemImage(row),
   }
 }
 

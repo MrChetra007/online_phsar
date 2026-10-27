@@ -442,16 +442,34 @@ export function AdminOrderDetailPage() {
               {order.items.map((item) => (
                 <li
                   key={item.id}
-                  className="flex items-start justify-between gap-3 py-2 first:pt-0 last:pb-0"
+                  className="flex items-start gap-3 py-3 first:pt-0 last:pb-0"
                 >
-                  <div className="min-w-0">
+                  <div className="size-16 shrink-0 overflow-hidden rounded-xl border border-stone-200/80 bg-stone-100">
+                    {item.imageUrl ? (
+                      <img
+                        src={item.imageUrl}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        className="size-full object-cover"
+                      />
+                    ) : (
+                      <div
+                        aria-hidden="true"
+                        className="grid size-full place-items-center bg-gradient-to-br from-emerald-50 to-stone-100 text-xl font-bold text-emerald-700"
+                      >
+                        {item.name.trim().slice(0, 1).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
                     <p className="break-words font-medium text-slate-900">
                       {item.name}
                     </p>
                     {item.variant ? (
                       <p className="text-sm text-slate-500">{item.variant}</p>
                     ) : null}
-                    <p className="text-sm text-slate-500">× {item.quantity}</p>
+                    <p className="text-sm text-slate-500">x {item.quantity}</p>
                   </div>
                   <p className="shrink-0 font-semibold text-slate-900">
                     {formatMoney(item.unitPrice * item.quantity)}
