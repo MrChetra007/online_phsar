@@ -26,6 +26,7 @@ import type { TranslationKey } from '../../lib/i18n/translations'
 import { ledgerTypeLabels } from '../../lib/ledger'
 import { formatMoney, parseMoneyToCents } from '../../lib/money'
 import { orderStatusLabels } from '../../lib/orderStatus'
+import { useToast } from '../toast'
 
 type StoreDetail = {
   eligibleOrders: EligibleOrder[]
@@ -59,6 +60,7 @@ function paymentLabelKey(
 
 export function AdminSettlementsPage() {
   const { t, language } = useI18n()
+  const { showToast } = useToast()
 
   const [summaries, setSummaries] = useState<SettlementSummary[]>([])
   const [summariesLoading, setSummariesLoading] = useState(true)
@@ -74,7 +76,6 @@ export function AdminSettlementsPage() {
   const [detailFailed, setDetailFailed] = useState(false)
 
   const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([])
-  const [notice, setNotice] = useState<TranslationKey | null>(null)
 
   const [settlementOpen, setSettlementOpen] = useState(false)
   const [reference, setReference] = useState('')
@@ -188,7 +189,6 @@ export function AdminSettlementsPage() {
     setDetailLoading(true)
     setDetailFailed(false)
     setSelectedOrderIds([])
-    setNotice(null)
     setSettlementResult(null)
     setSettlementOpen(false)
     setTransferErrors({})
@@ -203,17 +203,14 @@ export function AdminSettlementsPage() {
         ? current.filter((id) => id !== orderId)
         : [...current, orderId],
     )
-    setNotice(null)
   }
 
   function selectAllOrders() {
     setSelectedOrderIds(eligibleOrders.map((order) => order.id))
-    setNotice(null)
   }
 
   function clearOrders() {
     setSelectedOrderIds([])
-    setNotice(null)
   }
 
   function openSettlement() {
@@ -244,7 +241,6 @@ export function AdminSettlementsPage() {
     setSettlementBusy(true)
     setSettlementFieldError(null)
     setSettlementActionError(null)
-    setNotice(null)
 
     try {
       const result = await createSettlement(
@@ -255,7 +251,7 @@ export function AdminSettlementsPage() {
       )
       setSettlementResult(result)
       setSettlementOpen(false)
-      setNotice('admin.settlementCreated')
+      showToast(t('admin.settlementCreated'), { tone: 'success' })
       setDetailLoading(true)
       setVersion((current) => current + 1)
     } catch (error) {
@@ -285,7 +281,6 @@ export function AdminSettlementsPage() {
     setTransferBusy(true)
     setTransferErrors({})
     setTransferActionError(null)
-    setNotice(null)
 
     try {
       await recordCommissionSettled(
@@ -297,7 +292,7 @@ export function AdminSettlementsPage() {
       setTransferAmount('')
       setTransferReference('')
       setTransferNote('')
-      setNotice('admin.settlementTransferDone')
+      showToast(t('admin.settlementTransferDone'), { tone: 'success' })
       setDetailLoading(true)
       setVersion((current) => current + 1)
     } catch (error) {
@@ -330,7 +325,6 @@ export function AdminSettlementsPage() {
     setDeductionBusy(true)
     setDeductionErrors({})
     setDeductionActionError(null)
-    setNotice(null)
 
     try {
       await recordDeduction(
@@ -342,7 +336,7 @@ export function AdminSettlementsPage() {
       setDeductionOrderId('')
       setDeductionAmount('')
       setDeductionNote('')
-      setNotice('admin.settlementDeductionDone')
+      showToast(t('admin.settlementDeductionDone'), { tone: 'success' })
       setDetailLoading(true)
       setVersion((current) => current + 1)
     } catch (error) {
@@ -475,22 +469,12 @@ export function AdminSettlementsPage() {
               variant="secondary"
               onClick={() => {
                 setSelected(null)
-                setNotice(null)
                 setSettlementResult(null)
               }}
             >
               {t('admin.settlementClose')}
             </Button>
           </div>
-
-          {notice ? (
-            <p
-              role="status"
-              className="mt-4 rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800"
-            >
-              {t(notice)}
-            </p>
-          ) : null}
 
           {settlementResult ? (
             <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">

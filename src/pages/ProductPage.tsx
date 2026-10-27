@@ -13,6 +13,7 @@ import {
   TruckIcon,
 } from '../components/icons'
 import { useCart } from '../features/cart'
+import { useToast } from '../features/toast'
 import { categoryName } from '../lib/categories'
 import type { CartItemInput, CartStore } from '../lib/cart'
 import { getErrorMessage } from '../lib/errors'
@@ -35,6 +36,7 @@ type PendingAdd = {
 export function ProductPage() {
   const { t, language } = useI18n()
   const { cart, addItem, replaceWithItem } = useCart()
+  const { showToast } = useToast()
   const { productId } = useParams<{ productId: string }>()
   const [version, setVersion] = useState(0)
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
@@ -185,6 +187,12 @@ export function ProductPage() {
     }
 
     setAddStatus(outcome)
+    if (outcome === 'added') {
+      showToast(t('cart.added'), {
+        tone: 'success',
+        action: { label: t('nav.cart'), to: '/cart' },
+      })
+    }
   }
 
   function handleReplaceCart() {
@@ -197,6 +205,12 @@ export function ProductPage() {
     )
     setPendingAdd(null)
     setAddStatus(outcome === 'added' ? 'added' : 'sold_out')
+    if (outcome === 'added') {
+      showToast(t('cart.added'), {
+        tone: 'success',
+        action: { label: t('nav.cart'), to: '/cart' },
+      })
+    }
   }
 
   return (
@@ -387,15 +401,6 @@ export function ProductPage() {
                 {t('cart.addToCart')}
               </Button>
             </div>
-
-            {addStatus === 'added' ? (
-              <p role="status" className="mt-3 text-sm text-emerald-700">
-                {t('cart.added')}{' '}
-                <Link to="/cart" className="font-semibold underline">
-                  {t('nav.cart')}
-                </Link>
-              </p>
-            ) : null}
 
             {addStatus === 'sold_out' ? (
               <p role="alert" className="mt-3 text-sm text-red-600">

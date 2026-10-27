@@ -7,6 +7,7 @@ import { LoadingState } from '../../components/LoadingState'
 import { errorCodeFrom, getErrorMessage } from '../../lib/errors'
 import { useI18n } from '../../lib/i18n'
 import type { TranslationKey } from '../../lib/i18n/translations'
+import { useToast } from '../toast'
 
 type SettingKind = 'number' | 'boolean' | 'text'
 
@@ -146,6 +147,7 @@ function initialValue(setting: SettingConfig, raw: unknown): string | boolean {
 
 export function AdminSettingsPage() {
   const { t, language } = useI18n()
+  const { showToast } = useToast()
 
   const [values, setValues] = useState<Values>({})
   const [loading, setLoading] = useState(true)
@@ -154,7 +156,6 @@ export function AdminSettingsPage() {
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string | null>(null)
-  const [notice, setNotice] = useState<TranslationKey | null>(null)
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
@@ -190,7 +191,6 @@ export function AdminSettingsPage() {
       delete next[key]
       return next
     })
-    setNotice(null)
     setFormError(null)
   }
 
@@ -232,14 +232,12 @@ export function AdminSettingsPage() {
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors)
       setFormError(t('admin.settingInvalid'))
-      setNotice(null)
       return
     }
 
     setBusy(true)
     setFieldErrors({})
     setFormError(null)
-    setNotice(null)
 
     try {
       await Promise.all(
@@ -255,7 +253,7 @@ export function AdminSettingsPage() {
           return updatePlatformSetting(setting.key, value)
         }),
       )
-      setNotice('admin.settingsSaved')
+      showToast(t('admin.settingsSaved'), { tone: 'success' })
       setVersion((current) => current + 1)
     } catch (error) {
       setFormError(getErrorMessage(errorCodeFrom(error), language))
@@ -296,15 +294,6 @@ export function AdminSettingsPage() {
           className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700"
         >
           {formError}
-        </p>
-      ) : null}
-
-      {notice ? (
-        <p
-          role="status"
-          className="mt-4 rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800"
-        >
-          {t(notice)}
         </p>
       ) : null}
 

@@ -5,7 +5,7 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from 'react'
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { listActiveCategories, type Category } from '../../api/categories'
 import {
   addProductImage,
@@ -40,6 +40,7 @@ import { compressProductImage, validateProductImageFile } from '../../lib/image'
 import { centsToInput, formatMoney, parseMoneyToCents } from '../../lib/money'
 import { payoutCents } from '../../lib/products'
 import { useAuth } from '../auth/context'
+import { useToast } from '../toast'
 
 type VariantDraft = {
   key: string
@@ -70,11 +71,6 @@ type FormErrors = {
   variants?: string
   activeVariants?: string
   variantFields: Record<string, VariantFieldErrors>
-}
-
-type EditorState = {
-  saved?: boolean
-  photosFailed?: boolean
 }
 
 function blankVariant(label = ''): VariantDraft {
@@ -122,11 +118,10 @@ function emptyErrors(): FormErrors {
 export function ProductEditorPage() {
   const { t, language } = useI18n()
   const { session } = useAuth()
+  const { showToast } = useToast()
   const userId = session?.user.id
   const { productId } = useParams<{ productId: string }>()
   const navigate = useNavigate()
-  const location = useLocation()
-  const locationState = location.state as EditorState | null
   const isNew = !productId
 
   const [store, setStore] = useState<Store | null>(null)
@@ -145,13 +140,6 @@ export function ProductEditorPage() {
   const [errors, setErrors] = useState<FormErrors>(emptyErrors)
   const [formError, setFormError] = useState<TranslationKey | null>(null)
   const [imageError, setImageError] = useState<TranslationKey | null>(null)
-  const [notice, setNotice] = useState<TranslationKey | null>(
-    locationState?.photosFailed
-      ? 'store.photosFailed'
-      : locationState?.saved
-        ? 'store.productSaved'
-        : null,
-  )
   const [loadedKey, setLoadedKey] = useState<string | null>(null)
   const [failedKey, setFailedKey] = useState<string | null>(null)
   const [notFoundKey, setNotFoundKey] = useState<string | null>(null)
@@ -280,7 +268,6 @@ export function ProductEditorPage() {
         variant.key === key ? { ...variant, ...patch } : variant,
       ),
     )
-    setNotice(null)
     setFormError(null)
     setErrors((current) => ({
       ...current,
@@ -297,22 +284,18 @@ export function ProductEditorPage() {
     if (variants.length >= 20) return
     setVariants((current) => [...current, blankVariant()])
     setErrors((current) => ({ ...current, variants: undefined }))
-    setNotice(null)
   }
 
   function removeVariant(key: string) {
     setVariants((current) =>
       current.filter((variant) => variant.key !== key || variant.id),
     )
-    setNotice(null)
   }
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? [])
     event.target.value = ''
     if (files.length === 0) return
-
-    setNotice(null)
     setImageError(null)
 
     const available = 5 - images.length - pendingImages.length
@@ -352,7 +335,6 @@ export function ProductEditorPage() {
       return current.filter((pending) => pending.key !== key)
     })
     setImageError(null)
-    setNotice(null)
   }
 
   async function removeImage(image: ProductImage) {
@@ -360,7 +342,6 @@ export function ProductEditorPage() {
 
     setDeletingImageId(image.id)
     setImageError(null)
-    setNotice(null)
 
     try {
       await deleteProductImage(image)
@@ -450,7 +431,6 @@ export function ProductEditorPage() {
     event.preventDefault()
     if (!store || locked || saving) return
     setFormError(null)
-    setNotice(null)
     setImageError(null)
 
     if (!validateForm()) return
@@ -504,11 +484,12 @@ export function ProductEditorPage() {
         if (photoFailure) setImageError('store.errorImageUpload')
       }
 
+      showToast(t(photoFailure ? 'store.photosFailed' : 'store.productSaved'), {
+        tone: photoFailure ? 'warning' : 'success',
+      })
+
       if (isNew) {
-        navigate(`/store/products/${saved.id}`, {
-          replace: true,
-          state: { saved: !photoFailure, photosFailed: photoFailure },
-        })
+        navigate(`/store/products/${saved.id}`, { replace: true })
         return
       }
 
@@ -518,8 +499,6 @@ export function ProductEditorPage() {
       } catch {
         setFormError('store.productError')
       }
-
-      setNotice(photoFailure ? 'store.photosFailed' : 'store.productSaved')
     } catch (error) {
       setFormError(productErrorKey(error))
     } finally {
@@ -582,15 +561,6 @@ export function ProductEditorPage() {
           {t(formError)}
         </p>
       ) : null}
-      {notice ? (
-        <p
-          role="status"
-          className="mt-4 rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800"
-        >
-          {t(notice)}
-        </p>
-      ) : null}
-
       <form className="mt-5 space-y-5" onSubmit={handleSubmit} noValidate>
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="space-y-4">
@@ -600,7 +570,6 @@ export function ProductEditorPage() {
               value={name}
               onChange={(event) => {
                 setName(event.target.value)
-                setNotice(null)
                 setFormError(null)
                 setErrors((current) => ({ ...current, name: undefined }))
               }}
@@ -616,7 +585,6 @@ export function ProductEditorPage() {
               value={categoryId}
               onChange={(event) => {
                 setCategoryId(event.target.value)
-                setNotice(null)
                 setFormError(null)
                 setErrors((current) => ({
                   ...current,
@@ -653,7 +621,6 @@ export function ProductEditorPage() {
               value={description}
               onChange={(event) => {
                 setDescription(event.target.value)
-                setNotice(null)
                 setFormError(null)
                 setErrors((current) => ({
                   ...current,
@@ -673,7 +640,6 @@ export function ProductEditorPage() {
               value={status}
               onChange={(event) => {
                 setStatus(event.target.value as ProductStatus)
-                setNotice(null)
                 setFormError(null)
                 setErrors((current) => ({
                   ...current,

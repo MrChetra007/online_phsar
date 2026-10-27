@@ -10,6 +10,7 @@ import App from './App.tsx'
 import { AppErrorBoundary } from './components/AppErrorBoundary'
 import { AuthProvider } from './features/auth'
 import { CartProvider } from './features/cart'
+import { ToastProvider } from './features/toast'
 import { I18nProvider } from './lib/i18n'
 
 createRoot(document.getElementById('root')!).render(
@@ -19,7 +20,9 @@ createRoot(document.getElementById('root')!).render(
         <AuthProvider>
           <CartProvider>
             <BrowserRouter>
-              <App />
+              <ToastProvider>
+                <App />
+              </ToastProvider>
             </BrowserRouter>
           </CartProvider>
         </AuthProvider>

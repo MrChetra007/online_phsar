@@ -3,6 +3,7 @@ import { updateStore, type Store } from '../../api/stores'
 import { Button } from '../../components/Button'
 import { Input } from '../../components/Input'
 import { Textarea } from '../../components/Textarea'
+import { useToast } from '../toast'
 import { useI18n } from '../../lib/i18n'
 import type { TranslationKey } from '../../lib/i18n/translations'
 import { centsToInput, parseMoneyToCents } from '../../lib/money'
@@ -23,6 +24,7 @@ export function StoreDetailsForm({
   onUpdated: (store: Store) => void
 }) {
   const { t } = useI18n()
+  const { showToast } = useToast()
 
   const [name, setName] = useState(store.name)
   const [description, setDescription] = useState(store.description ?? '')
@@ -35,13 +37,11 @@ export function StoreDetailsForm({
   )
   const [errors, setErrors] = useState<FieldErrors>({})
   const [formError, setFormError] = useState<TranslationKey | null>(null)
-  const [notice, setNotice] = useState<TranslationKey | null>(null)
   const [saving, setSaving] = useState(false)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setFormError(null)
-    setNotice(null)
 
     const trimmedName = name.trim()
     const trimmedDescription = description.trim()
@@ -81,7 +81,7 @@ export function StoreDetailsForm({
         deliveryFeeOther: otherCents ?? 0,
       })
       onUpdated(updated)
-      setNotice('store.saved')
+      showToast(t('store.saved'), { tone: 'success' })
     } catch (error) {
       setFormError(storeSaveErrorKey(error))
     } finally {
@@ -114,7 +114,6 @@ export function StoreDetailsForm({
           value={name}
           onChange={(event) => {
             setName(event.target.value)
-            setNotice(null)
             setFormError(null)
             setErrors((current) => ({ ...current, name: undefined }))
           }}
@@ -130,7 +129,6 @@ export function StoreDetailsForm({
           value={description}
           onChange={(event) => {
             setDescription(event.target.value)
-            setNotice(null)
             setFormError(null)
             setErrors((current) => ({
               ...current,
@@ -149,7 +147,6 @@ export function StoreDetailsForm({
           value={province}
           onChange={(event) => {
             setProvince(event.target.value)
-            setNotice(null)
             setFormError(null)
             setErrors((current) => ({ ...current, province: undefined }))
           }}
@@ -166,7 +163,6 @@ export function StoreDetailsForm({
             value={deliveryFeeLocal}
             onChange={(event) => {
               setDeliveryFeeLocal(event.target.value)
-              setNotice(null)
               setFormError(null)
               setErrors((current) => ({
                 ...current,
@@ -184,7 +180,6 @@ export function StoreDetailsForm({
             value={deliveryFeeOther}
             onChange={(event) => {
               setDeliveryFeeOther(event.target.value)
-              setNotice(null)
               setFormError(null)
               setErrors((current) => ({
                 ...current,
@@ -206,15 +201,6 @@ export function StoreDetailsForm({
             {t(formError)}
           </p>
         ) : null}
-        {notice ? (
-          <p
-            role="status"
-            className="rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800"
-          >
-            {t(notice)}
-          </p>
-        ) : null}
-
         {!disabled ? (
           <Button type="submit" disabled={saving}>
             {saving ? t('common.loading') : t('store.save')}

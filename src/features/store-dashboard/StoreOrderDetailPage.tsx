@@ -23,6 +23,7 @@ import {
   OrderStatusBadge,
   PaymentStatusBadge,
 } from '../../components/OrderStatusBadge'
+import { useToast } from '../toast'
 
 type StatusActionId =
   'confirm' | 'reject' | 'ship' | 'deliver' | 'refuse' | 'return'
@@ -104,6 +105,7 @@ function actionsFor(status: StoreOrderStatus): StatusAction[] {
 
 export function StoreOrderDetailPage() {
   const { t, language } = useI18n()
+  const { showToast } = useToast()
   const { orderId } = useParams()
 
   const [order, setOrder] = useState<StoreOrder | null>(null)
@@ -119,7 +121,6 @@ export function StoreOrderDetailPage() {
   const [fieldError, setFieldError] = useState<string | null>(null)
   const [dialogError, setDialogError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
-  const [notice, setNotice] = useState<TranslationKey | null>(null)
 
   const [restockOpen, setRestockOpen] = useState(false)
   const [restockBusy, setRestockBusy] = useState(false)
@@ -190,7 +191,6 @@ export function StoreOrderDetailPage() {
     setBusy(true)
     setDialogError(null)
     setFieldError(null)
-    setNotice(null)
 
     try {
       await changeStoreOrderStatus(order.id, action.target, {
@@ -199,7 +199,7 @@ export function StoreOrderDetailPage() {
         trackingNote,
       })
       setAction(null)
-      setNotice('storeOrders.actionSuccess')
+      showToast(t('storeOrders.actionSuccess'), { tone: 'success' })
       await refreshOrder(order.id)
     } catch (error) {
       setDialogError(errorCodeFrom(error))
@@ -213,7 +213,6 @@ export function StoreOrderDetailPage() {
 
     setRestockBusy(true)
     setRestockError(null)
-    setNotice(null)
 
     try {
       await restockStoreOrder(order.id)
@@ -306,15 +305,6 @@ export function StoreOrderDetailPage() {
         <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           {t('storeOrders.dispute')}
         </div>
-      ) : null}
-
-      {notice ? (
-        <p
-          role="status"
-          className="mt-4 rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800"
-        >
-          {t(notice)}
-        </p>
       ) : null}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,250px)_minmax(0,1fr)]">

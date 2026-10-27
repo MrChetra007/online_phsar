@@ -2,7 +2,7 @@
 
 Last updated: 2026-10-27
 Branch: `main`
-Latest feature commit: `c02acd5 feat: add admin workspace sidebar`
+Latest feature commit: `53b70ec feat: redesign auth screens`
 
 This is the working handoff document. Read it first when resuming the project.
 Update it at the end of every build step, commit, deployment, or blocker.
@@ -893,17 +893,35 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
 
 ### 2026-10-27
 
+- Added a reusable toast system mounted inside the router: success, warning,
+  error, and info tones; four-toast cap; 4.2 s auto-dismiss; dismiss controls;
+  action links; accessible `status`/`alert` roles; and reduced-motion-aware
+  animation.
+- Replaced inline success notices across the app with toasts for add-to-cart,
+  product create/edit, store details, private store settings, store onboarding,
+  admin overview suspend, admin settings, categories, payments, disputes,
+  settlements, admin order actions, and store order status changes.
+- Product editor now shows a warning toast when photos fail after the product
+  itself is saved, without keeping stale route-state or inline notices.
+- Toast changes are uncommitted. Passed typecheck, lint, 74 tests, Prettier, and
+  production build; the main chunk is now 485.51 kB and no longer warns.
 - Committed the storefront redesign as `8713c2a feat: redesign storefront
   experience`.
 - Added product search autosuggestions with a 250 ms debounce, thumbnail, store,
   price, keyboard navigation, ARIA combobox/listbox behavior, and bilingual
   states; committed as `9442dff feat: add search autosuggestions`.
+- Redesigned the admin overview with a dark platform hero, live store counts,
+  four quick-action cards, a store directory grouped by status, store logo
+  tiles, and a proper suspend confirmation dialog.
+- Admin overview changes are uncommitted. Passed typecheck, lint, 74 tests,
+  Prettier, and production build; the main-chunk warning remains.
 - Redesigned login and signup around a shared `AuthShell`: dark brand panel with
   workspace messaging and three feature highlights, plus a white form card.
   Added bilingual auth workspace copy without changing form validation or auth
   behavior.
-- Auth redesign is uncommitted. Passed typecheck, lint, 74 tests, Prettier, and
-  production build; the main-chunk warning remains.
+- Auth redesign committed as `53b70ec feat: redesign auth screens`. Passed
+  typecheck, lint, 74 tests, Prettier, and production build; the main-chunk
+  warning remains.
 - Added a dedicated responsive admin workspace outside the public shell with a
   collapsible desktop sidebar persisted as `kos.adminSidebarCollapsed`, mobile
   drawer, admin identity card, super-admin badge, storefront shortcut, language,

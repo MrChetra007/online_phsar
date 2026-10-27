@@ -3,6 +3,7 @@ import { createStore } from '../../api/stores'
 import { Button } from '../../components/Button'
 import { Input } from '../../components/Input'
 import { Textarea } from '../../components/Textarea'
+import { useToast } from '../toast'
 import { useI18n } from '../../lib/i18n'
 import type { TranslationKey } from '../../lib/i18n/translations'
 import { parseMoneyToCents } from '../../lib/money'
@@ -26,6 +27,7 @@ export function StoreOnboardingForm({
   onCreated: () => void
 }) {
   const { t } = useI18n()
+  const { showToast } = useToast()
 
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
@@ -90,6 +92,7 @@ export function StoreOnboardingForm({
         deliveryFeeLocal: localCents ?? 0,
         deliveryFeeOther: otherCents ?? 0,
       })
+      showToast(t('store.created'), { tone: 'success' })
       onCreated()
     } catch (error) {
       const key = storeSaveErrorKey(error)

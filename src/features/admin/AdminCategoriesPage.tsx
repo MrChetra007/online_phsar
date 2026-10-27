@@ -20,6 +20,7 @@ import {
 } from '../../lib/categories'
 import { useI18n } from '../../lib/i18n'
 import type { TranslationKey } from '../../lib/i18n/translations'
+import { useToast } from '../toast'
 
 function compareCategories(a: Category, b: Category): number {
   return a.sort_order - b.sort_order || a.name_en.localeCompare(b.name_en)
@@ -212,11 +213,11 @@ function CategoryForm({
 
 export function AdminCategoriesPage() {
   const { t, language } = useI18n()
+  const { showToast } = useToast()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [failed, setFailed] = useState(false)
   const [version, setVersion] = useState(0)
-  const [notice, setNotice] = useState<TranslationKey | null>(null)
   const [actionError, setActionError] = useState<TranslationKey | null>(null)
   const [formBusy, setFormBusy] = useState(false)
   const [busyId, setBusyId] = useState<string | null>(null)
@@ -252,11 +253,10 @@ export function AdminCategoriesPage() {
 
   async function handleCreate(input: CategoryInput) {
     setFormBusy(true)
-    setNotice(null)
     setActionError(null)
     try {
       await createCategory(input)
-      setNotice('admin.categorySaved')
+      showToast(t('admin.categorySaved'), { tone: 'success' })
       setAddFormKey((current) => current + 1)
       setVersion((current) => current + 1)
     } catch (error) {
@@ -268,11 +268,10 @@ export function AdminCategoriesPage() {
 
   async function handleUpdate(categoryId: string, input: CategoryInput) {
     setFormBusy(true)
-    setNotice(null)
     setActionError(null)
     try {
       await updateCategory(categoryId, input)
-      setNotice('admin.categorySaved')
+      showToast(t('admin.categorySaved'), { tone: 'success' })
       setEditingId(null)
       setVersion((current) => current + 1)
     } catch (error) {
@@ -284,7 +283,6 @@ export function AdminCategoriesPage() {
 
   async function toggleCategory(category: Category) {
     setBusyId(category.id)
-    setNotice(null)
     setActionError(null)
     try {
       const updated = await updateCategory(category.id, {
@@ -293,7 +291,7 @@ export function AdminCategoriesPage() {
       setCategories((current) =>
         current.map((entry) => (entry.id === category.id ? updated : entry)),
       )
-      setNotice('admin.categorySaved')
+      showToast(t('admin.categorySaved'), { tone: 'success' })
     } catch (error) {
       setActionError(categoryErrorKey(error))
     } finally {
@@ -317,7 +315,6 @@ export function AdminCategoriesPage() {
     ordered[targetIndex] = current
 
     setBusyId(category.id)
-    setNotice(null)
     setActionError(null)
     try {
       await Promise.all(
@@ -327,7 +324,7 @@ export function AdminCategoriesPage() {
             : updateCategory(entry.id, { sortOrder: position + 1 }),
         ),
       )
-      setNotice('admin.categorySaved')
+      showToast(t('admin.categorySaved'), { tone: 'success' })
       setVersion((currentVersion) => currentVersion + 1)
     } catch (error) {
       setActionError(categoryErrorKey(error))
@@ -364,15 +361,6 @@ export function AdminCategoriesPage() {
           {t(actionError)}
         </p>
       ) : null}
-      {notice ? (
-        <p
-          role="status"
-          className="mt-4 rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800"
-        >
-          {t(notice)}
-        </p>
-      ) : null}
-
       <div className="mt-5">
         <CategoryForm
           key={addFormKey}

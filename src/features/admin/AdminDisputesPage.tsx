@@ -17,11 +17,12 @@ import { Textarea } from '../../components/Textarea'
 import { formatDateTime } from '../../lib/datetime'
 import { errorCodeFrom, getErrorMessage } from '../../lib/errors'
 import { useI18n } from '../../lib/i18n'
-import type { TranslationKey } from '../../lib/i18n/translations'
 import { formatMoney } from '../../lib/money'
+import { useToast } from '../toast'
 
 export function AdminDisputesPage() {
   const { t, language } = useI18n()
+  const { showToast } = useToast()
 
   const [orders, setOrders] = useState<AdminOrder[]>([])
   const [loading, setLoading] = useState(true)
@@ -33,7 +34,6 @@ export function AdminDisputesPage() {
   const [fieldError, setFieldError] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
-  const [notice, setNotice] = useState<TranslationKey | null>(null)
 
   useEffect(() => {
     let active = true
@@ -59,7 +59,6 @@ export function AdminDisputesPage() {
     setNote('')
     setFieldError(null)
     setActionError(null)
-    setNotice(null)
   }
 
   function closeDialog() {
@@ -84,7 +83,7 @@ export function AdminDisputesPage() {
     try {
       await resolveAdminDispute(selected.id, note)
       setSelected(null)
-      setNotice('admin.disputeResolved')
+      showToast(t('admin.disputeResolved'), { tone: 'success' })
       setVersion((current) => current + 1)
     } catch (error) {
       setActionError(errorCodeFrom(error))
@@ -115,15 +114,6 @@ export function AdminDisputesPage() {
       <p className="mt-2 text-sm text-slate-600">
         {t('admin.disputesSubtitle')}
       </p>
-      {notice ? (
-        <p
-          role="status"
-          className="mt-4 rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800"
-        >
-          {t(notice)}
-        </p>
-      ) : null}
-
       {orders.length === 0 ? (
         <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
           {t('admin.noDisputes')}

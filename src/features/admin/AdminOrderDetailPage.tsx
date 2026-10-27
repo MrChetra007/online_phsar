@@ -23,9 +23,9 @@ import { Textarea } from '../../components/Textarea'
 import { formatDateTime } from '../../lib/datetime'
 import { errorCodeFrom, getErrorMessage } from '../../lib/errors'
 import { useI18n } from '../../lib/i18n'
-import type { TranslationKey } from '../../lib/i18n/translations'
 import { formatMoney } from '../../lib/money'
 import { orderStatusLabels } from '../../lib/orderStatus'
+import { useToast } from '../toast'
 
 const adminTransitions: Record<AdminOrderStatus, AdminOrderStatus[]> = {
   pending: ['confirmed', 'rejected', 'cancelled'],
@@ -45,6 +45,7 @@ type PaymentDialog = 'confirm' | 'refund'
 
 export function AdminOrderDetailPage() {
   const { t, language } = useI18n()
+  const { showToast } = useToast()
   const { orderId } = useParams()
 
   const [order, setOrder] = useState<AdminOrder | null>(null)
@@ -77,8 +78,6 @@ export function AdminOrderDetailPage() {
   )
   const [disputeError, setDisputeError] = useState<string | null>(null)
   const [disputeBusy, setDisputeBusy] = useState(false)
-
-  const [notice, setNotice] = useState<TranslationKey | null>(null)
 
   useEffect(() => {
     if (!orderId) return
@@ -132,7 +131,6 @@ export function AdminOrderDetailPage() {
 
     setStatusBusy(true)
     setStatusError(null)
-    setNotice(null)
 
     try {
       await changeAdminOrderStatus(order.id, newStatus, {
@@ -140,7 +138,7 @@ export function AdminOrderDetailPage() {
         courierName,
         trackingNote,
       })
-      setNotice('admin.statusUpdated')
+      showToast(t('admin.statusUpdated'), { tone: 'success' })
       setNewStatus('')
       setNote('')
       await refreshOrder(order.id)
@@ -182,15 +180,14 @@ export function AdminOrderDetailPage() {
     setPaymentBusy(true)
     setPaymentFieldError(null)
     setPaymentError(null)
-    setNotice(null)
 
     try {
       if (paymentDialog === 'confirm') {
         await confirmPaymentManually(order.id, confirmNote)
-        setNotice('admin.paymentConfirmed')
+        showToast(t('admin.paymentConfirmed'), { tone: 'success' })
       } else {
         await markPaymentRefunded(order.id, refundReference, refundNote)
-        setNotice('admin.refundDone')
+        showToast(t('admin.refundDone'), { tone: 'success' })
       }
       setPaymentDialog(null)
       await refreshOrder(order.id)
@@ -226,12 +223,11 @@ export function AdminOrderDetailPage() {
     setDisputeBusy(true)
     setDisputeFieldError(null)
     setDisputeError(null)
-    setNotice(null)
 
     try {
       await resolveAdminDispute(order.id, disputeNote)
       setDisputeOpen(false)
-      setNotice('admin.disputeResolved')
+      showToast(t('admin.disputeResolved'), { tone: 'success' })
       await refreshOrder(order.id)
     } catch (error) {
       setDisputeError(errorCodeFrom(error))
@@ -329,15 +325,6 @@ export function AdminOrderDetailPage() {
             </p>
           ) : null}
         </div>
-      ) : null}
-
-      {notice ? (
-        <p
-          role="status"
-          className="mt-4 rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800"
-        >
-          {t(notice)}
-        </p>
       ) : null}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,250px)_minmax(0,1fr)]">

@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { updateStorePrivate, type StorePrivate } from '../../api/stores'
 import { Button } from '../../components/Button'
 import { Input } from '../../components/Input'
+import { useToast } from '../toast'
 import { useI18n } from '../../lib/i18n'
 import type { TranslationKey } from '../../lib/i18n/translations'
 import { isValidKhmerPhone, normalizePhone } from '../../lib/phone'
@@ -17,6 +18,7 @@ export function StorePrivateForm({
   onUpdated: (privateInfo: StorePrivate) => void
 }) {
   const { t } = useI18n()
+  const { showToast } = useToast()
 
   const [contactPhone, setContactPhone] = useState(
     privateInfo?.contact_phone ?? '',
@@ -30,13 +32,11 @@ export function StorePrivateForm({
   )
   const [phoneError, setPhoneError] = useState<string | null>(null)
   const [formError, setFormError] = useState<TranslationKey | null>(null)
-  const [notice, setNotice] = useState<TranslationKey | null>(null)
   const [saving, setSaving] = useState(false)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setFormError(null)
-    setNotice(null)
 
     const trimmedPhone = contactPhone.trim()
     if (trimmedPhone && !isValidKhmerPhone(trimmedPhone)) {
@@ -55,7 +55,7 @@ export function StorePrivateForm({
       })
       onUpdated(updated)
       setContactPhone(updated.contact_phone ?? '')
-      setNotice('store.saved')
+      showToast(t('store.saved'), { tone: 'success' })
     } catch (error) {
       setFormError(storeSaveErrorKey(error))
     } finally {
@@ -81,7 +81,6 @@ export function StorePrivateForm({
           onChange={(event) => {
             setContactPhone(event.target.value)
             setPhoneError(null)
-            setNotice(null)
             setFormError(null)
           }}
           error={phoneError ?? undefined}
@@ -95,7 +94,6 @@ export function StorePrivateForm({
           value={bankName}
           onChange={(event) => {
             setBankName(event.target.value)
-            setNotice(null)
             setFormError(null)
           }}
           maxLength={120}
@@ -106,7 +104,6 @@ export function StorePrivateForm({
           value={bankAccountName}
           onChange={(event) => {
             setBankAccountName(event.target.value)
-            setNotice(null)
             setFormError(null)
           }}
           maxLength={120}
@@ -117,7 +114,6 @@ export function StorePrivateForm({
           value={bankAccountNumber}
           onChange={(event) => {
             setBankAccountNumber(event.target.value)
-            setNotice(null)
             setFormError(null)
           }}
           maxLength={60}
@@ -132,15 +128,6 @@ export function StorePrivateForm({
             {t(formError)}
           </p>
         ) : null}
-        {notice ? (
-          <p
-            role="status"
-            className="rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800"
-          >
-            {t(notice)}
-          </p>
-        ) : null}
-
         <Button type="submit" disabled={saving}>
           {saving ? t('common.loading') : t('store.save')}
         </Button>
