@@ -2,7 +2,7 @@
 
 Last updated: 2026-10-27
 Branch: `main`
-Latest commit: `3471c2f chore: add hardening checks and runbook`
+Latest commit: `7d7bf93 perf: split routes and harden runtime`
 
 This is the working handoff document. Read it first when resuming the project.
 Update it at the end of every build step, commit, deployment, or blocker.
@@ -74,6 +74,7 @@ Known recent commits:
 
 | Commit    | Scope                              |
 | --------- | ---------------------------------- |
+| `7d7bf93` | Route splitting and error boundary |
 | `3471c2f` | Hardening checks and runbook        |
 | `4fe2607` | Scheduled jobs                     |
 | `410ad24` | Telegram notifications             |
