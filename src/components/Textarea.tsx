@@ -33,10 +33,10 @@ export function Textarea({
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy ? `${textareaId}-description` : undefined}
         className={[
-          'block w-full resize-y rounded-xl border bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition',
+          'block w-full resize-y rounded-2xl border bg-stone-50 px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:bg-white',
           error
             ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-            : 'border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100',
+            : 'border-stone-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100/70',
           className,
         ]
           .filter(Boolean)

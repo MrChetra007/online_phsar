@@ -893,6 +893,21 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
 
 ### 2026-10-27
 
+- Started a storefront design refresh after owner feedback that the current UI
+  was not good enough. Direction: modern marketplace, storefront first.
+- Redesigned the customer shell, home, product card/grid, category, search,
+  storefront, product detail, cart, checkout, order confirmation, payment, and
+  tracking pages with a warm stone canvas, dark ink sections, and emerald
+  accents.
+- Added shared SVG icons and a mobile bottom navigation; kept bilingual copy,
+  focus states, existing order/payment behavior, and 74 passing tests.
+- Design changes are uncommitted. Passed typecheck, lint, 74 tests, Prettier,
+  and production build after the refresh.
+- Lighthouse mobile after the refresh: home 87/100/100/100. Fixed the mobile
+  logo accessible name, footer contrast, and section subtitle contrast; the
+  product collage is desktop-only so mobile LCP is the hero copy.
+- Committed route splitting and runtime hardening as `7d7bf93`; recorded later
+  documentation follow-ups as `f01b90c` and `bd334da`.
 - Committed Step 13 as `4fe2607`.
 - Started Step 14: added 9 helper/translation tests, bringing the suite to 18
   files and 74 tests.

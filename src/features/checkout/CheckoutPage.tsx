@@ -6,11 +6,16 @@ import {
   type CheckoutSettings,
 } from '../../api/orders'
 import { getActiveStoreBySlug, type PublicStore } from '../../api/stores'
-import { Button } from '../../components/Button'
 import { ErrorState } from '../../components/ErrorState'
 import { Input } from '../../components/Input'
 import { Skeleton } from '../../components/Skeleton'
 import { Textarea } from '../../components/Textarea'
+import {
+  ArrowRightIcon,
+  CartIcon,
+  ShieldCheckIcon,
+  StoreIcon,
+} from '../../components/icons'
 import { useCart } from '../cart'
 import { clearOrderSource, getOrderSource } from '../../lib/attribution'
 import { errorCodeFrom, getErrorMessage } from '../../lib/errors'
@@ -106,15 +111,19 @@ export function CheckoutPage() {
   if (!cart) {
     return (
       <section className="mx-auto max-w-lg py-12 text-center">
-        <h1 className="text-3xl font-bold text-slate-900">
+        <span className="mx-auto grid size-16 place-items-center rounded-full bg-white text-emerald-700 shadow-sm">
+          <CartIcon className="size-8" />
+        </span>
+        <h1 className="mt-5 text-3xl font-bold tracking-tight text-slate-900">
           {t('checkout.title')}
         </h1>
         <p className="mt-3 text-slate-600">{t('cart.empty')}</p>
         <Link
           to="/"
-          className="mt-6 inline-flex items-center justify-center rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800"
+          className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-800"
         >
           {t('cart.browse')}
+          <ArrowRightIcon className="size-4" />
         </Link>
       </section>
     )
@@ -127,10 +136,11 @@ export function CheckoutPage() {
   if (!ready && loadState.status !== 'error') {
     return (
       <section className="mx-auto max-w-5xl">
-        <Skeleton className="h-8 w-48 rounded" />
+        <Skeleton className="h-4 w-28 rounded-full" />
+        <Skeleton className="mt-3 h-10 w-64 rounded" />
         <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <Skeleton className="h-96 rounded-2xl" />
-          <Skeleton className="h-72 rounded-2xl" />
+          <Skeleton className="h-96 rounded-3xl" />
+          <Skeleton className="h-72 rounded-3xl" />
         </div>
       </section>
     )
@@ -158,17 +168,17 @@ export function CheckoutPage() {
   if (blockedMessage) {
     return (
       <section className="mx-auto max-w-lg">
-        <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
           {t('checkout.title')}
         </h1>
         <div
           role="alert"
-          className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-900"
+          className="mt-6 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-900 shadow-sm"
         >
           <p className="text-sm leading-relaxed">{blockedMessage}</p>
           <Link
             to="/cart"
-            className="mt-4 inline-flex items-center justify-center rounded-xl border border-amber-300 bg-white px-4 py-2 text-sm font-medium text-amber-900 transition-colors hover:bg-amber-100"
+            className="mt-4 inline-flex items-center justify-center rounded-full border border-amber-300 bg-white px-4 py-2 text-sm font-semibold text-amber-900 transition-colors hover:bg-amber-100"
           >
             {t('checkout.backToCart')}
           </Link>
@@ -296,27 +306,47 @@ export function CheckoutPage() {
     <section className="mx-auto max-w-5xl">
       <Link
         to="/cart"
-        className="text-sm font-medium text-emerald-700 hover:underline"
+        className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition-colors hover:text-emerald-700"
       >
-        ← {t('checkout.backToCart')}
+        <ArrowRightIcon className="size-4 rotate-180" />
+        {t('checkout.backToCart')}
       </Link>
 
-      <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">
-        {t('checkout.title')}
-      </h1>
-      <p className="mt-1 text-sm text-slate-600">{store.name}</p>
+      <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            {t('checkout.title')}
+          </h1>
+          <p className="mt-2 flex max-w-md items-start gap-1.5 text-sm text-slate-500">
+            <ShieldCheckIcon className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+            {t('checkout.secureNote')}
+          </p>
+        </div>
+        <Link
+          to={`/s/${store.slug}`}
+          className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-stone-200/80 transition hover:text-emerald-700 hover:ring-emerald-300"
+        >
+          <StoreIcon className="size-3.5 text-emerald-600" />
+          {store.name}
+        </Link>
+      </div>
 
       <form
         noValidate
         onSubmit={handleSubmit}
-        className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]"
+        className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]"
       >
         <div className="space-y-5">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
-            <h2 className="text-lg font-semibold text-slate-900">
-              {t('checkout.customerTitle')}
-            </h2>
-            <div className="mt-4 space-y-4">
+          <div className="rounded-3xl border border-stone-200/80 bg-white p-5 shadow-sm sm:p-7">
+            <div className="flex items-center gap-2">
+              <span className="grid size-6 place-items-center rounded-full bg-emerald-700 text-xs font-bold text-white">
+                1
+              </span>
+              <h2 className="text-lg font-semibold text-slate-900">
+                {t('checkout.customerTitle')}
+              </h2>
+            </div>
+            <div className="mt-5 space-y-4">
               <Input
                 label={t('checkout.name')}
                 value={values.name}
@@ -363,18 +393,23 @@ export function CheckoutPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
-            <h2 className="text-lg font-semibold text-slate-900">
-              {t('checkout.paymentTitle')}
-            </h2>
+          <div className="rounded-3xl border border-stone-200/80 bg-white p-5 shadow-sm sm:p-7">
+            <div className="flex items-center gap-2">
+              <span className="grid size-6 place-items-center rounded-full bg-emerald-700 text-xs font-bold text-white">
+                2
+              </span>
+              <h2 className="text-lg font-semibold text-slate-900">
+                {t('checkout.paymentTitle')}
+              </h2>
+            </div>
 
-            <div className="mt-4 space-y-2">
+            <div className="mt-5 space-y-2.5">
               <label
                 className={[
-                  'flex gap-3 rounded-xl border p-3',
+                  'flex gap-3 rounded-2xl border-2 p-4 transition',
                   selectedPaymentMethod === 'cod'
-                    ? 'border-emerald-600 bg-emerald-50'
-                    : 'border-slate-200 bg-white',
+                    ? 'border-emerald-600 bg-emerald-50/60'
+                    : 'border-stone-200 bg-white',
                   settings.codEnabled
                     ? 'cursor-pointer'
                     : 'cursor-not-allowed opacity-60',
@@ -394,13 +429,13 @@ export function CheckoutPage() {
                     className={[
                       'block text-sm font-semibold',
                       selectedPaymentMethod === 'cod'
-                        ? 'text-emerald-900'
+                        ? 'text-emerald-950'
                         : 'text-slate-800',
                     ].join(' ')}
                   >
                     {t('checkout.cod')}
                   </span>
-                  <span className="mt-0.5 block text-sm text-slate-600">
+                  <span className="mt-1 block text-sm leading-relaxed text-slate-600">
                     {settings.codEnabled
                       ? t('checkout.codHint')
                       : getErrorMessage('COD_DISABLED', language)}
@@ -410,10 +445,10 @@ export function CheckoutPage() {
 
               <label
                 className={[
-                  'flex cursor-pointer gap-3 rounded-xl border p-3',
+                  'flex cursor-pointer gap-3 rounded-2xl border-2 p-4 transition',
                   selectedPaymentMethod === 'khqr'
-                    ? 'border-emerald-600 bg-emerald-50'
-                    : 'border-slate-200 bg-white',
+                    ? 'border-emerald-600 bg-emerald-50/60'
+                    : 'border-stone-200 bg-white',
                 ].join(' ')}
               >
                 <input
@@ -429,13 +464,13 @@ export function CheckoutPage() {
                     className={[
                       'block text-sm font-semibold',
                       selectedPaymentMethod === 'khqr'
-                        ? 'text-emerald-900'
+                        ? 'text-emerald-950'
                         : 'text-slate-800',
                     ].join(' ')}
                   >
                     {t('checkout.khqr')}
                   </span>
-                  <span className="mt-0.5 block text-sm text-slate-600">
+                  <span className="mt-1 block text-sm leading-relaxed text-slate-600">
                     {t('checkout.khqrHint')}
                   </span>
                 </span>
@@ -444,54 +479,52 @@ export function CheckoutPage() {
           </div>
         </div>
 
-        <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 lg:sticky lg:top-20">
-          <h2 className="text-lg font-semibold text-slate-900">
-            {t('checkout.summary')}
-          </h2>
+        <aside className="h-fit rounded-3xl bg-ink p-5 text-white shadow-xl shadow-emerald-950/10 sm:p-6 lg:sticky lg:top-28">
+          <h2 className="text-lg font-semibold">{t('checkout.summary')}</h2>
 
-          <ul className="mt-3 space-y-2 border-b border-slate-200 pb-3 text-sm">
+          <ul className="mt-4 space-y-3 border-b border-white/10 pb-4 text-sm">
             {cart.items.map((item) => (
               <li
                 key={item.variantId}
                 className="flex items-start justify-between gap-3"
               >
-                <span className="min-w-0 break-words text-slate-600">
+                <span className="min-w-0 break-words text-emerald-50/70">
                   {item.productName} × {item.quantity}
                   {item.variantLabel !== 'Default' ? (
-                    <span className="block text-xs text-slate-500">
+                    <span className="block text-xs text-emerald-50/60">
                       {item.variantLabel}
                     </span>
                   ) : null}
                 </span>
-                <span className="shrink-0 font-medium text-slate-900">
+                <span className="shrink-0 font-medium text-white">
                   {formatMoney(item.unitPrice * item.quantity)}
                 </span>
               </li>
             ))}
           </ul>
 
-          <dl className="mt-3 space-y-2 text-sm">
+          <dl className="mt-4 space-y-2.5 text-sm">
             <div className="flex items-center justify-between gap-3">
-              <dt className="text-slate-600">{t('checkout.subtotal')}</dt>
-              <dd className="font-medium text-slate-900">
+              <dt className="text-emerald-50/60">{t('checkout.subtotal')}</dt>
+              <dd className="font-medium text-white">
                 {formatMoney(subtotal)}
               </dd>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <dt className="text-slate-600">
+              <dt className="text-emerald-50/60">
                 {t('checkout.deliveryEstimate')}
               </dt>
-              <dd className="font-medium text-slate-900">
+              <dd className="font-medium text-white">
                 {minFee === maxFee
                   ? formatMoney(minFee)
                   : `${formatMoney(minFee)} – ${formatMoney(maxFee)}`}
               </dd>
             </div>
-            <div className="flex items-center justify-between gap-3 border-t border-slate-200 pt-2 text-base">
-              <dt className="font-semibold text-slate-900">
+            <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-4">
+              <dt className="font-semibold text-white">
                 {t('checkout.totalEstimate')}
               </dt>
-              <dd className="font-bold text-slate-900">
+              <dd className="text-xl font-bold tracking-tight text-white">
                 {minTotal === maxTotal
                   ? formatMoney(minTotal)
                   : `${formatMoney(minTotal)} – ${formatMoney(maxTotal)}`}
@@ -499,14 +532,14 @@ export function CheckoutPage() {
             </div>
           </dl>
 
-          <p className="mt-2 text-xs leading-relaxed text-slate-500">
+          <p className="mt-2 text-xs leading-relaxed text-emerald-50/60">
             {t('checkout.deliveryNote')}
           </p>
 
           {failure ? (
             <div
               role="alert"
-              className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+              className="mt-4 rounded-2xl bg-red-400/10 p-3 text-sm text-red-200 ring-1 ring-red-300/20"
             >
               <p>{getErrorMessage(failure.code, language)}</p>
               {failure.itemLabel ? (
@@ -517,7 +550,7 @@ export function CheckoutPage() {
               {failure.code === 'SOLD_OUT' ? (
                 <Link
                   to="/cart"
-                  className="mt-2 inline-block font-semibold underline"
+                  className="mt-2 inline-block font-semibold text-red-100 underline"
                 >
                   {t('checkout.updateCart')}
                 </Link>
@@ -525,9 +558,14 @@ export function CheckoutPage() {
             </div>
           ) : null}
 
-          <Button type="submit" disabled={submitting} className="mt-4 w-full">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-ink transition-colors hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
             {submitting ? t('checkout.placing') : t('checkout.placeOrder')}
-          </Button>
+            {!submitting ? <ArrowRightIcon className="size-4" /> : null}
+          </button>
         </aside>
       </form>
     </section>

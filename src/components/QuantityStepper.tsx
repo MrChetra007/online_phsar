@@ -20,7 +20,7 @@ export function QuantityStepper({
   return (
     <div
       className={[
-        'inline-flex items-center rounded-xl border border-slate-300 bg-white',
+        'inline-flex items-center rounded-full border border-stone-200 bg-white shadow-sm',
         className,
       ]
         .filter(Boolean)
@@ -31,7 +31,7 @@ export function QuantityStepper({
         aria-label={t('cart.decrease')}
         disabled={value <= min}
         onClick={() => onChange(Math.max(min, value - 1))}
-        className="px-3 py-2 text-base text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+        className="px-3 py-2 text-base text-slate-700 transition-colors hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40"
       >
         −
       </button>
@@ -43,7 +43,7 @@ export function QuantityStepper({
         aria-label={t('cart.increase')}
         disabled={value >= max}
         onClick={() => onChange(Math.min(max, value + 1))}
-        className="px-3 py-2 text-base text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+        className="px-3 py-2 text-base text-slate-700 transition-colors hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40"
       >
         +
       </button>

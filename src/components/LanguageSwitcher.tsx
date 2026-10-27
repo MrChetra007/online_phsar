@@ -10,7 +10,7 @@ export function LanguageSwitcher() {
     <div
       role="group"
       aria-label={t('nav.language')}
-      className="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 text-sm"
+      className="inline-flex rounded-full border border-stone-200 bg-white p-0.5 text-sm shadow-sm"
     >
       {languages.map((value) => (
         <button
@@ -19,10 +19,10 @@ export function LanguageSwitcher() {
           onClick={() => setLanguage(value)}
           aria-pressed={language === value}
           className={[
-            'rounded-md px-2.5 py-1 transition-colors',
+            'rounded-full px-2.5 py-1 transition-colors',
             language === value
               ? 'bg-emerald-700 font-medium text-white'
-              : 'text-slate-600 hover:bg-slate-100',
+              : 'text-slate-600 hover:bg-stone-100',
           ].join(' ')}
         >
           {t(value === 'km' ? 'lang.km' : 'lang.en')}

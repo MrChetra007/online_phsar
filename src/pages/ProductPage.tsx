@@ -6,6 +6,12 @@ import { ConfirmDialog } from '../components/ConfirmDialog'
 import { ErrorState } from '../components/ErrorState'
 import { QuantityStepper } from '../components/QuantityStepper'
 import { Skeleton } from '../components/Skeleton'
+import {
+  ArrowRightIcon,
+  CheckIcon,
+  StoreIcon,
+  TruckIcon,
+} from '../components/icons'
 import { useCart } from '../features/cart'
 import { categoryName } from '../lib/categories'
 import type { CartItemInput, CartStore } from '../lib/cart'
@@ -78,13 +84,14 @@ export function ProductPage() {
 
   if (state.requestKey !== requestKey) {
     return (
-      <div className="grid gap-6 md:grid-cols-2 md:gap-8">
-        <Skeleton className="aspect-square rounded-2xl" />
+      <div className="grid gap-8 lg:grid-cols-2 lg:gap-10">
+        <Skeleton className="aspect-square rounded-[2rem]" />
         <div className="space-y-4">
-          <Skeleton className="h-4 w-24 rounded" />
-          <Skeleton className="h-9 w-3/4 rounded" />
-          <Skeleton className="h-7 w-32 rounded" />
-          <Skeleton className="h-20 w-full rounded-xl" />
+          <Skeleton className="h-5 w-28 rounded-full" />
+          <Skeleton className="h-11 w-3/4 rounded" />
+          <Skeleton className="h-8 w-32 rounded" />
+          <Skeleton className="h-24 w-full rounded-2xl" />
+          <Skeleton className="h-14 w-full rounded-3xl" />
           <Skeleton className="h-4 w-1/2 rounded" />
         </div>
       </div>
@@ -103,15 +110,19 @@ export function ProductPage() {
   if (!state.product) {
     return (
       <section className="mx-auto max-w-lg py-12 text-center">
-        <h1 className="text-3xl font-bold text-slate-900">
+        <span className="mx-auto grid size-14 place-items-center rounded-full bg-white text-emerald-700 shadow-sm">
+          <StoreIcon className="size-7" />
+        </span>
+        <h1 className="mt-5 text-3xl font-bold tracking-tight text-slate-900">
           {t('product.notFoundTitle')}
         </h1>
         <p className="mt-3 text-slate-600">{t('product.notFoundText')}</p>
         <Link
           to="/"
-          className="mt-6 inline-flex items-center justify-center rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800"
+          className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-800"
         >
           {t('common.backHome')}
+          <ArrowRightIcon className="size-4" />
         </Link>
       </section>
     )
@@ -212,19 +223,20 @@ export function ProductPage() {
         <span className="truncate text-slate-700">{product.name}</span>
       </nav>
 
-      <div className="mt-4 grid gap-6 md:grid-cols-2 md:gap-8">
+      <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:gap-12">
         <div>
-          <div className="aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+          <div className="relative aspect-square overflow-hidden rounded-[2rem] border border-stone-200/80 bg-stone-100 shadow-sm">
             {selectedImage ? (
               <img
                 src={selectedImage.url}
                 alt={product.name}
+                fetchPriority="high"
                 className="size-full object-cover"
               />
             ) : (
               <div
                 aria-hidden="true"
-                className="grid size-full place-items-center bg-emerald-50 text-5xl font-bold text-emerald-700"
+                className="grid size-full place-items-center bg-gradient-to-br from-emerald-50 to-stone-100 text-5xl font-bold text-emerald-700"
               >
                 {product.name.trim().slice(0, 1).toUpperCase()}
               </div>
@@ -241,10 +253,10 @@ export function ProductPage() {
                   aria-label={`${t('product.photo')} ${index + 1}`}
                   aria-pressed={selectedImage?.id === image.id}
                   className={[
-                    'size-16 shrink-0 overflow-hidden rounded-xl border-2 transition',
+                    'size-16 shrink-0 overflow-hidden rounded-2xl border-2 transition',
                     selectedImage?.id === image.id
                       ? 'border-emerald-600'
-                      : 'border-transparent hover:border-slate-300',
+                      : 'border-transparent opacity-70 hover:opacity-100',
                   ].join(' ')}
                 >
                   <img
@@ -261,41 +273,49 @@ export function ProductPage() {
         </div>
 
         <div>
-          {product.category ? (
-            <Link
-              to={`/c/${product.category.slug}`}
-              className="text-xs font-semibold uppercase tracking-wide text-emerald-700"
-            >
-              {categoryName(product.category, language)}
-            </Link>
-          ) : null}
-
-          <h1 className="mt-1 break-words text-2xl font-bold text-slate-900 sm:text-3xl">
-            {product.name}
-          </h1>
-
-          <div className="mt-3 flex flex-wrap items-center gap-3">
-            <p className="text-2xl font-bold text-slate-900">
-              {selectedVariant
-                ? formatMoney(selectedVariant.price)
-                : range
-                  ? `${formatMoney(range.min)} – ${formatMoney(range.max)}`
-                  : null}
-            </p>
+          <div className="flex flex-wrap items-center gap-2">
+            {product.category ? (
+              <Link
+                to={`/c/${product.category.slug}`}
+                className="rounded-full bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-700 ring-1 ring-stone-200/80 transition hover:ring-emerald-300"
+              >
+                {categoryName(product.category, language)}
+              </Link>
+            ) : null}
             <span
-              className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+              className={[
+                'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest',
                 inStock
                   ? 'bg-emerald-50 text-emerald-700'
-                  : 'bg-red-50 text-red-700'
-              }`}
+                  : 'bg-red-50 text-red-600',
+              ].join(' ')}
             >
+              <span
+                aria-hidden="true"
+                className={[
+                  'size-1.5 rounded-full',
+                  inStock ? 'bg-emerald-500' : 'bg-red-500',
+                ].join(' ')}
+              />
               {inStock ? t('product.inStock') : t('product.outOfStock')}
             </span>
           </div>
 
+          <h1 className="mt-3 break-words text-3xl font-bold leading-tight tracking-tight text-slate-950 sm:text-4xl">
+            {product.name}
+          </h1>
+
+          <p className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+            {selectedVariant
+              ? formatMoney(selectedVariant.price)
+              : range
+                ? `${formatMoney(range.min)} â€“ ${formatMoney(range.max)}`
+                : null}
+          </p>
+
           {product.variants.length > 0 ? (
-            <div className="mt-6">
-              <h2 className="text-sm font-semibold text-slate-900">
+            <div className="mt-7">
+              <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
                 {t('product.chooseVariant')}
               </h2>
               <div className="mt-2 grid gap-2 sm:grid-cols-2">
@@ -315,15 +335,15 @@ export function ProductPage() {
                         setAddStatus(null)
                       }}
                       className={[
-                        'flex flex-wrap items-center justify-between gap-x-2 gap-y-1 rounded-xl border px-3 py-2.5 text-left text-sm transition',
+                        'flex flex-wrap items-center justify-between gap-x-2 gap-y-1 rounded-2xl border-2 px-4 py-3 text-left text-sm transition',
                         unavailable
-                          ? 'cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400'
+                          ? 'cursor-not-allowed border-stone-200 bg-stone-50 text-slate-500'
                           : isSelected
-                            ? 'border-emerald-600 bg-emerald-50 text-emerald-900'
-                            : 'border-slate-300 bg-white text-slate-800 hover:border-emerald-400',
+                            ? 'border-emerald-600 bg-emerald-50/60 text-emerald-950'
+                            : 'border-stone-200 bg-white text-slate-800 hover:border-emerald-300',
                       ].join(' ')}
                     >
-                      <span className="font-medium">
+                      <span className="font-semibold">
                         {variant.label === 'Default'
                           ? t('store.defaultVariant')
                           : variant.label}
@@ -343,10 +363,10 @@ export function ProductPage() {
             </div>
           ) : null}
 
-          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="mt-6 rounded-3xl border border-stone-200/80 bg-white p-4 shadow-sm sm:p-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
               <div>
-                <p className="text-sm font-semibold text-slate-900">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
                   {t('cart.quantity')}
                 </p>
                 <QuantityStepper
@@ -362,7 +382,7 @@ export function ProductPage() {
               <Button
                 onClick={handleAddToCart}
                 disabled={!canAdd}
-                className="w-full sm:flex-1"
+                className="h-12 w-full sm:flex-1"
               >
                 {t('cart.addToCart')}
               </Button>
@@ -382,33 +402,60 @@ export function ProductPage() {
                 {getErrorMessage('SOLD_OUT', language)}
               </p>
             ) : null}
+
+            <p className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+              <CheckIcon className="size-3.5 text-emerald-600" />
+              {t('checkout.secureNote')}
+            </p>
           </div>
 
-          <div className="mt-6">
-            <h2 className="text-sm font-semibold text-slate-900">
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <span className="flex items-center gap-2 rounded-2xl bg-white px-3 py-2.5 text-xs font-medium text-slate-600 ring-1 ring-stone-200/80">
+              <CheckIcon className="size-3.5 shrink-0 text-emerald-600" />
+              {t('checkout.cod')}
+            </span>
+            <span className="flex items-center gap-2 rounded-2xl bg-white px-3 py-2.5 text-xs font-medium text-slate-600 ring-1 ring-stone-200/80">
+              <CheckIcon className="size-3.5 shrink-0 text-emerald-600" />
+              KHQR
+            </span>
+            <span className="flex items-center gap-2 rounded-2xl bg-white px-3 py-2.5 text-xs font-medium text-slate-600 ring-1 ring-stone-200/80">
+              <TruckIcon className="size-3.5 shrink-0 text-emerald-600" />
+              {t('nav.track')}
+            </span>
+          </div>
+
+          <div className="mt-6 rounded-3xl border border-stone-200/80 bg-white p-5 shadow-sm sm:p-6">
+            <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
               {t('product.descriptionTitle')}
             </h2>
-            <p className="mt-2 whitespace-pre-line break-words text-sm leading-relaxed text-slate-700 sm:text-base">
+            <p className="mt-3 whitespace-pre-line break-words text-sm leading-relaxed text-slate-700 sm:text-base">
               {product.description || t('product.noDescription')}
             </p>
           </div>
 
           {product.store ? (
-            <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                {t('product.soldBy')}
-              </p>
-              <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                <p className="font-semibold text-slate-900">
+            <div className="mt-4 flex flex-wrap items-center gap-3 rounded-3xl border border-stone-200/80 bg-white p-4 shadow-sm sm:p-5">
+              <span
+                aria-hidden="true"
+                className="grid size-11 shrink-0 place-items-center rounded-2xl bg-emerald-50 text-sm font-bold text-emerald-700"
+              >
+                {product.store.name.trim().slice(0, 1).toUpperCase()}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                  {t('product.soldBy')}
+                </p>
+                <p className="truncate font-semibold text-slate-900">
                   {product.store.name}
                 </p>
-                <Link
-                  to={`/s/${product.store.slug}`}
-                  className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 transition-colors hover:bg-slate-50"
-                >
-                  {t('product.visitStore')}
-                </Link>
               </div>
+              <Link
+                to={`/s/${product.store.slug}`}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-stone-200 bg-white px-4 py-2 text-xs font-semibold text-slate-800 transition-colors hover:border-emerald-300 hover:text-emerald-700"
+              >
+                {t('product.visitStore')}
+                <ArrowRightIcon className="size-3.5" />
+              </Link>
             </div>
           ) : null}
         </div>
@@ -426,7 +473,7 @@ export function ProductPage() {
           <p>{t('cart.differentStoreText')}</p>
           {cart ? (
             <p className="mt-2 font-medium text-slate-800">
-              {cart.name} · {pendingAdd.store.name}
+              {cart.name} Â· {pendingAdd.store.name}
             </p>
           ) : null}
         </ConfirmDialog>

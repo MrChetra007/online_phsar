@@ -274,70 +274,83 @@ export function TrackingPage() {
 
   return (
     <section className="mx-auto max-w-4xl">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-          {t('tracking.title')}
-        </h1>
-        <p className="mt-2 text-sm text-slate-600">{t('tracking.subtitle')}</p>
-      </div>
+      <div className="relative overflow-hidden rounded-[2rem] bg-ink p-6 text-white shadow-lg shadow-emerald-950/10 sm:p-10">
+        <div
+          aria-hidden="true"
+          className="absolute -right-20 -top-24 size-80 rounded-full bg-emerald-500/20 blur-3xl"
+        />
+        <div className="relative">
+          <p className="text-xs font-semibold uppercase tracking-widest text-emerald-300">
+            {t('nav.track')}
+          </p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+            {t('tracking.title')}
+          </h1>
+          <p className="mt-2 max-w-xl text-sm text-emerald-50/60">
+            {t('tracking.subtitle')}
+          </p>
 
-      <form
-        noValidate
-        onSubmit={handleLookup}
-        className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6"
-      >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Input
-            label={t('tracking.code')}
-            value={values.code}
-            onChange={(event) => {
-              setValues((current) => ({
-                ...current,
-                code: event.target.value.toUpperCase(),
-              }))
-              setErrors((current) => ({ ...current, code: undefined }))
-            }}
-            placeholder="DS-XXXXXXXXXX"
-            error={errors.code}
-            autoComplete="off"
-            autoCapitalize="characters"
-            spellCheck={false}
-            maxLength={40}
-            required
-          />
-          <Input
-            label={t('tracking.phone')}
-            type="tel"
-            inputMode="tel"
-            value={values.phone}
-            onChange={(event) => {
-              setValues((current) => ({
-                ...current,
-                phone: event.target.value,
-              }))
-              setErrors((current) => ({ ...current, phone: undefined }))
-            }}
-            hint={t('tracking.phoneHint')}
-            error={errors.phone}
-            autoComplete="tel"
-            maxLength={30}
-            required
-          />
+          <form
+            noValidate
+            onSubmit={handleLookup}
+            className="mt-6 rounded-3xl bg-white p-4 text-slate-900 shadow-xl shadow-emerald-950/20 sm:p-5"
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Input
+                label={t('tracking.code')}
+                value={values.code}
+                onChange={(event) => {
+                  setValues((current) => ({
+                    ...current,
+                    code: event.target.value.toUpperCase(),
+                  }))
+                  setErrors((current) => ({ ...current, code: undefined }))
+                }}
+                placeholder="DS-XXXXXXXXXX"
+                error={errors.code}
+                autoComplete="off"
+                autoCapitalize="characters"
+                spellCheck={false}
+                maxLength={40}
+                required
+              />
+              <Input
+                label={t('tracking.phone')}
+                type="tel"
+                inputMode="tel"
+                value={values.phone}
+                onChange={(event) => {
+                  setValues((current) => ({
+                    ...current,
+                    phone: event.target.value,
+                  }))
+                  setErrors((current) => ({ ...current, phone: undefined }))
+                }}
+                hint={t('tracking.phoneHint')}
+                error={errors.phone}
+                autoComplete="tel"
+                maxLength={30}
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={status === 'loading'}
+              className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-full bg-emerald-700 px-5 text-sm font-semibold text-white transition-colors hover:bg-emerald-800 disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
+            >
+              {status === 'loading'
+                ? t('tracking.checking')
+                : t('tracking.check')}
+            </button>
+          </form>
         </div>
-
-        <Button
-          type="submit"
-          disabled={status === 'loading'}
-          className="mt-4 w-full sm:w-auto"
-        >
-          {status === 'loading' ? t('tracking.checking') : t('tracking.check')}
-        </Button>
-      </form>
+      </div>
 
       {status === 'not_found' ? (
         <div
           role="status"
-          className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700"
+          className="mt-4 rounded-2xl border border-stone-200/80 bg-white p-4 text-sm text-slate-700 shadow-sm"
         >
           {t('tracking.notFound')}
         </div>
@@ -346,7 +359,7 @@ export function TrackingPage() {
       {status === 'error' ? (
         <div
           role="alert"
-          className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+          className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
         >
           {getErrorMessage(errorCode, language)}
         </div>
@@ -354,8 +367,8 @@ export function TrackingPage() {
 
       {status === 'ready' && order ? (
         <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,250px)_minmax(0,1fr)]">
-          <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
-            <h2 className="text-sm font-semibold text-slate-900">
+          <aside className="h-fit rounded-3xl border border-stone-200/80 bg-white p-4 shadow-sm sm:p-5 lg:sticky lg:top-28">
+            <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
               {t('tracking.timeline')}
             </h2>
             <ol className="mt-4 space-y-4">
@@ -371,7 +384,7 @@ export function TrackingPage() {
                     <div className="flex flex-col items-center">
                       <span
                         className={[
-                          'mt-1 size-2.5 shrink-0 rounded-full',
+                          'mt-1 size-2.5 shrink-0 rounded-full ring-4 ring-white',
                           latest
                             ? negative
                               ? 'bg-red-500'
@@ -404,13 +417,13 @@ export function TrackingPage() {
           </aside>
 
           <div className="space-y-6">
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+            <div className="rounded-3xl border border-stone-200/80 bg-white p-5 shadow-sm sm:p-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700">
                     {order.storeName || t('tracking.store')}
                   </p>
-                  <p className="mt-1 break-all font-mono text-lg font-bold text-slate-900">
+                  <p className="mt-1 break-all font-mono text-xl font-bold tracking-tight text-slate-950">
                     {order.orderCode}
                   </p>
                   <p className="mt-1 text-xs text-slate-500">
@@ -429,7 +442,7 @@ export function TrackingPage() {
                 </div>
               </div>
 
-              <dl className="mt-4 grid gap-3 border-t border-slate-200 pt-4 text-sm sm:grid-cols-2">
+              <dl className="mt-4 grid gap-3 border-t border-stone-100 pt-4 text-sm sm:grid-cols-2">
                 <div>
                   <dt className="text-slate-500">
                     {t('tracking.paymentMethod')}
@@ -465,7 +478,7 @@ export function TrackingPage() {
               </dl>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+            <div className="rounded-3xl border border-stone-200/80 bg-white p-5 shadow-sm sm:p-6">
               <h2 className="text-lg font-semibold text-slate-900">
                 {t('tracking.items')}
               </h2>
@@ -483,7 +496,7 @@ export function TrackingPage() {
                         <p className="text-sm text-slate-500">{item.variant}</p>
                       ) : null}
                       <p className="text-sm text-slate-500">
-                        × {item.quantity}
+                        Ã— {item.quantity}
                       </p>
                     </div>
                     <p className="shrink-0 font-semibold text-slate-900">
@@ -493,7 +506,7 @@ export function TrackingPage() {
                 ))}
               </ul>
 
-              <dl className="mt-3 space-y-1 border-t border-slate-200 pt-3 text-sm">
+              <dl className="mt-3 space-y-1 border-t border-stone-100 pt-3 text-sm">
                 <div className="flex items-center justify-between gap-3">
                   <dt className="text-slate-600">{t('checkout.subtotal')}</dt>
                   <dd className="font-medium text-slate-900">
@@ -506,7 +519,7 @@ export function TrackingPage() {
                     {formatMoney(order.deliveryFee)}
                   </dd>
                 </div>
-                <div className="flex items-center justify-between gap-3 border-t border-slate-200 pt-2 text-base">
+                <div className="flex items-center justify-between gap-3 border-t border-stone-100 pt-2 text-base">
                   <dt className="font-semibold text-slate-900">
                     {t('tracking.total')}
                   </dt>
@@ -517,7 +530,7 @@ export function TrackingPage() {
               </dl>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+            <div className="rounded-3xl border border-stone-200/80 bg-white p-5 shadow-sm sm:p-6">
               <h2 className="text-lg font-semibold text-slate-900">
                 {t('tracking.deliveryTitle')}
               </h2>
@@ -551,7 +564,7 @@ export function TrackingPage() {
             order.canReopen ||
             order.canConfirmReceived ||
             order.canReportProblem ? (
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+              <div className="rounded-3xl border border-stone-200/80 bg-white p-5 shadow-sm sm:p-6">
                 <h2 className="text-lg font-semibold text-slate-900">
                   {t('tracking.actions')}
                 </h2>

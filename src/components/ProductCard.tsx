@@ -4,6 +4,7 @@ import { categoryName } from '../lib/categories'
 import { useI18n } from '../lib/i18n'
 import { formatMoney } from '../lib/money'
 import { priceRange } from '../lib/products'
+import { ArrowRightIcon } from './icons'
 
 export function ProductCard({
   product,
@@ -23,59 +24,83 @@ export function ProductCard({
   return (
     <Link
       to={`/p/${product.id}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:border-emerald-300 hover:shadow-md"
+      className="group flex h-full flex-col overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-950/5"
     >
-      <div className="aspect-square overflow-hidden bg-slate-100">
+      <div className="relative aspect-[4/5] overflow-hidden bg-stone-100">
         {image ? (
           <img
             src={image.url}
             alt={product.name}
             loading="lazy"
             decoding="async"
-            className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="size-full object-cover transition duration-500 group-hover:scale-105"
           />
         ) : (
           <div
             aria-hidden="true"
-            className="grid size-full place-items-center bg-emerald-50 text-2xl font-bold text-emerald-700"
+            className="grid size-full place-items-center bg-gradient-to-br from-emerald-50 to-stone-100 text-4xl font-bold text-emerald-700"
           >
             {product.name.trim().slice(0, 1).toUpperCase()}
           </div>
         )}
+
+        <span
+          className={[
+            'absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide shadow-sm backdrop-blur',
+            stock > 0
+              ? 'bg-white/90 text-emerald-700'
+              : 'bg-white/90 text-red-600',
+          ].join(' ')}
+        >
+          <span
+            aria-hidden="true"
+            className={[
+              'size-1.5 rounded-full',
+              stock > 0 ? 'bg-emerald-500' : 'bg-red-500',
+            ].join(' ')}
+          />
+          {stock > 0 ? t('product.inStock') : t('product.outOfStock')}
+        </span>
       </div>
 
-      <div className="flex flex-1 flex-col p-3 sm:p-4">
+      <div className="flex flex-1 flex-col p-4">
         {product.category ? (
-          <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-emerald-700">
+          <p className="truncate text-[10px] font-bold uppercase tracking-widest text-emerald-700">
             {categoryName(product.category, language)}
           </p>
         ) : null}
 
-        <h3 className="mt-1 line-clamp-2 text-sm font-semibold text-slate-900 sm:text-base">
+        <h3 className="mt-1.5 line-clamp-2 text-sm font-semibold leading-snug text-slate-900 sm:text-base">
           {product.name}
         </h3>
 
         {showStore && product.store ? (
-          <p className="mt-1 truncate text-xs text-slate-500">
-            {product.store.name}
-          </p>
+          <div className="mt-2 flex items-center gap-1.5">
+            <span
+              aria-hidden="true"
+              className="grid size-5 shrink-0 place-items-center rounded-full bg-stone-100 text-[9px] font-bold text-stone-500"
+            >
+              {product.store.name.trim().slice(0, 1).toUpperCase()}
+            </span>
+            <p className="truncate text-xs text-slate-500">
+              {product.store.name}
+            </p>
+          </div>
         ) : null}
 
-        <div className="mt-auto flex flex-wrap items-center justify-between gap-x-2 gap-y-1 pt-2">
+        <div className="mt-auto flex items-end justify-between gap-3 pt-4">
           {range ? (
-            <p className="text-sm font-semibold text-slate-900">
+            <p className="text-base font-bold tracking-tight text-slate-950 sm:text-lg">
               {range.min === range.max
                 ? formatMoney(range.min)
                 : `${formatMoney(range.min)} – ${formatMoney(range.max)}`}
             </p>
-          ) : null}
-          <p
-            className={`text-[11px] font-medium ${
-              stock > 0 ? 'text-emerald-700' : 'text-red-600'
-            }`}
-          >
-            {stock > 0 ? t('product.inStock') : t('product.outOfStock')}
-          </p>
+          ) : (
+            <span />
+          )}
+          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-stone-100 text-slate-500 transition group-hover:bg-emerald-700 group-hover:text-white">
+            <ArrowRightIcon className="size-4" />
+          </span>
         </div>
       </div>
     </Link>

@@ -7,7 +7,7 @@ import {
   type PaymentCheck,
 } from '../api/payments'
 import { reopenExpiredOrder } from '../api/tracking'
-import { Button } from '../components/Button'
+import { CheckIcon, ShieldCheckIcon, StoreIcon } from '../components/icons'
 import { errorCodeFrom, getErrorMessage } from '../lib/errors'
 import { useI18n } from '../lib/i18n'
 import type { TranslationKey } from '../lib/i18n/translations'
@@ -260,7 +260,10 @@ export function PaymentPage() {
   if (!context) {
     return (
       <section className="mx-auto max-w-lg py-12 text-center">
-        <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+        <span className="mx-auto grid size-16 place-items-center rounded-full bg-white text-emerald-700 shadow-sm">
+          <StoreIcon className="size-8" />
+        </span>
+        <h1 className="mt-5 text-3xl font-bold tracking-tight text-slate-900">
           {t('payment.missingTitle')}
         </h1>
         <p className="mt-3 text-slate-600">{t('payment.missingText')}</p>
@@ -268,14 +271,14 @@ export function PaymentPage() {
           {orderCode ? (
             <Link
               to={`/track?code=${encodeURIComponent(orderCode)}`}
-              className="inline-flex items-center justify-center rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800"
+              className="inline-flex items-center justify-center rounded-full bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-800"
             >
               {t('order.track')}
             </Link>
           ) : null}
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 transition-colors hover:bg-slate-50"
+            className="inline-flex items-center justify-center rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 transition-colors hover:bg-stone-50"
           >
             {t('order.continue')}
           </Link>
@@ -296,44 +299,29 @@ export function PaymentPage() {
   if (status === 'paid') {
     return (
       <section className="mx-auto max-w-lg">
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center sm:p-8">
-          <span
-            aria-hidden="true"
-            className="mx-auto grid size-14 place-items-center rounded-full bg-emerald-700 text-white"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              className="size-8"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m5 12 4 4L19 6"
-              />
-            </svg>
+        <div className="rounded-[2rem] border border-emerald-200 bg-emerald-50 p-6 text-center shadow-sm sm:p-8">
+          <span className="mx-auto grid size-14 place-items-center rounded-full bg-emerald-700 text-white shadow-lg shadow-emerald-700/20">
+            <CheckIcon className="size-7" />
           </span>
-          <h1 className="mt-4 text-2xl font-bold text-emerald-950 sm:text-3xl">
+          <h1 className="mt-4 text-2xl font-bold tracking-tight text-emerald-950 sm:text-3xl">
             {t('payment.paidTitle')}
           </h1>
           <p className="mt-2 text-sm text-emerald-800">
             {t('payment.paidText')}
           </p>
-          <p className="mt-4 select-all break-all font-mono text-xl font-bold tracking-wider text-emerald-950">
+          <p className="mt-4 select-all break-all rounded-2xl bg-white/60 px-4 py-3 font-mono text-xl font-bold tracking-wider text-emerald-950">
             {context.orderCode}
           </p>
           <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
             <Link
               to={trackLink}
-              className="inline-flex items-center justify-center rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800"
+              className="inline-flex items-center justify-center rounded-full bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-800"
             >
               {t('order.track')}
             </Link>
             <Link
               to="/"
-              className="inline-flex items-center justify-center rounded-xl border border-emerald-300 bg-white px-5 py-2.5 text-sm font-medium text-emerald-900 transition-colors hover:bg-emerald-100"
+              className="inline-flex items-center justify-center rounded-full border border-emerald-300 bg-white px-5 py-2.5 text-sm font-semibold text-emerald-900 transition-colors hover:bg-emerald-100"
             >
               {t('order.continue')}
             </Link>
@@ -348,18 +336,18 @@ export function PaymentPage() {
       <section className="mx-auto max-w-lg">
         <div
           role="alert"
-          className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center sm:p-8"
+          className="rounded-[2rem] border border-amber-200 bg-amber-50 p-6 text-center shadow-sm sm:p-8"
         >
-          <h1 className="text-2xl font-bold text-amber-950">
+          <h1 className="text-2xl font-bold tracking-tight text-amber-950 sm:text-3xl">
             {t('payment.flaggedTitle')}
           </h1>
-          <p className="mt-2 text-sm text-amber-900">
+          <p className="mt-2 text-sm leading-relaxed text-amber-900">
             {t('payment.flaggedText')}
           </p>
           <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
             <Link
               to={trackLink}
-              className="inline-flex items-center justify-center rounded-xl bg-amber-700 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-amber-800"
+              className="inline-flex items-center justify-center rounded-full bg-amber-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-800"
             >
               {t('order.track')}
             </Link>
@@ -372,8 +360,8 @@ export function PaymentPage() {
   if (status === 'cancelled') {
     return (
       <section className="mx-auto max-w-lg">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center sm:p-8">
-          <h1 className="text-2xl font-bold text-slate-900">
+        <div className="rounded-[2rem] border border-stone-200/80 bg-white p-6 text-center shadow-sm sm:p-8">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             {t('payment.cancelledTitle')}
           </h1>
           <p className="mt-2 text-sm text-slate-600">
@@ -381,7 +369,7 @@ export function PaymentPage() {
           </p>
           <Link
             to={trackLink}
-            className="mt-6 inline-flex items-center justify-center rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800"
+            className="mt-6 inline-flex items-center justify-center rounded-full bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-800"
           >
             {t('order.track')}
           </Link>
@@ -392,131 +380,141 @@ export function PaymentPage() {
 
   return (
     <section className="mx-auto max-w-lg">
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
-        <div className="text-center">
-          <p className="text-sm font-medium text-slate-600">
+      <div className="overflow-hidden rounded-[2rem] border border-stone-200/80 bg-white shadow-lg shadow-emerald-950/5">
+        <div className="relative bg-ink p-6 text-center text-white sm:p-8">
+          <div
+            aria-hidden="true"
+            className="absolute -right-16 -top-20 size-64 rounded-full bg-emerald-500/20 blur-3xl"
+          />
+          <p className="relative inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-200/70 ring-1 ring-white/10">
             {context.storeName}
           </p>
-          <h1 className="mt-1 text-2xl font-bold text-slate-900">
+          <h1 className="relative mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
             {t('payment.title')}
           </h1>
-          <p className="mt-1 text-sm text-slate-600">{t('payment.subtitle')}</p>
-        </div>
+          <p className="relative mt-1 text-sm text-emerald-50/60">
+            {t('payment.subtitle')}
+          </p>
 
-        <div className="mt-5 rounded-xl bg-slate-50 p-4 text-center">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-            {t('payment.amount')}
-          </p>
-          <p className="mt-1 text-3xl font-bold text-slate-900">
-            {formatMoney(payment?.amountCents ?? context.totalAmount)}
-          </p>
-          <p className="mt-1 select-all break-all font-mono text-sm text-slate-600">
-            {context.orderCode}
-          </p>
-        </div>
-
-        {status === 'loading' ? (
-          <div className="mt-6 grid min-h-64 place-items-center rounded-2xl border border-slate-200 bg-slate-50">
-            <p className="text-sm font-medium text-slate-600">
-              {t('payment.loadingQr')}
+          <div className="relative mt-5 rounded-2xl bg-white/10 p-4 ring-1 ring-white/10">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-200/70">
+              {t('payment.amount')}
+            </p>
+            <p className="mt-1 text-3xl font-bold tracking-tight text-white">
+              {formatMoney(payment?.amountCents ?? context.totalAmount)}
+            </p>
+            <p className="mt-1 select-all break-all font-mono text-sm text-emerald-50/60">
+              {context.orderCode}
             </p>
           </div>
-        ) : status === 'error' ? (
-          <div
-            role="alert"
-            className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
-          >
-            <p>{errorMessage}</p>
-            <Button
-              variant="secondary"
-              onClick={() => void requestQr()}
-              className="mt-3"
-            >
-              {t('payment.tryAgain')}
-            </Button>
-          </div>
-        ) : (
-          <>
-            {payment ? (
-              <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4">
-                <div className="relative mx-auto w-fit">
-                  <img
-                    src={payment.qrImageUrl}
-                    alt={t('payment.qrAlt')}
-                    className={[
-                      'mx-auto size-64 max-w-full rounded-xl',
-                      isExpired ? 'opacity-30' : '',
-                    ].join(' ')}
-                  />
-                  {isExpired ? (
-                    <span className="absolute inset-0 grid place-items-center text-center text-sm font-semibold text-slate-900">
-                      {t('payment.expiredShort')}
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-            ) : null}
+        </div>
 
-            <div className="mt-4 text-center">
-              {isExpired ? (
-                <p className="text-sm font-semibold text-red-700">
-                  {t('payment.expiredTitle')}
-                </p>
-              ) : (
-                <>
-                  <p className="text-sm text-slate-600">
-                    {t('payment.expiresIn')}{' '}
-                    <span className="font-mono font-semibold text-slate-900">
-                      {formatCountdown(remaining)}
-                    </span>
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {t('payment.waiting')}
-                  </p>
-                </>
-              )}
+        <div className="p-5 sm:p-7">
+          {status === 'loading' ? (
+            <div className="mt-1 grid min-h-64 place-items-center rounded-3xl border border-dashed border-stone-200 bg-stone-50">
+              <p className="text-sm font-medium text-slate-500">
+                {t('payment.loadingQr')}
+              </p>
             </div>
-
-            {checkDelayed && !isExpired ? (
-              <p className="mt-3 rounded-lg bg-slate-50 p-2 text-center text-xs text-slate-500">
-                {t('payment.checkDelayed')}
-              </p>
-            ) : null}
-
-            {errorCode && status === 'ready' ? (
-              <p
-                role="alert"
-                className="mt-3 rounded-lg bg-red-50 p-2 text-center text-xs text-red-700"
+          ) : status === 'error' ? (
+            <div
+              role="alert"
+              className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+            >
+              <p>{errorMessage}</p>
+              <button
+                type="button"
+                onClick={() => void requestQr()}
+                className="mt-3 inline-flex items-center justify-center rounded-full border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-700 transition-colors hover:bg-red-100"
               >
-                {errorMessage}
-              </p>
-            ) : null}
+                {t('payment.tryAgain')}
+              </button>
+            </div>
+          ) : (
+            <>
+              {payment ? (
+                <div className="rounded-3xl border border-stone-200/80 bg-white p-4">
+                  <div className="relative mx-auto w-fit">
+                    <img
+                      src={payment.qrImageUrl}
+                      alt={t('payment.qrAlt')}
+                      className={[
+                        'mx-auto size-64 max-w-full rounded-2xl',
+                        isExpired ? 'opacity-30' : '',
+                      ].join(' ')}
+                    />
+                    {isExpired ? (
+                      <span className="absolute inset-0 grid place-items-center rounded-2xl bg-white/60 text-center text-sm font-semibold text-slate-900">
+                        {t('payment.expiredShort')}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
 
-            {isExpired ? (
-              <div className="mt-4 rounded-xl bg-amber-50 p-3 text-center">
-                <Button
-                  onClick={() => void handleReopen()}
-                  disabled={reopening}
-                  className="w-full"
-                >
-                  {reopening ? t('payment.reopening') : t('payment.newQr')}
-                </Button>
+              <div className="mt-4 text-center">
+                {isExpired ? (
+                  <p className="text-sm font-semibold text-red-700">
+                    {t('payment.expiredTitle')}
+                  </p>
+                ) : (
+                  <>
+                    <p className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm text-emerald-800">
+                      {t('payment.expiresIn')}{' '}
+                      <span className="font-mono font-bold">
+                        {formatCountdown(remaining)}
+                      </span>
+                    </p>
+                    <p className="mt-2 text-xs text-slate-500">
+                      {t('payment.waiting')}
+                    </p>
+                  </>
+                )}
               </div>
-            ) : null}
-          </>
-        )}
 
-        <p className="mt-4 text-center text-xs leading-relaxed text-slate-500">
-          {t('payment.saveCode')}
-        </p>
+              {checkDelayed && !isExpired ? (
+                <p className="mt-3 rounded-2xl bg-stone-50 p-2.5 text-center text-xs text-slate-500">
+                  {t('payment.checkDelayed')}
+                </p>
+              ) : null}
 
-        <div className="mt-5 text-center">
-          <Link
-            to={trackLink}
-            className="text-sm font-medium text-emerald-700 hover:underline"
-          >
-            {t('order.track')}
-          </Link>
+              {errorCode && status === 'ready' ? (
+                <p
+                  role="alert"
+                  className="mt-3 rounded-2xl bg-red-50 p-2.5 text-center text-xs text-red-700"
+                >
+                  {errorMessage}
+                </p>
+              ) : null}
+
+              {isExpired ? (
+                <div className="mt-4 rounded-2xl bg-amber-50 p-3 text-center">
+                  <button
+                    type="button"
+                    onClick={() => void handleReopen()}
+                    disabled={reopening}
+                    className="inline-flex w-full items-center justify-center rounded-full bg-amber-700 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {reopening ? t('payment.reopening') : t('payment.newQr')}
+                  </button>
+                </div>
+              ) : null}
+            </>
+          )}
+
+          <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-xs leading-relaxed text-slate-500">
+            <ShieldCheckIcon className="size-3.5 shrink-0 text-emerald-600" />
+            {t('payment.saveCode')}
+          </p>
+
+          <div className="mt-5 text-center">
+            <Link
+              to={trackLink}
+              className="inline-flex items-center justify-center rounded-full border border-stone-200 px-4 py-2 text-sm font-semibold text-emerald-700 transition-colors hover:border-emerald-300 hover:bg-emerald-50"
+            >
+              {t('order.track')}
+            </Link>
+          </div>
         </div>
       </div>
     </section>

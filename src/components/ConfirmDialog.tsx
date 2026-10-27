@@ -36,7 +36,7 @@ export function ConfirmDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4"
+      className="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 p-4 backdrop-blur-sm"
       onClick={(event) => {
         if (event.target === event.currentTarget) onCancel()
       }}
@@ -46,7 +46,7 @@ export function ConfirmDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl sm:p-6"
+        className="w-full max-w-md rounded-3xl border border-stone-200/80 bg-white p-5 shadow-2xl shadow-emerald-950/20 sm:p-6"
       >
         <h2 id={titleId} className="text-lg font-semibold text-slate-900">
           {title}

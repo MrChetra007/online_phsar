@@ -10,6 +10,7 @@ import { EmptyState } from '../components/EmptyState'
 import { ErrorState } from '../components/ErrorState'
 import { ProductGrid, ProductGridSkeleton } from '../components/ProductGrid'
 import { Skeleton } from '../components/Skeleton'
+import { ArrowRightIcon } from '../components/icons'
 import { categoryName, descendantCategoryIds } from '../lib/categories'
 import { useI18n } from '../lib/i18n'
 
@@ -102,8 +103,8 @@ export function CategoryPage() {
     return (
       <div>
         <Skeleton className="h-4 w-32 rounded" />
-        <Skeleton className="mt-3 h-9 w-56 rounded" />
-        <div className="mt-6">
+        <Skeleton className="mt-4 h-52 w-full rounded-[2rem]" />
+        <div className="mt-8">
           <ProductGridSkeleton count={6} />
         </div>
       </div>
@@ -122,15 +123,19 @@ export function CategoryPage() {
   if (!state.category) {
     return (
       <section className="mx-auto max-w-lg py-12 text-center">
-        <h1 className="text-3xl font-bold text-slate-900">
+        <span className="mx-auto grid size-14 place-items-center rounded-full bg-white text-2xl font-bold text-emerald-700 shadow-sm">
+          ?
+        </span>
+        <h1 className="mt-5 text-3xl font-bold tracking-tight text-slate-900">
           {t('category.notFoundTitle')}
         </h1>
         <p className="mt-3 text-slate-600">{t('category.notFoundText')}</p>
         <Link
           to="/"
-          className="mt-6 inline-flex items-center justify-center rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800"
+          className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-800"
         >
           {t('common.backHome')}
+          <ArrowRightIcon className="size-4" />
         </Link>
       </section>
     )
@@ -155,29 +160,52 @@ export function CategoryPage() {
         </span>
       </nav>
 
-      <h1 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
-        {categoryName(category, language)}
-      </h1>
+      <div className="relative mt-4 overflow-hidden rounded-[2rem] bg-ink text-white shadow-lg shadow-emerald-950/10">
+        {category.image_url ? (
+          <img
+            src={category.image_url}
+            alt=""
+            className="absolute inset-0 size-full object-cover opacity-25"
+          />
+        ) : null}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-gradient-to-r from-ink via-ink/90 to-transparent"
+        />
+        <div className="relative px-6 py-10 sm:px-10 sm:py-14">
+          <p className="text-xs font-semibold uppercase tracking-widest text-emerald-300">
+            {t('home.categoriesEyebrow')}
+          </p>
+          <h1 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight sm:text-5xl">
+            {categoryName(category, language)}
+          </h1>
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-emerald-50/70 sm:text-base">
+            {t('home.categoriesSubtitle')}
+          </p>
 
-      {children.length > 0 ? (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {children.map((child) => (
-            <Link
-              key={child.id}
-              to={`/c/${child.slug}`}
-              className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 transition hover:border-emerald-400 hover:text-emerald-700"
-            >
-              {categoryName(child, language)}
-            </Link>
-          ))}
+          {children.length > 0 ? (
+            <div className="mt-6 flex flex-wrap gap-2">
+              {children.map((child) => (
+                <Link
+                  key={child.id}
+                  to={`/c/${child.slug}`}
+                  className="rounded-full bg-white/10 px-3.5 py-1.5 text-sm font-medium text-white ring-1 ring-white/15 transition hover:bg-white/20"
+                >
+                  {categoryName(child, language)}
+                </Link>
+              ))}
+            </div>
+          ) : null}
         </div>
-      ) : null}
+      </div>
 
-      <div className="mt-6">
-        <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
-          {t('publicStore.productsTitle')}
-        </h2>
-        <div className="mt-3">
+      <div className="mt-8">
+        <div className="flex items-end justify-between gap-4">
+          <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+            {t('publicStore.productsTitle')}
+          </h2>
+        </div>
+        <div className="mt-4">
           {state.products.length === 0 ? (
             <EmptyState>{t('category.empty')}</EmptyState>
           ) : (

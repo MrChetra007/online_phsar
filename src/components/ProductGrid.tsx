@@ -3,7 +3,7 @@ import { useI18n } from '../lib/i18n'
 import { ProductCard } from './ProductCard'
 import { Skeleton } from './Skeleton'
 
-const GRID = 'grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4'
+const GRID = 'grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4'
 
 export function ProductGrid({
   products,
@@ -31,13 +31,14 @@ export function ProductGridSkeleton({ count = 8 }: { count?: number }) {
         {Array.from({ length: count }, (_, index) => (
           <div
             key={index}
-            className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
+            className="overflow-hidden rounded-3xl border border-stone-200/80 bg-white"
           >
-            <Skeleton className="aspect-square" />
-            <div className="space-y-2 p-3 sm:p-4">
-              <Skeleton className="h-3 w-1/2 rounded" />
+            <Skeleton className="aspect-[4/5]" />
+            <div className="space-y-2.5 p-4">
+              <Skeleton className="h-2.5 w-1/2 rounded" />
               <Skeleton className="h-4 w-5/6 rounded" />
               <Skeleton className="h-4 w-1/3 rounded" />
+              <Skeleton className="mt-4 h-5 w-2/5 rounded" />
             </div>
           </div>
         ))}

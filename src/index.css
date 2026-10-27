@@ -4,15 +4,22 @@
   --font-sans:
     'Noto Sans Khmer', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
     Roboto, sans-serif;
+  --color-canvas: #f5f6f1;
+  --color-ink: #10231a;
 }
 
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
   }
 
   body {
-    @apply bg-slate-50 text-slate-800 antialiased;
+    @apply bg-canvas text-slate-800 antialiased;
+  }
+
+  ::selection {
+    @apply bg-emerald-200 text-emerald-950;
   }
 
   :focus-visible {
