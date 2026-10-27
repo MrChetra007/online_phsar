@@ -36,6 +36,13 @@ export const en = {
   'search.resultsFor': 'Results for',
   'search.noResults': 'No products match your search.',
   'search.error': 'Search could not be completed. Please try again.',
+  'search.suggestions': 'Suggestions',
+  'search.suggestionsLoading': 'Searching...',
+  'search.suggestionsError':
+    'Suggestions are unavailable. Press Enter to search.',
+  'search.noSuggestions':
+    'No matching products. Press Enter to search all results.',
+  'search.searchFor': 'Search for',
   'category.notFoundTitle': 'Category not found',
   'category.notFoundText': 'This category does not exist or is hidden.',
   'category.empty': 'No products in this category yet.',
@@ -771,6 +778,13 @@ export const km: Record<TranslationKey, string> = {
   'search.resultsFor': 'លទ្ធផលសម្រាប់',
   'search.noResults': 'រកមិនឃើញទំនិញដែលត្រូវនឹងការស្វែងរករបស់អ្នកទេ។',
   'search.error': 'មិនអាចស្វែងរកបានទេ។ សូមព្យាយាមម្តងទៀត។',
+  'search.suggestions': 'សំណើស្វែងរក',
+  'search.suggestionsLoading': 'កំពុងស្វែងរក...',
+  'search.suggestionsError':
+    'មិនអាចបង្ហាញសំណើស្វែងរកបានទេ។ សូមចុច Enter ដើម្បីស្វែងរក។',
+  'search.noSuggestions':
+    'រកមិនឃើញទំនិញដែលត្រូវគ្នាទេ។ សូមចុច Enter ដើម្បីស្វែងរកទាំងអស់។',
+  'search.searchFor': 'ស្វែងរក',
   'category.notFoundTitle': 'រកមិនឃើញប្រភេទ',
   'category.notFoundText': 'ប្រភេទនេះមិនមាន ឬត្រូវបានលាក់។',
   'category.empty': 'មិនទាន់មានទំនិញក្នុងប្រភេទនេះនៅឡើយទេ។',

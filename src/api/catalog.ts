@@ -39,6 +39,27 @@ type ListPublicProductsOptions = {
   limit?: number
 }
 
+export type ProductSuggestion = {
+  id: string
+  name: string
+  imageUrl: string | null
+  price: number
+  storeName: string | null
+}
+
+type ProductSuggestionRow = {
+  id: string
+  name: string
+  stores: { name: string } | null
+  product_variants:
+    | {
+        price: number
+        is_active: boolean
+      }[]
+    | null
+  product_images: { url: string; sort_order: number }[] | null
+}
+
 const PUBLIC_PRODUCT_SELECT =
   'id, store_id, name, description, category_id, created_at, categories(name_km, name_en, slug), stores(name, slug), product_variants(id, label, price, stock, is_active, created_at), product_images(id, url, sort_order)'
 
@@ -91,6 +112,50 @@ export async function listPublicProducts({
   return ((data ?? []) as unknown as PublicProductRow[])
     .map(mapPublicProduct)
     .filter((product) => product.variants.length > 0)
+}
+
+export async function listProductSuggestions(
+  query: string,
+  limit = 6,
+): Promise<ProductSuggestion[]> {
+  const term = normalizeSearchQuery(query)
+  if (!term) return []
+
+  const { data, error } = await supabase
+    .from('products')
+    .select(
+      'id, name, created_at, stores(name), product_variants(price, is_active), product_images(url, sort_order)',
+    )
+    .eq('status', 'active')
+    .ilike('name', `%${escapeLikePattern(term)}%`)
+    .order('created_at', { ascending: false })
+    .limit(limit * 2)
+
+  if (error) throw error
+
+  return ((data ?? []) as unknown as ProductSuggestionRow[])
+    .map((row): ProductSuggestion | null => {
+      const variants = (row.product_variants ?? []).filter(
+        (variant) => variant.is_active,
+      )
+      if (variants.length === 0) return null
+
+      const image = [...(row.product_images ?? [])].sort(
+        (a, b) => a.sort_order - b.sort_order,
+      )[0]
+
+      return {
+        id: row.id,
+        name: row.name,
+        imageUrl: image?.url ?? null,
+        price: Math.min(...variants.map((variant) => variant.price)),
+        storeName: row.stores?.name ?? null,
+      }
+    })
+    .filter(
+      (suggestion): suggestion is ProductSuggestion => suggestion !== null,
+    )
+    .slice(0, limit)
 }
 
 export async function listFeaturedProducts(
