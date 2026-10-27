@@ -27,6 +27,27 @@ Log in and link the project first. The database password is required.
 ```bash
 npx supabase login
 npx supabase link --project-ref wdbelxrhvkikrncsgshg
+npx supabase migration list --project-ref wdbelxrhvkikrncsgshg
+```
+
+If the remote history has no rows for `001`–`003` but the baseline schema already
+exists, record those migrations as applied before pushing. `migration repair`
+only writes history; it does not change the schema.
+
+For this project, the owner applied all five schemas manually through the SQL
+editor on 2026-10-27. After verifying the `orders` KHQR columns and the
+`cron.job` rows exist, record all five as applied:
+
+```bash
+npx supabase migration repair --status applied 001 002 003 004 005 \
+  --project-ref wdbelxrhvkikrncsgshg
+npx supabase migration list --project-ref wdbelxrhvkikrncsgshg
+```
+
+Only future migrations should remain pending. If any expected schema object is
+missing, stop and apply that migration instead of marking it applied.
+
+```bash
 npx supabase db push
 ```
 

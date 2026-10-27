@@ -12,6 +12,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "security:check": "node --env-file=.env.local scripts/security-check.mjs",
+    "types:generate": "node scripts/generate-types.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

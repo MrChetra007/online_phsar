@@ -1,33 +1,135 @@
+import { lazy } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { AppShell } from './components/AppShell'
-import { AdminCategoriesPage } from './features/admin/AdminCategoriesPage'
-import { AdminDisputesPage } from './features/admin/AdminDisputesPage'
-import { AdminOrderDetailPage } from './features/admin/AdminOrderDetailPage'
-import { AdminOrdersPage } from './features/admin/AdminOrdersPage'
-import { AdminPage } from './features/admin/AdminPage'
-import { AdminPaymentsPage } from './features/admin/AdminPaymentsPage'
-import { AdminSettingsPage } from './features/admin/AdminSettingsPage'
-import { AdminSettlementsPage } from './features/admin/AdminSettlementsPage'
-import { LoginPage } from './features/auth/LoginPage'
 import { RequireAuth } from './features/auth/RequireAuth'
 import { RequireRole } from './features/auth/RequireRole'
-import { SignUpPage } from './features/auth/SignUpPage'
-import { ProductEditorPage } from './features/store-dashboard/ProductEditorPage'
-import { StoreDashboardPage } from './features/store-dashboard/StoreDashboardPage'
-import { StoreOrderDetailPage } from './features/store-dashboard/StoreOrderDetailPage'
-import { StoreOrdersPage } from './features/store-dashboard/StoreOrdersPage'
-import { StoreStatementPage } from './features/store-dashboard/StoreStatementPage'
-import { CheckoutPage } from './features/checkout/CheckoutPage'
-import { CartPage } from './pages/CartPage'
-import { CategoryPage } from './pages/CategoryPage'
 import { HomePage } from './pages/HomePage'
-import { NotFoundPage } from './pages/NotFoundPage'
-import { OrderConfirmationPage } from './pages/OrderConfirmationPage'
-import { PaymentPage } from './pages/PaymentPage'
-import { ProductPage } from './pages/ProductPage'
-import { PublicStorePage } from './pages/PublicStorePage'
-import { SearchPage } from './pages/SearchPage'
-import { TrackingPage } from './pages/TrackingPage'
+
+const AdminCategoriesPage = lazy(() =>
+  import('./features/admin/AdminCategoriesPage').then((module) => ({
+    default: module.AdminCategoriesPage,
+  })),
+)
+const AdminDisputesPage = lazy(() =>
+  import('./features/admin/AdminDisputesPage').then((module) => ({
+    default: module.AdminDisputesPage,
+  })),
+)
+const AdminOrderDetailPage = lazy(() =>
+  import('./features/admin/AdminOrderDetailPage').then((module) => ({
+    default: module.AdminOrderDetailPage,
+  })),
+)
+const AdminOrdersPage = lazy(() =>
+  import('./features/admin/AdminOrdersPage').then((module) => ({
+    default: module.AdminOrdersPage,
+  })),
+)
+const AdminPage = lazy(() =>
+  import('./features/admin/AdminPage').then((module) => ({
+    default: module.AdminPage,
+  })),
+)
+const AdminPaymentsPage = lazy(() =>
+  import('./features/admin/AdminPaymentsPage').then((module) => ({
+    default: module.AdminPaymentsPage,
+  })),
+)
+const AdminSettingsPage = lazy(() =>
+  import('./features/admin/AdminSettingsPage').then((module) => ({
+    default: module.AdminSettingsPage,
+  })),
+)
+const AdminSettlementsPage = lazy(() =>
+  import('./features/admin/AdminSettlementsPage').then((module) => ({
+    default: module.AdminSettlementsPage,
+  })),
+)
+const LoginPage = lazy(() =>
+  import('./features/auth/LoginPage').then((module) => ({
+    default: module.LoginPage,
+  })),
+)
+const SignUpPage = lazy(() =>
+  import('./features/auth/SignUpPage').then((module) => ({
+    default: module.SignUpPage,
+  })),
+)
+const CheckoutPage = lazy(() =>
+  import('./features/checkout/CheckoutPage').then((module) => ({
+    default: module.CheckoutPage,
+  })),
+)
+const ProductEditorPage = lazy(() =>
+  import('./features/store-dashboard/ProductEditorPage').then((module) => ({
+    default: module.ProductEditorPage,
+  })),
+)
+const StoreDashboardPage = lazy(() =>
+  import('./features/store-dashboard/StoreDashboardPage').then((module) => ({
+    default: module.StoreDashboardPage,
+  })),
+)
+const StoreOrderDetailPage = lazy(() =>
+  import('./features/store-dashboard/StoreOrderDetailPage').then((module) => ({
+    default: module.StoreOrderDetailPage,
+  })),
+)
+const StoreOrdersPage = lazy(() =>
+  import('./features/store-dashboard/StoreOrdersPage').then((module) => ({
+    default: module.StoreOrdersPage,
+  })),
+)
+const StoreStatementPage = lazy(() =>
+  import('./features/store-dashboard/StoreStatementPage').then((module) => ({
+    default: module.StoreStatementPage,
+  })),
+)
+const CartPage = lazy(() =>
+  import('./pages/CartPage').then((module) => ({
+    default: module.CartPage,
+  })),
+)
+const CategoryPage = lazy(() =>
+  import('./pages/CategoryPage').then((module) => ({
+    default: module.CategoryPage,
+  })),
+)
+const NotFoundPage = lazy(() =>
+  import('./pages/NotFoundPage').then((module) => ({
+    default: module.NotFoundPage,
+  })),
+)
+const OrderConfirmationPage = lazy(() =>
+  import('./pages/OrderConfirmationPage').then((module) => ({
+    default: module.OrderConfirmationPage,
+  })),
+)
+const PaymentPage = lazy(() =>
+  import('./pages/PaymentPage').then((module) => ({
+    default: module.PaymentPage,
+  })),
+)
+const ProductPage = lazy(() =>
+  import('./pages/ProductPage').then((module) => ({
+    default: module.ProductPage,
+  })),
+)
+const PublicStorePage = lazy(() =>
+  import('./pages/PublicStorePage').then((module) => ({
+    default: module.PublicStorePage,
+  })),
+)
+const SearchPage = lazy(() =>
+  import('./pages/SearchPage').then((module) => ({
+    default: module.SearchPage,
+  })),
+)
+const TrackingPage = lazy(() =>
+  import('./pages/TrackingPage').then((module) => ({
+    default: module.TrackingPage,
+  })),
+)
 
 function App() {
   return (

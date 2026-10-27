@@ -272,6 +272,9 @@ export type Database = {
           delivery_fee: number
           has_open_dispute: boolean
           id: string
+          khqr_checkout_url: string | null
+          khqr_md5: string | null
+          khqr_tran_id: string | null
           order_code: string
           paid_at: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
@@ -309,6 +312,9 @@ export type Database = {
           delivery_fee?: number
           has_open_dispute?: boolean
           id?: string
+          khqr_checkout_url?: string | null
+          khqr_md5?: string | null
+          khqr_tran_id?: string | null
           order_code?: string
           paid_at?: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
@@ -346,6 +352,9 @@ export type Database = {
           delivery_fee?: number
           has_open_dispute?: boolean
           id?: string
+          khqr_checkout_url?: string | null
+          khqr_md5?: string | null
+          khqr_tran_id?: string | null
           order_code?: string
           paid_at?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"]
@@ -972,6 +981,7 @@ export type Database = {
       }
       get_store_balance: { Args: { p_store_id: string }; Returns: number }
       get_store_commission_percent: { Args: never; Returns: number }
+      invoke_notify: { Args: never; Returns: undefined }
       is_super_admin: { Args: never; Returns: boolean }
       link_telegram_chat: {
         Args: { p_chat_id: number; p_code: string }
@@ -1019,6 +1029,17 @@ export type Database = {
       }
       restock_order: {
         Args: { p_note?: string; p_order_id: string }
+        Returns: undefined
+      }
+      set_order_khqr: {
+        Args: {
+          p_expires_at: string
+          p_khqr_checkout_url: string
+          p_khqr_md5: string
+          p_khqr_tran_id: string
+          p_order_id: string
+          p_qr_string: string
+        }
         Returns: undefined
       }
       set_order_qr: {

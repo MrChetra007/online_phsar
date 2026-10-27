@@ -7,6 +7,7 @@ import '@fontsource/noto-sans-khmer/600.css'
 import '@fontsource/noto-sans-khmer/700.css'
 import './index.css'
 import App from './App.tsx'
+import { AppErrorBoundary } from './components/AppErrorBoundary'
 import { AuthProvider } from './features/auth'
 import { CartProvider } from './features/cart'
 import { I18nProvider } from './lib/i18n'
@@ -14,13 +15,15 @@ import { I18nProvider } from './lib/i18n'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <I18nProvider>
-      <AuthProvider>
-        <CartProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
-        </CartProvider>
-      </AuthProvider>
+      <AppErrorBoundary>
+        <AuthProvider>
+          <CartProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </CartProvider>
+        </AuthProvider>
+      </AppErrorBoundary>
     </I18nProvider>
   </StrictMode>,
 )

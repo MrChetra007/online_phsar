@@ -1,9 +1,11 @@
+import { Suspense } from 'react'
 import { Link, Outlet, useNavigate } from 'react-router-dom'
 import { useI18n } from '../lib/i18n'
 import { homeForRole } from '../lib/roles'
 import { useAuth } from '../features/auth/context'
 import { useCart } from '../features/cart'
 import { LanguageSwitcher } from './LanguageSwitcher'
+import { LoadingState } from './LoadingState'
 
 const currentYear = new Date().getFullYear()
 
@@ -105,7 +107,9 @@ export function AppShell() {
         id="main"
         className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:py-12"
       >
-        <Outlet />
+        <Suspense fallback={<LoadingState />}>
+          <Outlet />
+        </Suspense>
       </main>
 
       <footer className="border-t border-slate-200 bg-white">

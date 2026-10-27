@@ -123,21 +123,22 @@ supabase functions deploy khqr_webhook --no-verify-jwt --project-ref wdbelxrhvki
 Regenerate types after every migration:
 
 ```bash
-supabase gen types typescript --project-id wdbelxrhvkikrncsgshg > src/lib/database.types.ts
+npm run types:generate
 ```
 
 ## Scripts
 
-| Command                  | What it does                                  |
-| ------------------------ | --------------------------------------------- |
-| `npm run dev`            | Start the Vite dev server                     |
-| `npm run build`          | Type-check and build for production           |
-| `npm run typecheck`      | Type-check only (`tsc -b`)                    |
-| `npm run lint`           | Run Oxlint                                    |
-| `npm run test`           | Run unit tests with Vitest                    |
-| `npm run security:check` | Verify anon permission walls and public reads |
-| `npm run format`         | Format with Prettier                          |
-| `npm run preview`        | Preview the production build                  |
+| Command                  | What it does                                     |
+| ------------------------ | ------------------------------------------------ |
+| `npm run dev`            | Start the Vite dev server                        |
+| `npm run build`          | Type-check and build for production              |
+| `npm run typecheck`      | Type-check only (`tsc -b`)                       |
+| `npm run lint`           | Run Oxlint                                       |
+| `npm run test`           | Run unit tests with Vitest                       |
+| `npm run security:check` | Verify anon permission walls and public reads    |
+| `npm run types:generate` | Regenerate database types from the hosted schema |
+| `npm run format`         | Format with Prettier                             |
+| `npm run preview`        | Preview the production build                     |
 
 ## Structure
 
@@ -148,7 +149,7 @@ src/
   features/     # feature screens (added per build step)
   lib/          # money, phone, errors, i18n, database.types.ts
   pages/        # routed screens
-scripts/        # read-only anon permission probe
+scripts/        # anon permission probe and database type generation
 supabase/
   functions/    # Edge Functions for KHQR generation, polling, and webhooks
   migrations/   # numbered SQL files; never edit an applied migration

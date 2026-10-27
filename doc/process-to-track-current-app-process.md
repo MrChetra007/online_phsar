@@ -2,7 +2,7 @@
 
 Last updated: 2026-10-27
 Branch: `main`
-Latest commit: `4fe2607 feat: add scheduled jobs`
+Latest commit: `3471c2f chore: add hardening checks and runbook`
 
 This is the working handoff document. Read it first when resuming the project.
 Update it at the end of every build step, commit, deployment, or blocker.
@@ -74,6 +74,7 @@ Known recent commits:
 
 | Commit    | Scope                              |
 | --------- | ---------------------------------- |
+| `3471c2f` | Hardening checks and runbook        |
 | `4fe2607` | Scheduled jobs                     |
 | `410ad24` | Telegram notifications             |
 | `83dcf8b` | Weekly settlements                 |
@@ -159,7 +160,7 @@ Implemented behavior:
 | 11   | Settlement                     | Implemented locally; live acceptance pending |
 | 12   | Telegram notifications         | Implemented locally; live acceptance pending |
 | 13   | Scheduled jobs                 | Implemented locally; live acceptance pending |
-| 14   | Hardening, tests, deploy       | In progress; integration/deploy pending    |
+| 14   | Hardening, tests, deploy       | Local hardening complete; deploy pending   |
 
 ---
 
@@ -627,10 +628,17 @@ has not been tested.
   `store_private` are authenticated-only with owner/admin checks. Webhook
   handlers verify the KHQR HMAC and timestamp and the Telegram secret header.
 - Lighthouse mobile run against the production preview:
-  - Home: performance 89, accessibility 100, best practices 100, SEO 100.
-  - Checkout: performance 90, accessibility 100, best practices 100, SEO 63.
+  - Home: performance 90, accessibility 100, best practices 100, SEO 100.
+  - Checkout: performance 91, accessibility 100, best practices 100, SEO 63.
     The SEO failure is the intentional `robots.txt` block on private routes.
-  - Only remaining audit is a non-scored source-map warning.
+  - No failing binary audits remain.
+- Added route-level lazy loading with a localized loading fallback. The largest
+  JavaScript chunk dropped from about 803 kB to 242 kB, and the Vite
+  chunk-size warning is gone.
+- Added a top-level error boundary with a translated recovery screen and reload
+  action for render or lazy-chunk failures.
+- Regenerated `src/lib/database.types.ts` from the hosted schema; it now matches
+  the manual 004/005 schema, including KHQR columns and RPCs.
 - Added `doc/runbook.md` for deploy, key rotation, scheduled-job checks, flagged
   payments, rollback, and post-deploy smoke tests.
 - Added a meta description, `robots.txt`, darker primary-button colors, and
@@ -638,9 +646,8 @@ has not been tested.
 
 ### Still pending
 
-- Integration tests against local Supabase for create-order, stock race, KHQR
-  webhook variants, settlement netting, and permission walls. Docker Desktop is
-  not running and no local database exists.
+- Local Docker integration tests were deferred by owner decision on 2026-10-27.
+  The critical-flow checklist remains in `doc/runbook.md`.
 - Supabase security/performance advisors and the remote deploy need the database
   password or dashboard access.
 - Frontend host deployment and the full two-store end-to-end acceptance run.
@@ -654,7 +661,7 @@ has not been tested.
 | Webhook authenticity review                            | Passed by code review                  |
 | Lighthouse catalog and checkout                        | Passed; checkout SEO intentionally low |
 | Supabase advisors                                       | Blocked on remote access               |
-| Local integration suite                                 | Blocked on Docker/local DB             |
+| Local integration suite                                 | Deferred by owner                      |
 | Deployed happy path with two stores through settlement | Blocked on deployment                  |
 
 ---
@@ -673,24 +680,31 @@ Last known Supabase project:
 
 Last known remote status:
 
-- Migration `004_khqr_payments.sql` and `005_scheduled_jobs.sql`: not applied.
-- Edge Functions: not deployed.
-- KHQR secrets: not configured.
+- Migration `004_khqr_payments.sql` and `005_scheduled_jobs.sql`: schema applied
+  manually by the owner on 2026-10-27. Migration history is still empty, so
+  repair `001`–`005` as applied before any future `db push`.
+- Edge Functions: five active v1 deployments (`generate_khqr`, `khqr_webhook`,
+  `verify_khqr_payment`, `notify`, `telegram_webhook`). Redeploy `notify` and
+  `telegram_webhook` after the secret setup because their current deployments
+  predate the final Step 12 commit.
+- KHQR secrets: not configured. `secrets list` shows only the default Supabase
+  function secrets.
 - Telegram bot token, webhook secret, webhook registration, and notify trigger:
   not configured.
-- `pg_cron`/`pg_net`/Vault and the `telegram-notify` job: not configured or
-  verified remotely.
-- CLI can list projects, but `db push`/`migration list` still need the database
-  password or a working link.
+- `pg_cron`/`pg_net`/Vault and the `telegram-notify` job: schema is applied, but
+  Vault values and job runs are not verified.
+- CLI project, function, secret, and migration-list reads work. `db dump` still
+  needs Docker, so remote schema inspection is limited.
 - `deno` is not installed globally, but `npx -y deno check` works and the Step
   12 functions pass it.
-- The Docker daemon is not running, so local Supabase migrations cannot be
-  executed yet.
+- The Docker daemon is not running; local integration tests were deferred by the
+  owner.
 - Anon permission probes on 2026-10-27 blocked `orders`, `ledger_entries`,
   `store_private`, and the other protected tables, and blocked
   `get_settlement_summary`.
 - No frontend host is configured; the production build is only local.
-- Do not apply remote changes without owner approval.
+- Do not apply remote changes, set secrets, or reveal key values without owner
+  approval.
 
 Last known test data:
 
@@ -708,14 +722,14 @@ These values may have changed. Verify before relying on them.
 
 ### Preferred next action
 
-Step 14 hardening is partly complete locally. Remaining work:
+Step 14 local hardening is complete; Docker integration tests are deferred by
+owner decision. The owner applied all five schemas manually. Remaining deploy
+work:
 
-1. Start Docker Desktop, run local Supabase, and execute the critical-flow
-   integration tests.
-2. Apply migrations 004/005 and run the Supabase security and performance
-   advisors; fix findings.
-3. Set secrets/Vault values, deploy the functions, register both webhooks, and
-   deploy the frontend.
+1. Run the Supabase security and performance advisors; fix findings.
+2. Set the function secrets and Vault values, repair migration history, and
+   redeploy `notify` and `telegram_webhook`.
+3. Register both webhooks and deploy the frontend.
 4. Run the full two-store happy path through settlement.
 5. Update this document with the results.
 
@@ -723,19 +737,18 @@ Do not mark Step 14 complete until the deployed acceptance run passes.
 
 Step 13 live acceptance remains pending:
 
-1. Apply `005_scheduled_jobs.sql` to the Supabase project.
-2. Create Vault secrets `project_url` and `notify_service_role_key`.
-3. Deploy the `notify` Edge Function.
-4. Confirm the five rows exist in `cron.job` and inspect `cron.job_run_details`.
-5. Test QR expiry with stock return, completion after the return window, a
+1. Create Vault secrets `project_url` and `notify_service_role_key`.
+2. Redeploy the `notify` Edge Function.
+3. Confirm the five rows exist in `cron.job` and inspect `cron.job_run_details`.
+4. Test QR expiry with stock return, completion after the return window, a
    single shipping reminder, and the notify dispatch.
-6. Update this document with the results.
+5. Update this document with the results.
 
 Step 12 live acceptance remains pending:
 
 1. Create the bot with `@BotFather`; set `TELEGRAM_BOT_TOKEN` and
    `TELEGRAM_WEBHOOK_SECRET`.
-2. Deploy `telegram_webhook` and `notify`.
+2. Redeploy `telegram_webhook` and `notify`.
 3. Register the webhook URL and secret with Telegram.
 4. Set `admin_telegram_chat_id` in `/admin/settings`.
 5. Confirm the Step 13 `telegram-notify` job or a Database Webhook invokes
@@ -770,17 +783,16 @@ Step 9 acceptance is still pending and was deferred at the owner's request:
 3. Attempt an invalid status change and confirm the translated error appears.
 4. Update this document with the results.
 
-### Step 8 live acceptance (still blocked)
+### Step 8 live acceptance (still blocked on provider secrets)
 
 Finish when credentials and approval are available:
 
-1. Apply migration 004 to the Supabase project.
-2. Set `KHQRDEV_TOKEN` and `KHQRDEV_WEBHOOK_SECRET`; set `KHQRDEV_CURRENCY` and
+1. Set `KHQRDEV_TOKEN` and `KHQRDEV_WEBHOOK_SECRET`; set `KHQRDEV_CURRENCY` and
    `KHQRDEV_KHR_PER_USD` if using KHR.
-3. Deploy `generate_khqr`, `verify_khqr_payment`, and `khqr_webhook`.
-4. Register the webhook URL in KHQR.dev.
-5. Test the four Step 8 acceptance cases.
-6. Update this document with results.
+2. Redeploy `generate_khqr`, `verify_khqr_payment`, and `khqr_webhook`.
+3. Register the webhook URL in KHQR.dev.
+4. Test the four Step 8 acceptance cases.
+5. Update this document with results.
 
 Deploy commands:
 
@@ -794,8 +806,8 @@ supabase functions deploy khqr_webhook --no-verify-jwt --project-ref wdbelxrhvki
 
 ## 9. Known open items
 
-- Live KHQR acceptance is blocked by missing remote migration, secrets, and
-  function deployment.
+- Live KHQR acceptance is blocked by missing provider secrets and webhook
+  registration; the schema and functions are deployed.
 - Step 9 acceptance is pending; the RLS and UI paths are implemented.
 - Step 10 acceptance is pending; the admin routes, RPC calls, settings editor,
   and notes are implemented locally.
@@ -806,8 +818,8 @@ supabase functions deploy khqr_webhook --no-verify-jwt --project-ref wdbelxrhvki
   implemented locally.
 - Step 12 needs `TELEGRAM_BOT_TOKEN` and, preferably,
   `TELEGRAM_WEBHOOK_SECRET`; neither is configured remotely.
-- Step 13 migration schedules `notify`, but it is not applied yet. Until then,
-  use a dashboard Database Webhook or call `notify` manually.
+- Step 13 schema is applied remotely, but the scheduled jobs remain unverified
+  until Vault secrets exist.
 - Step 13 acceptance is pending; `005_scheduled_jobs.sql` adds the five cron
   jobs and the Vault-backed `invoke_notify()` function.
 - Migration 005 was reviewed but not executed locally because no local Supabase
@@ -818,12 +830,19 @@ supabase functions deploy khqr_webhook --no-verify-jwt --project-ref wdbelxrhvki
   translation completeness; the suite is now 18 files and 74 tests.
 - `npm run security:check` is a read-only anon probe using `.env.local`; it does
   not replace the Supabase advisors.
-- Lighthouse mobile scored home 89/100/100/100 and checkout 90/100/100/63.
+- Lighthouse mobile scored home 90/100/100/100 and checkout 91/100/100/63.
   Checkout SEO is intentionally low because private routes are disallowed in
   `robots.txt`.
-- Step 14 integration tests, advisors, and deployment are still pending.
+- Route-level lazy loading removed the Vite chunk-size warning; the largest
+  script chunk is now about 242 kB instead of about 803 kB.
+- A top-level error boundary catches render and lazy-chunk failures and offers a
+  reload action.
+- Local Docker integration tests are deferred by owner decision; advisors and
+  deployment are still pending.
 - `doc/runbook.md` was added but its deploy and recovery steps are not executed.
-- Step 14 needed no new migration and no regenerated `database.types.ts`.
+- Step 14 regenerated `src/lib/database.types.ts` from the remote schema after
+  migrations 004/005; it now includes the KHQR columns, `set_order_khqr`, and
+  `invoke_notify`.
 - Failed Telegram notifications retry until 5 attempts, then stay `failed`.
 - Step 12 needed no new migration and no regenerated `database.types.ts`.
 - The store dashboard does not show the bot username yet. Tell owners the bot
@@ -836,14 +855,12 @@ supabase functions deploy khqr_webhook --no-verify-jwt --project-ref wdbelxrhvki
 - The admin order list loads up to 500 orders and filters in the browser; add
   server-side paging if order volume grows.
 - The Telegram link code can now be consumed by `telegram_webhook`; live
-  linking still needs the bot token and deployed functions.
+  linking still needs the bot token and webhook registration.
 - Step 9 needed no new migration and no regenerated `database.types.ts`.
-- Remote DB migration needs the database password or an approved Management API
-  path.
+- The remote schemas are applied, but repairing migration history and future
+  pushes need the database password or an approved Management API path.
 - `npx -y deno check` works even though `deno` is not installed globally; use it
   for Edge Function type checks.
-- `src/lib/database.types.ts` has not been regenerated after migration 004.
-- The Vite build reports an existing chunk larger than 500 kB.
 - `doc/khqr_platform_guide.md` and
   `doc/khqrdev_payment_implementation.md` are untracked reference documents.
 - Open product decisions still exist in `doc/AI_BUILD_GUIDE.md` section 7,
@@ -860,6 +877,7 @@ npm run typecheck
 npm run lint
 npm run test
 npm run security:check
+npm run types:generate
 npm run format:check
 npm run build
 
@@ -883,9 +901,23 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
   payments, rollback, and smoke tests.
 - Fixed Lighthouse findings: meta description, `robots.txt`, darker primary
   colors, and the duplicate home-link label.
-- Lighthouse mobile: home 89/100/100/100; checkout 90/100/100/63 (intentional
-  private-route SEO block).
-- Step 14 integration tests, Supabase advisors, and deployment remain pending.
+- Committed Step 14 local hardening as `3471c2f`.
+- Added route-level lazy loading; the largest script chunk dropped from about
+  803 kB to 242 kB and the Vite chunk-size warning cleared.
+- Lighthouse mobile after splitting: home 90/100/100/100; checkout
+  91/100/100/63 (intentional private-route SEO block).
+- Regenerated `src/lib/database.types.ts` from the hosted schema and confirmed
+  it matches the remote types exactly.
+- Added `npm run types:generate` to regenerate UTF-8 types without a BOM on
+  Windows.
+- Added a top-level error boundary for render and lazy-chunk failures.
+- Passed typecheck, lint, 74 tests, Prettier, and production build.
+- Local Docker integration tests deferred by owner; Supabase advisors and
+  deployment remain pending.
+- Remote preflight on 2026-10-27: owner applied all five schemas manually and
+  the five functions are active v1; only default Supabase function secrets
+  exist. Migration history is empty, so the runbook now repairs `001`–`005`
+  before any future push.
 - Committed Step 12 as `410ad24`.
 - Implemented Step 13 scheduling: migration 005 enables `pg_cron`, `pg_net`, and
   Vault, schedules the four maintenance jobs, and adds `invoke_notify()` every
