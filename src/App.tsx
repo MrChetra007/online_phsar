@@ -15,6 +15,11 @@ const AdminDisputesPage = lazy(() =>
     default: module.AdminDisputesPage,
   })),
 )
+const AdminLayout = lazy(() =>
+  import('./features/admin/AdminLayout').then((module) => ({
+    default: module.AdminLayout,
+  })),
+)
 const AdminOrderDetailPage = lazy(() =>
   import('./features/admin/AdminOrderDetailPage').then((module) => ({
     default: module.AdminOrderDetailPage,
@@ -163,26 +168,23 @@ function App() {
         <Route path="p/:productId" element={<ProductPage />} />
         <Route path="s/:slug" element={<PublicStorePage />} />
 
-        <Route element={<RequireAuth />}>
-          <Route element={<RequireRole role="super_admin" />}>
-            <Route path="admin" element={<AdminPage />} />
-            <Route path="admin/orders" element={<AdminOrdersPage />} />
-            <Route
-              path="admin/orders/:orderId"
-              element={<AdminOrderDetailPage />}
-            />
-            <Route path="admin/payments" element={<AdminPaymentsPage />} />
-            <Route path="admin/disputes" element={<AdminDisputesPage />} />
-            <Route
-              path="admin/settlements"
-              element={<AdminSettlementsPage />}
-            />
-            <Route path="admin/settings" element={<AdminSettingsPage />} />
-            <Route path="admin/categories" element={<AdminCategoriesPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+
+      <Route element={<RequireAuth />}>
+        <Route element={<RequireRole role="super_admin" />}>
+          <Route path="admin" element={<AdminLayout />}>
+            <Route index element={<AdminPage />} />
+            <Route path="orders" element={<AdminOrdersPage />} />
+            <Route path="orders/:orderId" element={<AdminOrderDetailPage />} />
+            <Route path="payments" element={<AdminPaymentsPage />} />
+            <Route path="disputes" element={<AdminDisputesPage />} />
+            <Route path="settlements" element={<AdminSettlementsPage />} />
+            <Route path="categories" element={<AdminCategoriesPage />} />
+            <Route path="settings" element={<AdminSettingsPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Route>
-
-        <Route path="*" element={<NotFoundPage />} />
       </Route>
 
       <Route element={<RequireAuth />}>

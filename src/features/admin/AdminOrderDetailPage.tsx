@@ -292,7 +292,7 @@ export function AdminOrderDetailPage() {
         ]
 
   return (
-    <section className="mx-auto max-w-6xl">
+    <section>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <Link

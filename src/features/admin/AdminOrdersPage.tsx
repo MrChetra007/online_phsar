@@ -7,7 +7,6 @@ import {
   type AdminPaymentStatus,
 } from '../../api/admin'
 import { listStoresForAdmin, type Store } from '../../api/stores'
-import { AdminNav } from './AdminNav'
 import { ErrorState } from '../../components/ErrorState'
 import { LoadingState } from '../../components/LoadingState'
 import {
@@ -94,13 +93,11 @@ export function AdminOrdersPage() {
   }
 
   return (
-    <section className="mx-auto max-w-6xl">
+    <section>
       <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
         {t('admin.ordersTitle')}
       </h1>
       <p className="mt-2 text-sm text-slate-600">{t('admin.ordersSubtitle')}</p>
-      <AdminNav />
-
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
         <Select
           label={t('admin.filterStatus')}

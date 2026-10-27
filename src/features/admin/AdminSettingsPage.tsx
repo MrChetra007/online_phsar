@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { listPlatformSettings, updatePlatformSetting } from '../../api/admin'
-import { AdminNav } from './AdminNav'
 import { Button } from '../../components/Button'
 import { ErrorState } from '../../components/ErrorState'
 import { Input } from '../../components/Input'
@@ -280,15 +279,13 @@ export function AdminSettingsPage() {
   }
 
   return (
-    <section className="mx-auto max-w-4xl">
+    <section>
       <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
         {t('admin.settingsTitle')}
       </h1>
       <p className="mt-2 text-sm text-slate-600">
         {t('admin.settingsSubtitle')}
       </p>
-      <AdminNav />
-
       <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
         {t('admin.commissionWarning')}
       </div>

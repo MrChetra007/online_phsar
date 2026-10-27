@@ -5,7 +5,6 @@ import {
   resolveAdminDispute,
   type AdminOrder,
 } from '../../api/admin'
-import { AdminNav } from './AdminNav'
 import { Button } from '../../components/Button'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { ErrorState } from '../../components/ErrorState'
@@ -109,15 +108,13 @@ export function AdminDisputesPage() {
   }
 
   return (
-    <section className="mx-auto max-w-5xl">
+    <section>
       <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
         {t('admin.disputesTitle')}
       </h1>
       <p className="mt-2 text-sm text-slate-600">
         {t('admin.disputesSubtitle')}
       </p>
-      <AdminNav />
-
       {notice ? (
         <p
           role="status"

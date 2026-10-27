@@ -2,7 +2,7 @@
 
 Last updated: 2026-10-27
 Branch: `main`
-Latest feature commit: `9442dff feat: add search autosuggestions`
+Latest feature commit: `7edfeac feat: add store workspace sidebar`
 
 This is the working handoff document. Read it first when resuming the project.
 Update it at the end of every build step, commit, deployment, or blocker.
@@ -898,6 +898,16 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
 - Added product search autosuggestions with a 250 ms debounce, thumbnail, store,
   price, keyboard navigation, ARIA combobox/listbox behavior, and bilingual
   states; committed as `9442dff feat: add search autosuggestions`.
+- Added a dedicated responsive admin workspace outside the public shell with a
+  collapsible desktop sidebar persisted as `kos.adminSidebarCollapsed`, mobile
+  drawer, admin identity card, super-admin badge, storefront shortcut, language,
+  and logout actions.
+- Removed the old `AdminNav`, moved admin routes under `AdminLayout`, added
+  payments/disputes/categories icons and bilingual admin navigation copy, and
+  normalized admin page widths.
+- Admin workspace changes are uncommitted. Passed typecheck, lint, 74 tests,
+  Prettier, and production build; the build still reports the main-chunk warning
+  that should be reviewed in a later performance pass.
 - Started the store-owner workspace refresh: added a dedicated responsive shell
   outside the public storefront, a collapsible desktop sidebar, a mobile drawer,
   persisted collapse state, store status/language/logout actions, and new
@@ -905,9 +915,10 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
 - Split the former single dashboard into overview, products, and settings pages;
   restyled store products and aligned orders/statement/order-detail cards with
   the workspace design.
-- Store-owner workspace changes are uncommitted. Passed typecheck, lint, 74
-  tests, Prettier, and production build; the build reports a 520 kB main-chunk
-  warning that should be reviewed in a later performance pass.
+- Store-owner workspace committed as `7edfeac feat: add store workspace sidebar`.
+  Passed typecheck, lint, 74 tests, Prettier, and production build; the build
+  reports a 520 kB main-chunk warning that should be reviewed in a later
+  performance pass.
 - Started a storefront design refresh after owner feedback that the current UI
   was not good enough. Direction: modern marketplace, storefront first.
 - Redesigned the customer shell, home, product card/grid, category, search,

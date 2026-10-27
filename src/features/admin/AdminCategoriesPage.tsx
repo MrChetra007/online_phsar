@@ -1,5 +1,4 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
 import {
   categoryErrorKey,
   createCategory,
@@ -351,15 +350,8 @@ export function AdminCategoriesPage() {
   }
 
   return (
-    <section className="mx-auto max-w-4xl">
-      <Link
-        to="/admin"
-        className="text-sm font-medium text-emerald-700 hover:underline"
-      >
-        ← {t('admin.backToStores')}
-      </Link>
-
-      <h1 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
+    <section>
+      <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
         {t('admin.categoriesTitle')}
       </h1>
       <p className="mt-2 text-slate-600">{t('admin.categoriesSubtitle')}</p>

@@ -151,6 +151,37 @@ export function WalletIcon({ className = 'size-5', ...props }: IconProps) {
   )
 }
 
+export function CreditCardIcon({ className = 'size-5', ...props }: IconProps) {
+  return (
+    <svg {...iconProps(className, props)}>
+      <rect x="3" y="5" width="18" height="14" rx="2.5" />
+      <path d="M3 10h18" />
+      <path d="M7 15h3" />
+    </svg>
+  )
+}
+
+export function ScaleIcon({ className = 'size-5', ...props }: IconProps) {
+  return (
+    <svg {...iconProps(className, props)}>
+      <path d="M12 4v16" />
+      <path d="M6 20h12" />
+      <path d="M5 7h14" />
+      <path d="m5 7-3 6h6L5 7Z" />
+      <path d="m19 7-3 6h6l-3-6Z" />
+    </svg>
+  )
+}
+
+export function TagIcon({ className = 'size-5', ...props }: IconProps) {
+  return (
+    <svg {...iconProps(className, props)}>
+      <path d="m4 4 7.5-.5L20 12l-8 8-8.5-8.5L4 4Z" />
+      <circle cx="8.5" cy="8.5" r="1.2" />
+    </svg>
+  )
+}
+
 export function SettingsIcon({ className = 'size-5', ...props }: IconProps) {
   return (
     <svg {...iconProps(className, props)}>

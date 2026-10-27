@@ -12,7 +12,6 @@ import {
   type SettlementSummary,
 } from '../../api/settlement'
 import type { StoreLedgerEntry, StoreSettlement } from '../../api/statement'
-import { AdminNav } from './AdminNav'
 import { Button } from '../../components/Button'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { ErrorState } from '../../components/ErrorState'
@@ -370,15 +369,13 @@ export function AdminSettlementsPage() {
   }
 
   return (
-    <section className="mx-auto max-w-6xl">
+    <section>
       <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
         {t('admin.settlementsTitle')}
       </h1>
       <p className="mt-2 text-sm text-slate-600">
         {t('admin.settlementsSubtitle')}
       </p>
-      <AdminNav />
-
       {summariesFailed ? (
         <p className="mt-4 rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700">
           {t('admin.settlementsError')}{' '}
