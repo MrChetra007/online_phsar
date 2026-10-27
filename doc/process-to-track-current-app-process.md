@@ -2,7 +2,7 @@
 
 Last updated: 2026-10-27
 Branch: `main`
-Latest feature commit: `105ec95 feat: add product images to order details`
+Latest feature commit: `4d60f37 feat: add printable invoices and province selector`
 
 This is the working handoff document. Read it first when resuming the project.
 Update it at the end of every build step, commit, deployment, or blocker.
@@ -122,7 +122,9 @@ Implemented behavior:
 
 - Auth, role guards, and store onboarding.
 - Categories, products, variants, images, and public catalog.
-- Cart and COD checkout with server-computed delivery fee and totals.
+- Cart and COD checkout with server-computed delivery fee, totals, and a
+  searchable bilingual province selector.
+- Downloadable post-checkout invoice for COD and paid KHQR orders.
 - Guest tracking with cancel, confirm received, report problem, and reopen.
 - KHQR checkout selection, QR generation, polling, signed webhook, and
   payment-status UI.
@@ -893,6 +895,26 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
 
 ### 2026-10-27
 
+- Replaced the checkout province free-text input with a searchable combobox
+  covering all 25 Cambodian provinces, with bilingual labels, English/Khmer
+  search keywords, keyboard and ARIA support, and localized display everywhere
+  an order or store province is shown.
+- Added `src/lib/provinces.ts`, `src/components/SearchSelect.tsx`, and province
+  unit tests. Committed with the invoice work as
+  `4d60f37 feat: add printable invoices and province selector`. Passed
+  typecheck, lint, 81 tests, Prettier, and production build; the main chunk is
+  485.95 kB.
+- Added a downloadable, print-ready invoice after checkout. The invoice is a
+  self-contained bilingual HTML file with store, order, customer, delivery,
+  payment, item, and total details plus a print/save-as-PDF action.
+- The invoice now downloads automatically once per order/tab on the COD
+  confirmation and paid KHQR screens, with session and in-memory guards; the
+  manual button remains as a fallback.
+- Extended checkout and KHQR payment state with a validated order snapshot so
+  the invoice can be downloaded from both the COD confirmation and paid KHQR
+  screens. Customer text is HTML-escaped before rendering.
+- Invoice changes passed typecheck, lint, 78 tests, Prettier, and production
+  build before the province work added three more tests.
 - Added product thumbnails to store-owner and admin order detail item rows,
   loaded through the order item variant/product relation with a branded
   initial fallback when an image is unavailable.
