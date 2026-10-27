@@ -249,7 +249,7 @@ export function StoreOrderDetailPage() {
   if (notFound || !order) {
     return (
       <section className="mx-auto max-w-3xl">
-        <p className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
+        <p className="rounded-2xl border border-dashed border-stone-300 bg-white p-6 text-sm text-slate-600">
           {t('storeOrders.notFound')}
         </p>
         <Link
@@ -318,7 +318,7 @@ export function StoreOrderDetailPage() {
       ) : null}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,250px)_minmax(0,1fr)]">
-        <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+        <aside className="h-fit rounded-2xl border border-stone-200/80 bg-white p-4 sm:p-5">
           <h2 className="text-sm font-semibold text-slate-900">
             {t('storeOrders.history')}
           </h2>
@@ -365,7 +365,7 @@ export function StoreOrderDetailPage() {
         </aside>
 
         <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+          <div className="rounded-2xl border border-stone-200/80 bg-white p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-slate-900">
               {t('storeOrders.customer')}
             </h2>
@@ -410,7 +410,7 @@ export function StoreOrderDetailPage() {
             </dl>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+          <div className="rounded-2xl border border-stone-200/80 bg-white p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-slate-900">
               {t('storeOrders.items')}
             </h2>
@@ -476,7 +476,7 @@ export function StoreOrderDetailPage() {
             </dl>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+          <div className="rounded-2xl border border-stone-200/80 bg-white p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-slate-900">
               {t('order.delivery')}
             </h2>
@@ -498,7 +498,7 @@ export function StoreOrderDetailPage() {
             </dl>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+          <div className="rounded-2xl border border-stone-200/80 bg-white p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-slate-900">
               {t('storeOrders.actions')}
             </h2>

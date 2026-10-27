@@ -545,10 +545,10 @@ export function ProductEditorPage() {
           {t('store.productNotFound')}
         </h1>
         <Link
-          to="/store"
+          to="/store/products"
           className="mt-5 inline-flex rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-800"
         >
-          {t('store.backToDashboard')}
+          {t('store.backToProducts')}
         </Link>
       </section>
     )
@@ -558,10 +558,10 @@ export function ProductEditorPage() {
   return (
     <section className="mx-auto max-w-3xl">
       <Link
-        to="/store"
+        to="/store/products"
         className="text-sm font-medium text-emerald-700 hover:underline"
       >
-        ← {t('store.backToDashboard')}
+        ← {t('store.backToProducts')}
       </Link>
 
       <h1 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
@@ -959,7 +959,7 @@ export function ProductEditorPage() {
               : t('store.saveProduct')}
           </Button>
           <Link
-            to="/store"
+            to="/store/products"
             className="text-sm font-medium text-slate-600 hover:underline"
           >
             {t('common.cancel')}

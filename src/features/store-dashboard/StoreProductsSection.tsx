@@ -40,7 +40,13 @@ function ProductPrice({ variants }: { variants: ProductVariant[] }) {
   )
 }
 
-export function StoreProductsSection({ store }: { store: Store }) {
+export function StoreProductsSection({
+  store,
+  showHeading = true,
+}: {
+  store: Store
+  showHeading?: boolean
+}) {
   const { t, language } = useI18n()
   const [products, setProducts] = useState<ProductWithDetails[]>([])
   const [loading, setLoading] = useState(true)
@@ -69,25 +75,27 @@ export function StoreProductsSection({ store }: { store: Store }) {
   const locked = store.status === 'suspended'
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold text-slate-900">
-            {t('store.productsTitle')}
-          </h2>
-          <p className="mt-1 text-sm text-slate-600">
-            {t('store.productsSubtitle')}
-          </p>
+    <div className="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-sm sm:p-6">
+      {showHeading ? (
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-900">
+              {t('store.productsTitle')}
+            </h2>
+            <p className="mt-1 text-sm text-slate-600">
+              {t('store.productsSubtitle')}
+            </p>
+          </div>
+          {locked ? null : (
+            <Link
+              to="/store/products/new"
+              className="inline-flex items-center justify-center rounded-full bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-800"
+            >
+              {t('store.addProduct')}
+            </Link>
+          )}
         </div>
-        {locked ? null : (
-          <Link
-            to="/store/products/new"
-            className="inline-flex items-center justify-center rounded-xl bg-emerald-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-800"
-          >
-            {t('store.addProduct')}
-          </Link>
-        )}
-      </div>
+      ) : null}
 
       {locked ? (
         <p className="mt-4 rounded-xl bg-amber-50 px-3.5 py-2.5 text-sm text-amber-800">
@@ -113,7 +121,7 @@ export function StoreProductsSection({ store }: { store: Store }) {
           </button>
         </div>
       ) : products.length === 0 ? (
-        <div className="mt-5 rounded-xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-600">
+        <div className="mt-5 rounded-xl border border-dashed border-stone-300 px-4 py-6 text-sm text-slate-600">
           {t('store.productListEmpty')}
         </div>
       ) : (
@@ -129,17 +137,17 @@ export function StoreProductsSection({ store }: { store: Store }) {
             return (
               <li
                 key={product.id}
-                className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 p-3"
+                className="flex flex-wrap items-center gap-3 rounded-2xl border border-stone-200/80 p-3.5 transition-colors hover:border-emerald-200"
               >
                 {image ? (
                   <img
                     src={image.url}
                     alt=""
                     loading="lazy"
-                    className="size-16 rounded-lg border border-slate-200 object-cover"
+                    className="size-16 rounded-xl border border-stone-200 object-cover"
                   />
                 ) : (
-                  <div className="grid size-16 place-items-center rounded-lg bg-slate-100 text-lg font-semibold text-slate-400">
+                  <div className="grid size-16 place-items-center rounded-xl bg-stone-100 text-lg font-semibold text-stone-400">
                     {product.name.slice(0, 1).toUpperCase()}
                   </div>
                 )}
@@ -166,7 +174,7 @@ export function StoreProductsSection({ store }: { store: Store }) {
                 {locked ? null : (
                   <Link
                     to={`/store/products/${product.id}`}
-                    className="rounded-lg px-3 py-1.5 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
+                    className="rounded-full px-3 py-1.5 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-50"
                   >
                     {t('common.edit')}
                   </Link>

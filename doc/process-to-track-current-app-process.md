@@ -2,7 +2,7 @@
 
 Last updated: 2026-10-27
 Branch: `main`
-Latest feature commit: `7d7bf93 perf: split routes and harden runtime`
+Latest feature commit: `9442dff feat: add search autosuggestions`
 
 This is the working handoff document. Read it first when resuming the project.
 Update it at the end of every build step, commit, deployment, or blocker.
@@ -893,6 +893,21 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
 
 ### 2026-10-27
 
+- Committed the storefront redesign as `8713c2a feat: redesign storefront
+  experience`.
+- Added product search autosuggestions with a 250 ms debounce, thumbnail, store,
+  price, keyboard navigation, ARIA combobox/listbox behavior, and bilingual
+  states; committed as `9442dff feat: add search autosuggestions`.
+- Started the store-owner workspace refresh: added a dedicated responsive shell
+  outside the public storefront, a collapsible desktop sidebar, a mobile drawer,
+  persisted collapse state, store status/language/logout actions, and new
+  overview/products/settings routes.
+- Split the former single dashboard into overview, products, and settings pages;
+  restyled store products and aligned orders/statement/order-detail cards with
+  the workspace design.
+- Store-owner workspace changes are uncommitted. Passed typecheck, lint, 74
+  tests, Prettier, and production build; the build reports a 520 kB main-chunk
+  warning that should be reviewed in a later performance pass.
 - Started a storefront design refresh after owner feedback that the current UI
   was not good enough. Direction: modern marketplace, storefront first.
 - Redesigned the customer shell, home, product card/grid, category, search,
@@ -901,8 +916,8 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
   accents.
 - Added shared SVG icons and a mobile bottom navigation; kept bilingual copy,
   focus states, existing order/payment behavior, and 74 passing tests.
-- Design changes are uncommitted. Passed typecheck, lint, 74 tests, Prettier,
-  and production build after the refresh.
+- Passed typecheck, lint, 74 tests, Prettier, and production build after the
+  refresh.
 - Lighthouse mobile after the refresh: home 87/100/100/100. Fixed the mobile
   logo accessible name, footer contrast, and section subtitle contrast; the
   product collage is desktop-only so mobile LCP is the hero copy.

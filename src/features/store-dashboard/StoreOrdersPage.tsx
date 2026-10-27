@@ -110,7 +110,7 @@ export function StoreOrdersPage() {
         <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
           {t('storeOrders.title')}
         </h1>
-        <p className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
+        <p className="mt-4 rounded-2xl border border-dashed border-stone-300 bg-white p-6 text-sm text-slate-600">
           {t('store.onboardingTitle')}
         </p>
         <Link
@@ -125,29 +125,24 @@ export function StoreOrdersPage() {
 
   return (
     <section className="mx-auto max-w-5xl">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+          <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">
+            {t('storeNav.workspace')}
+          </p>
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
             {t('storeOrders.title')}
           </h1>
           <p className="mt-2 text-sm text-slate-600">
             {t('storeOrders.subtitle')}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            to="/store/statement"
-            className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
-          >
-            {t('store.statement')}
-          </Link>
-          <Link
-            to="/store"
-            className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
-          >
-            {t('storeOrders.backToDashboard')}
-          </Link>
-        </div>
+        <Link
+          to="/store/statement"
+          className="inline-flex items-center rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:border-emerald-200 hover:text-emerald-800"
+        >
+          {t('store.statement')}
+        </Link>
       </div>
 
       <div className="mt-5 flex flex-wrap gap-2">
@@ -160,7 +155,7 @@ export function StoreOrdersPage() {
               'rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
               activeTab === tab.key
                 ? 'bg-emerald-700 text-white'
-                : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50',
+                : 'border border-stone-200 bg-white text-slate-700 hover:border-emerald-200',
             ].join(' ')}
           >
             {t(tab.labelKey)}
@@ -186,11 +181,11 @@ export function StoreOrdersPage() {
           </button>
         </div>
       ) : orders.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
+        <div className="mt-6 rounded-2xl border border-dashed border-stone-300 bg-white p-6 text-sm text-slate-600">
           {t('storeOrders.empty')}
         </div>
       ) : visibleOrders.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
+        <div className="mt-6 rounded-2xl border border-dashed border-stone-300 bg-white p-6 text-sm text-slate-600">
           {t('storeOrders.emptyFiltered')}
         </div>
       ) : (
@@ -199,7 +194,7 @@ export function StoreOrdersPage() {
             <li key={order.id}>
               <Link
                 to={`/store/orders/${order.id}`}
-                className="block rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-emerald-300 hover:bg-emerald-50/30"
+                className="block rounded-2xl border border-stone-200/80 bg-white p-4 shadow-sm transition-colors hover:border-emerald-300 hover:bg-emerald-50/30"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">

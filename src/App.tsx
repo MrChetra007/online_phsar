@@ -70,6 +70,11 @@ const StoreDashboardPage = lazy(() =>
     default: module.StoreDashboardPage,
   })),
 )
+const StoreLayout = lazy(() =>
+  import('./features/store-dashboard/StoreLayout').then((module) => ({
+    default: module.StoreLayout,
+  })),
+)
 const StoreOrderDetailPage = lazy(() =>
   import('./features/store-dashboard/StoreOrderDetailPage').then((module) => ({
     default: module.StoreOrderDetailPage,
@@ -78,6 +83,16 @@ const StoreOrderDetailPage = lazy(() =>
 const StoreOrdersPage = lazy(() =>
   import('./features/store-dashboard/StoreOrdersPage').then((module) => ({
     default: module.StoreOrdersPage,
+  })),
+)
+const StoreProductsPage = lazy(() =>
+  import('./features/store-dashboard/StoreProductsPage').then((module) => ({
+    default: module.StoreProductsPage,
+  })),
+)
+const StoreSettingsPage = lazy(() =>
+  import('./features/store-dashboard/StoreSettingsPage').then((module) => ({
+    default: module.StoreSettingsPage,
   })),
 )
 const StoreStatementPage = lazy(() =>
@@ -149,20 +164,6 @@ function App() {
         <Route path="s/:slug" element={<PublicStorePage />} />
 
         <Route element={<RequireAuth />}>
-          <Route element={<RequireRole role="store_owner" />}>
-            <Route path="store" element={<StoreDashboardPage />} />
-            <Route path="store/orders" element={<StoreOrdersPage />} />
-            <Route
-              path="store/orders/:orderId"
-              element={<StoreOrderDetailPage />}
-            />
-            <Route path="store/statement" element={<StoreStatementPage />} />
-            <Route path="store/products/new" element={<ProductEditorPage />} />
-            <Route
-              path="store/products/:productId"
-              element={<ProductEditorPage />}
-            />
-          </Route>
           <Route element={<RequireRole role="super_admin" />}>
             <Route path="admin" element={<AdminPage />} />
             <Route path="admin/orders" element={<AdminOrdersPage />} />
@@ -182,6 +183,22 @@ function App() {
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />
+      </Route>
+
+      <Route element={<RequireAuth />}>
+        <Route element={<RequireRole role="store_owner" />}>
+          <Route path="store" element={<StoreLayout />}>
+            <Route index element={<StoreDashboardPage />} />
+            <Route path="orders" element={<StoreOrdersPage />} />
+            <Route path="orders/:orderId" element={<StoreOrderDetailPage />} />
+            <Route path="products" element={<StoreProductsPage />} />
+            <Route path="products/new" element={<ProductEditorPage />} />
+            <Route path="products/:productId" element={<ProductEditorPage />} />
+            <Route path="statement" element={<StoreStatementPage />} />
+            <Route path="settings" element={<StoreSettingsPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
+        </Route>
       </Route>
     </Routes>
   )

@@ -81,7 +81,7 @@ export function StoreStatementPage() {
         <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
           {t('storeStatement.title')}
         </h1>
-        <p className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
+        <p className="mt-4 rounded-2xl border border-dashed border-stone-300 bg-white p-6 text-sm text-slate-600">
           {t('store.onboardingTitle')}
         </p>
         <Link
@@ -103,29 +103,24 @@ export function StoreStatementPage() {
 
   return (
     <section className="mx-auto max-w-5xl">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+          <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">
+            {t('storeNav.workspace')}
+          </p>
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
             {t('storeStatement.title')}
           </h1>
           <p className="mt-2 text-sm text-slate-600">
             {t('storeStatement.subtitle')}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            to="/store/orders"
-            className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
-          >
-            {t('storeStatement.manageOrders')}
-          </Link>
-          <Link
-            to="/store"
-            className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
-          >
-            {t('storeStatement.backToDashboard')}
-          </Link>
-        </div>
+        <Link
+          to="/store/orders"
+          className="inline-flex items-center rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:border-emerald-200 hover:text-emerald-800"
+        >
+          {t('storeStatement.manageOrders')}
+        </Link>
       </div>
 
       {loading ? (
@@ -148,7 +143,7 @@ export function StoreStatementPage() {
       ) : (
         <>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-sm">
               <p className="text-sm font-medium text-slate-500">
                 {t('storeStatement.balance')}
               </p>
@@ -157,7 +152,7 @@ export function StoreStatementPage() {
               </p>
               <p className="mt-2 text-sm text-slate-600">{balanceHint}</p>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-sm">
               <p className="text-sm font-medium text-slate-500">
                 {t('storeStatement.codOwed')}
               </p>
@@ -170,7 +165,7 @@ export function StoreStatementPage() {
             </div>
           </div>
 
-          <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+          <div className="mt-8 rounded-2xl border border-stone-200/80 bg-white p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-slate-900">
               {t('storeStatement.ledger')}
             </h2>
@@ -221,7 +216,7 @@ export function StoreStatementPage() {
             )}
           </div>
 
-          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+          <div className="mt-6 rounded-2xl border border-stone-200/80 bg-white p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-slate-900">
               {t('storeStatement.settlements')}
             </h2>
@@ -235,7 +230,7 @@ export function StoreStatementPage() {
                 {settlements.map((settlement) => (
                   <li
                     key={settlement.id}
-                    className="rounded-xl border border-slate-200 p-3"
+                    className="rounded-xl border border-stone-200 p-3"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
