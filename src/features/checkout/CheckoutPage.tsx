@@ -80,7 +80,7 @@ export function CheckoutPage() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [failure, setFailure] = useState<FormFailure | null>(null)
   const [submitting, setSubmitting] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'khqr'>('cod')
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'khqr'>('khqr')
   const provinceChoices = useMemo(() => provinceOptions(language), [language])
 
   const cartId = cart?.id
@@ -164,7 +164,7 @@ export function CheckoutPage() {
 
   const store = loadState.store
   const settings = loadState.settings
-  const selectedPaymentMethod = settings.codEnabled ? paymentMethod : 'khqr'
+  const selectedPaymentMethod: 'cod' | 'khqr' = 'khqr'
   const blockedMessage = settings.maintenance
     ? getErrorMessage('MAINTENANCE', language)
     : null
@@ -420,76 +420,55 @@ export function CheckoutPage() {
             </div>
 
             <div className="mt-5 space-y-2.5">
-              <label
-                className={[
-                  'flex gap-3 rounded-2xl border-2 p-4 transition',
-                  selectedPaymentMethod === 'cod'
-                    ? 'border-emerald-600 bg-emerald-50/60'
-                    : 'border-stone-200 bg-white',
-                  settings.codEnabled
-                    ? 'cursor-pointer'
-                    : 'cursor-not-allowed opacity-60',
-                ].join(' ')}
+              <div
+                className="flex cursor-not-allowed select-none gap-3 rounded-2xl border-2 border-stone-200 bg-stone-100/70 p-4 opacity-60 transition"
+                aria-disabled="true"
               >
                 <input
                   type="radio"
                   name="paymentMethod"
                   value="cod"
-                  checked={selectedPaymentMethod === 'cod'}
-                  onChange={() => setPaymentMethod('cod')}
-                  disabled={!settings.codEnabled}
-                  className="mt-1 size-4 accent-emerald-600"
+                  checked={false}
+                  disabled
+                  readOnly
+                  aria-disabled="true"
+                  tabIndex={-1}
+                  className="mt-1 size-4 cursor-not-allowed accent-stone-400"
                 />
-                <span>
-                  <span
-                    className={[
-                      'block text-sm font-semibold',
-                      selectedPaymentMethod === 'cod'
-                        ? 'text-emerald-950'
-                        : 'text-slate-800',
-                    ].join(' ')}
-                  >
-                    {t('checkout.cod')}
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="block text-sm font-semibold text-slate-500">
+                      {t('checkout.cod')}
+                    </span>
+                    <span className="inline-flex items-center rounded-full bg-stone-200 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+                      ({t('checkout.comingSoon')})
+                    </span>
+                  </div>
+                  <span className="mt-1 block text-sm leading-relaxed text-slate-400">
+                    {t('checkout.codHint')}
                   </span>
-                  <span className="mt-1 block text-sm leading-relaxed text-slate-600">
-                    {settings.codEnabled
-                      ? t('checkout.codHint')
-                      : getErrorMessage('COD_DISABLED', language)}
-                  </span>
-                </span>
-              </label>
+                </div>
+              </div>
 
               <label
-                className={[
-                  'flex cursor-pointer gap-3 rounded-2xl border-2 p-4 transition',
-                  selectedPaymentMethod === 'khqr'
-                    ? 'border-emerald-600 bg-emerald-50/60'
-                    : 'border-stone-200 bg-white',
-                ].join(' ')}
+                className="flex cursor-pointer gap-3 rounded-2xl border-2 border-emerald-600 bg-emerald-50/60 p-4 transition"
               >
                 <input
                   type="radio"
                   name="paymentMethod"
                   value="khqr"
-                  checked={selectedPaymentMethod === 'khqr'}
+                  checked={true}
                   onChange={() => setPaymentMethod('khqr')}
                   className="mt-1 size-4 accent-emerald-600"
                 />
-                <span>
-                  <span
-                    className={[
-                      'block text-sm font-semibold',
-                      selectedPaymentMethod === 'khqr'
-                        ? 'text-emerald-950'
-                        : 'text-slate-800',
-                    ].join(' ')}
-                  >
+                <div className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold text-emerald-950">
                     {t('checkout.khqr')}
                   </span>
                   <span className="mt-1 block text-sm leading-relaxed text-slate-600">
                     {t('checkout.khqrHint')}
                   </span>
-                </span>
+                </div>
               </label>
             </div>
           </div>
