@@ -15,6 +15,7 @@ import { errorCodeFrom, getErrorMessage } from '../lib/errors'
 import { useI18n, type Language } from '../lib/i18n'
 import { formatMoney } from '../lib/money'
 import { isValidKhmerPhone } from '../lib/phone'
+import { provinceLabel } from '../lib/provinces'
 import type { OrderStatus, PaymentStatus, TrackedOrder } from '../lib/tracking'
 import type { TranslationKey } from '../lib/i18n/translations'
 
@@ -456,7 +457,7 @@ export function TrackingPage() {
                 <div>
                   <dt className="text-slate-500">{t('checkout.province')}</dt>
                   <dd className="mt-0.5 font-medium text-slate-900">
-                    {order.province}
+                    {provinceLabel(order.province, language)}
                   </dd>
                 </div>
                 <div>
@@ -544,7 +545,7 @@ export function TrackingPage() {
                 <div>
                   <dt className="text-slate-500">{t('checkout.province')}</dt>
                   <dd className="mt-0.5 font-medium text-slate-900">
-                    {order.province}
+                    {provinceLabel(order.province, language)}
                   </dd>
                 </div>
                 <div className="sm:col-span-2">

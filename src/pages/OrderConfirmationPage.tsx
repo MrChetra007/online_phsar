@@ -1,41 +1,28 @@
+import { useEffect, useMemo } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
-import { CheckIcon, StoreIcon } from '../components/icons'
-import type { OrderConfirmationState } from '../features/checkout/types'
+import { CheckIcon, DownloadIcon, StoreIcon } from '../components/icons'
 import { useI18n } from '../lib/i18n'
+import {
+  downloadInvoice,
+  downloadInvoiceAutomatically,
+  parseOrderInvoice,
+} from '../lib/invoice'
 import { formatMoney } from '../lib/money'
 
-function readConfirmation(value: unknown): OrderConfirmationState | null {
-  if (typeof value !== 'object' || value === null) return null
-
-  const state = value as Record<string, unknown>
-  if (
-    typeof state.orderCode !== 'string' ||
-    typeof state.storeName !== 'string' ||
-    typeof state.storeSlug !== 'string' ||
-    (state.paymentMethod !== 'cod' && state.paymentMethod !== 'khqr') ||
-    typeof state.subtotal !== 'number' ||
-    typeof state.deliveryFee !== 'number' ||
-    typeof state.totalAmount !== 'number'
-  ) {
-    return null
-  }
-
-  return {
-    orderCode: state.orderCode,
-    storeName: state.storeName,
-    storeSlug: state.storeSlug,
-    paymentMethod: state.paymentMethod,
-    subtotal: state.subtotal,
-    deliveryFee: state.deliveryFee,
-    totalAmount: state.totalAmount,
-  }
-}
-
 export function OrderConfirmationPage() {
-  const { t } = useI18n()
+  const { t, language } = useI18n()
   const { orderCode } = useParams<{ orderCode: string }>()
   const location = useLocation()
-  const confirmation = readConfirmation(location.state)
+  const confirmation = useMemo(
+    () => parseOrderInvoice(location.state),
+    [location.state],
+  )
+
+  useEffect(() => {
+    if (confirmation) {
+      downloadInvoiceAutomatically(confirmation, language, t)
+    }
+  }, [confirmation, language, t])
 
   if (!confirmation) {
     return (
@@ -152,13 +139,21 @@ export function OrderConfirmationPage() {
             </p>
           ) : null}
 
-          <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+          <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <Link
               to={`/track?code=${encodeURIComponent(confirmation.orderCode)}`}
               className="inline-flex items-center justify-center rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-800"
             >
               {t('order.track')}
             </Link>
+            <button
+              type="button"
+              onClick={() => downloadInvoice(confirmation, language, t)}
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-5 py-3 text-sm font-semibold text-emerald-800 transition-colors hover:bg-emerald-100"
+            >
+              <DownloadIcon className="size-4" />
+              {t('order.downloadInvoice')}
+            </button>
             <Link
               to="/"
               className="inline-flex items-center justify-center rounded-full border border-stone-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 transition-colors hover:bg-stone-50"
@@ -166,6 +161,9 @@ export function OrderConfirmationPage() {
               {t('order.continue')}
             </Link>
           </div>
+          <p className="mt-3 text-xs leading-relaxed text-slate-500">
+            {t('order.invoiceHint')}
+          </p>
         </div>
       </div>
     </section>

@@ -1,3 +1,4 @@
+import { parseOrderInvoice } from '../../lib/invoice'
 import type { KhqrPaymentState } from './types'
 
 const keyPrefix = 'kos.payment.'
@@ -29,6 +30,7 @@ export function parsePaymentState(value: unknown): KhqrPaymentState | null {
     return null
   }
 
+  const invoice = parseOrderInvoice(value.invoice)
   return {
     orderId: value.orderId,
     orderCode: value.orderCode,
@@ -37,6 +39,7 @@ export function parsePaymentState(value: unknown): KhqrPaymentState | null {
     customerPhone: value.customerPhone,
     totalAmount: value.totalAmount,
     qrExpiresAt: value.qrExpiresAt,
+    ...(invoice && invoice.orderCode === value.orderCode ? { invoice } : {}),
   }
 }
 

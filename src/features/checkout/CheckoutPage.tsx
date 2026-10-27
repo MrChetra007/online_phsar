@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   createOrder,
@@ -8,6 +8,7 @@ import {
 import { getActiveStoreBySlug, type PublicStore } from '../../api/stores'
 import { ErrorState } from '../../components/ErrorState'
 import { Input } from '../../components/Input'
+import { SearchSelect } from '../../components/SearchSelect'
 import { Skeleton } from '../../components/Skeleton'
 import { Textarea } from '../../components/Textarea'
 import {
@@ -20,8 +21,10 @@ import { useCart } from '../cart'
 import { clearOrderSource, getOrderSource } from '../../lib/attribution'
 import { errorCodeFrom, getErrorMessage } from '../../lib/errors'
 import { useI18n } from '../../lib/i18n'
+import type { OrderInvoice } from '../../lib/invoice'
 import { formatMoney } from '../../lib/money'
 import { isValidKhmerPhone } from '../../lib/phone'
+import { provinceOptions } from '../../lib/provinces'
 import { savePaymentState } from './paymentContext'
 import type { KhqrPaymentState, OrderConfirmationState } from './types'
 
@@ -78,6 +81,7 @@ export function CheckoutPage() {
   const [failure, setFailure] = useState<FormFailure | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'khqr'>('cod')
+  const provinceChoices = useMemo(() => provinceOptions(language), [language])
 
   const cartId = cart?.id
   const cartSlug = cart?.slug
@@ -237,6 +241,27 @@ export function CheckoutPage() {
         source: getOrderSource(),
       })
 
+      const invoice: OrderInvoice = {
+        orderCode: result.orderCode,
+        storeName: cart.name,
+        storeSlug: cart.slug,
+        customerName: values.name.trim(),
+        customerPhone: values.phone.trim(),
+        address: values.address.trim(),
+        province: values.province.trim(),
+        paymentMethod: result.paymentMethod,
+        subtotal: result.subtotal,
+        deliveryFee: result.deliveryFee,
+        totalAmount: result.totalAmount,
+        createdAt: new Date().toISOString(),
+        items: cart.items.map((item) => ({
+          name: item.productName,
+          variant: item.variantLabel === 'Default' ? null : item.variantLabel,
+          unitPrice: item.unitPrice,
+          quantity: item.quantity,
+        })),
+      }
+
       if (result.paymentMethod === 'khqr') {
         const payment: KhqrPaymentState = {
           orderId: result.orderId,
@@ -246,6 +271,7 @@ export function CheckoutPage() {
           customerPhone: values.phone.trim(),
           totalAmount: result.totalAmount,
           qrExpiresAt: result.qrExpiresAt,
+          invoice,
         }
 
         savePaymentState(payment)
@@ -258,15 +284,7 @@ export function CheckoutPage() {
         return
       }
 
-      const confirmation: OrderConfirmationState = {
-        orderCode: result.orderCode,
-        storeName: cart.name,
-        storeSlug: cart.slug,
-        paymentMethod: result.paymentMethod,
-        subtotal: result.subtotal,
-        deliveryFee: result.deliveryFee,
-        totalAmount: result.totalAmount,
-      }
+      const confirmation: OrderConfirmationState = invoice
 
       clearCart()
       clearOrderSource()
@@ -378,16 +396,14 @@ export function CheckoutPage() {
                 rows={3}
                 required
               />
-              <Input
+              <SearchSelect
                 label={t('checkout.province')}
                 value={values.province}
-                onChange={(event) =>
-                  updateValue('province', event.target.value)
-                }
+                options={provinceChoices}
+                onChange={(value) => updateValue('province', value)}
                 placeholder={t('checkout.provincePlaceholder')}
+                emptyText={t('checkout.provinceEmpty')}
                 error={errors.province}
-                autoComplete="address-level1"
-                maxLength={100}
                 required
               />
             </div>

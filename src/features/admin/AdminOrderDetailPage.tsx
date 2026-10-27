@@ -25,6 +25,7 @@ import { errorCodeFrom, getErrorMessage } from '../../lib/errors'
 import { useI18n } from '../../lib/i18n'
 import { formatMoney } from '../../lib/money'
 import { orderStatusLabels } from '../../lib/orderStatus'
+import { provinceLabel } from '../../lib/provinces'
 import { useToast } from '../toast'
 
 const adminTransitions: Record<AdminOrderStatus, AdminOrderStatus[]> = {
@@ -406,7 +407,7 @@ export function AdminOrderDetailPage() {
               <div>
                 <dt className="text-slate-500">{t('storeOrders.province')}</dt>
                 <dd className="mt-0.5 font-medium text-slate-900">
-                  {order.province}
+                  {provinceLabel(order.province, language)}
                 </dd>
               </div>
               <div className="sm:col-span-2">

@@ -10,9 +10,10 @@ import { ArrowRightIcon, StoreIcon, TruckIcon } from '../components/icons'
 import { rememberStoreLinkSource } from '../lib/attribution'
 import { useI18n } from '../lib/i18n'
 import { formatMoney } from '../lib/money'
+import { provinceLabel } from '../lib/provinces'
 
 export function PublicStorePage() {
-  const { t } = useI18n()
+  const { t, language } = useI18n()
   const { slug } = useParams<{ slug: string }>()
 
   const [store, setStore] = useState<PublicStore | null>(null)
@@ -172,7 +173,7 @@ export function PublicStorePage() {
               </h1>
               {store.province ? (
                 <p className="mt-2 text-sm text-emerald-50/70">
-                  {store.province}
+                  {provinceLabel(store.province, language)}
                 </p>
               ) : null}
             </div>

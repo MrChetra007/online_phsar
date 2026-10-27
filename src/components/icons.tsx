@@ -267,6 +267,24 @@ export function ExternalLinkIcon({
   )
 }
 
+export function ChevronDownIcon({ className = 'size-5', ...props }: IconProps) {
+  return (
+    <svg {...iconProps(className, props)}>
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  )
+}
+
+export function DownloadIcon({ className = 'size-5', ...props }: IconProps) {
+  return (
+    <svg {...iconProps(className, props)}>
+      <path d="M12 4v11" />
+      <path d="m7 10 5 5 5-5" />
+      <path d="M5 20h14" />
+    </svg>
+  )
+}
+
 export function LogOutIcon({ className = 'size-5', ...props }: IconProps) {
   return (
     <svg {...iconProps(className, props)}>

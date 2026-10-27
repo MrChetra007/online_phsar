@@ -7,10 +7,16 @@ import {
   type PaymentCheck,
 } from '../api/payments'
 import { reopenExpiredOrder } from '../api/tracking'
-import { CheckIcon, ShieldCheckIcon, StoreIcon } from '../components/icons'
+import {
+  CheckIcon,
+  DownloadIcon,
+  ShieldCheckIcon,
+  StoreIcon,
+} from '../components/icons'
 import { errorCodeFrom, getErrorMessage } from '../lib/errors'
 import { useI18n } from '../lib/i18n'
 import type { TranslationKey } from '../lib/i18n/translations'
+import { downloadInvoice, downloadInvoiceAutomatically } from '../lib/invoice'
 import { formatMoney } from '../lib/money'
 import {
   clearPaymentState,
@@ -61,6 +67,12 @@ export function PaymentPage() {
   const [reopening, setReopening] = useState(false)
   const started = useRef(false)
   const checking = useRef(false)
+
+  useEffect(() => {
+    if (status === 'paid' && context?.invoice) {
+      downloadInvoiceAutomatically(context.invoice, language, t)
+    }
+  }, [status, context, language, t])
 
   const requestQr = useCallback(async () => {
     if (!context) return
@@ -312,13 +324,23 @@ export function PaymentPage() {
           <p className="mt-4 select-all break-all rounded-2xl bg-white/60 px-4 py-3 font-mono text-xl font-bold tracking-wider text-emerald-950">
             {context.orderCode}
           </p>
-          <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
+          <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row sm:flex-wrap">
             <Link
               to={trackLink}
               className="inline-flex items-center justify-center rounded-full bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-800"
             >
               {t('order.track')}
             </Link>
+            {context.invoice ? (
+              <button
+                type="button"
+                onClick={() => downloadInvoice(context.invoice!, language, t)}
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-emerald-300 bg-white px-5 py-2.5 text-sm font-semibold text-emerald-900 transition-colors hover:bg-emerald-100"
+              >
+                <DownloadIcon className="size-4" />
+                {t('order.downloadInvoice')}
+              </button>
+            ) : null}
             <Link
               to="/"
               className="inline-flex items-center justify-center rounded-full border border-emerald-300 bg-white px-5 py-2.5 text-sm font-semibold text-emerald-900 transition-colors hover:bg-emerald-100"

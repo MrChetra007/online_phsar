@@ -1,14 +1,6 @@
-import type { Database } from '../../lib/database.types'
+import type { OrderInvoice } from '../../lib/invoice'
 
-export type OrderConfirmationState = {
-  orderCode: string
-  storeName: string
-  storeSlug: string
-  paymentMethod: Database['public']['Enums']['payment_method']
-  subtotal: number
-  deliveryFee: number
-  totalAmount: number
-}
+export type OrderConfirmationState = OrderInvoice
 
 export type KhqrPaymentState = {
   orderId: string
@@ -18,4 +10,5 @@ export type KhqrPaymentState = {
   customerPhone: string
   totalAmount: number
   qrExpiresAt: string | null
+  invoice?: OrderInvoice
 }

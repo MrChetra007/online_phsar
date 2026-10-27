@@ -19,6 +19,7 @@ import { useI18n } from '../../lib/i18n'
 import type { TranslationKey } from '../../lib/i18n/translations'
 import { formatMoney } from '../../lib/money'
 import { orderStatusLabels } from '../../lib/orderStatus'
+import { provinceLabel } from '../../lib/provinces'
 import {
   OrderStatusBadge,
   PaymentStatusBadge,
@@ -386,7 +387,7 @@ export function StoreOrderDetailPage() {
               <div>
                 <dt className="text-slate-500">{t('storeOrders.province')}</dt>
                 <dd className="mt-0.5 font-medium text-slate-900">
-                  {order.province}
+                  {provinceLabel(order.province, language)}
                 </dd>
               </div>
               <div>
