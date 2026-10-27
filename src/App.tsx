@@ -130,6 +130,11 @@ const PaymentPage = lazy(() =>
     default: module.PaymentPage,
   })),
 )
+const PrivacyPage = lazy(() =>
+  import('./pages/PrivacyPage').then((module) => ({
+    default: module.PrivacyPage,
+  })),
+)
 const ProductPage = lazy(() =>
   import('./pages/ProductPage').then((module) => ({
     default: module.ProductPage,
@@ -150,6 +155,11 @@ const TrackingPage = lazy(() =>
     default: module.TrackingPage,
   })),
 )
+const TermsPage = lazy(() =>
+  import('./pages/TermsPage').then((module) => ({
+    default: module.TermsPage,
+  })),
+)
 
 function App() {
   return (
@@ -167,6 +177,8 @@ function App() {
         <Route path="c/:slug" element={<CategoryPage />} />
         <Route path="p/:productId" element={<ProductPage />} />
         <Route path="s/:slug" element={<PublicStorePage />} />
+        <Route path="privacy" element={<PrivacyPage />} />
+        <Route path="terms" element={<TermsPage />} />
 
         <Route path="*" element={<NotFoundPage />} />
       </Route>

@@ -193,7 +193,7 @@ export function AppShell() {
 
       <footer className="border-t border-stone-200 bg-white">
         <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="sm:col-span-2">
+          <div className="sm:col-span-2 lg:col-span-1">
             <Link
               to="/"
               className="inline-flex items-center gap-2.5 text-slate-900"
@@ -274,14 +274,40 @@ export function AppShell() {
               )}
             </ul>
           </div>
+
+          <div>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+              {t('footer.legal')}
+            </h2>
+            <ul className="mt-3 space-y-2 text-sm text-slate-600">
+              <li>
+                <Link to="/privacy" className="hover:text-emerald-700">
+                  {t('footer.privacy')}
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms" className="hover:text-emerald-700">
+                  {t('footer.terms')}
+                </Link>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div className="border-t border-stone-100">
-          <div className="mx-auto flex w-full max-w-6xl flex-col gap-1 px-4 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-            <p>{t('footer.rights')}</p>
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
             <p>
-              Â© {currentYear} {t('app.name')}.
+              © {currentYear} {t('app.name')}. {t('footer.rights')}
             </p>
+            <div className="flex items-center gap-4">
+              <Link to="/privacy" className="transition hover:text-emerald-700">
+                {t('footer.privacy')}
+              </Link>
+              <span className="text-stone-300">•</span>
+              <Link to="/terms" className="transition hover:text-emerald-700">
+                {t('footer.terms')}
+              </Link>
+            </div>
           </div>
         </div>
       </footer>
