@@ -164,7 +164,7 @@ export function CheckoutPage() {
 
   const store = loadState.store
   const settings = loadState.settings
-  const selectedPaymentMethod: 'cod' | 'khqr' = 'khqr'
+  const selectedPaymentMethod: 'cod' | 'khqr' = paymentMethod
   const blockedMessage = settings.maintenance
     ? getErrorMessage('MAINTENANCE', language)
     : null
