@@ -7,6 +7,8 @@ import { useCart } from '../features/cart'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { LoadingState } from './LoadingState'
 import { SearchBar } from './SearchBar'
+import iconImg from '../assets/icon.jpg'
+import brandImg from '../assets/brand.jpg'
 import {
   ArrowRightIcon,
   CartIcon,
@@ -61,17 +63,21 @@ export function AppShell() {
             <Link
               to="/"
               aria-label={t('app.name')}
-              className="flex shrink-0 items-center gap-2.5 text-slate-900"
+              className="flex shrink-0 items-center"
             >
-              <span
+              {/* Icon mark — always visible */}
+              <img
+                src={iconImg}
+                alt=""
                 aria-hidden="true"
-                className="grid size-10 place-items-center rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-900 text-base font-bold text-white shadow-lg shadow-emerald-900/20"
-              >
-                K
-              </span>
-              <span className="hidden text-base font-semibold tracking-tight sm:block">
-                {t('app.name')}
-              </span>
+                className="size-10 rounded-xl object-cover shadow-md shadow-emerald-900/20 sm:hidden"
+              />
+              {/* Full wordmark — visible on sm+ */}
+              <img
+                src={brandImg}
+                alt={t('app.name')}
+                className="hidden h-10 w-auto object-contain sm:block"
+              />
             </Link>
 
             {!isHome ? (
@@ -196,17 +202,13 @@ export function AppShell() {
           <div className="sm:col-span-2 lg:col-span-1">
             <Link
               to="/"
-              className="inline-flex items-center gap-2.5 text-slate-900"
+              className="inline-flex items-center"
             >
-              <span
-                aria-hidden="true"
-                className="grid size-10 place-items-center rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-900 text-base font-bold text-white"
-              >
-                K
-              </span>
-              <span className="text-base font-semibold tracking-tight">
-                {t('app.name')}
-              </span>
+              <img
+                src={brandImg}
+                alt={t('app.name')}
+                className="h-10 w-auto object-contain"
+              />
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-500">
               {t('footer.tagline')}
