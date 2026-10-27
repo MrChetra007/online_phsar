@@ -13,6 +13,7 @@ import {
   ShieldCheckIcon,
   StoreIcon,
 } from '../components/icons'
+import { KhqrCard } from '../components/KhqrCard'
 import { errorCodeFrom, getErrorMessage } from '../lib/errors'
 import { useI18n } from '../lib/i18n'
 import type { TranslationKey } from '../lib/i18n/translations'
@@ -455,23 +456,13 @@ export function PaymentPage() {
           ) : (
             <>
               {payment ? (
-                <div className="rounded-3xl border border-stone-200/80 bg-white p-4">
-                  <div className="relative mx-auto w-fit">
-                    <img
-                      src={payment.qrImageUrl}
-                      alt={t('payment.qrAlt')}
-                      className={[
-                        'mx-auto size-64 max-w-full rounded-2xl',
-                        isExpired ? 'opacity-30' : '',
-                      ].join(' ')}
-                    />
-                    {isExpired ? (
-                      <span className="absolute inset-0 grid place-items-center rounded-2xl bg-white/60 text-center text-sm font-semibold text-slate-900">
-                        {t('payment.expiredShort')}
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
+                <KhqrCard
+                  merchantName={context.storeName}
+                  amount={payment.amountCents / 100}
+                  currency="USD"
+                  qrData={payment.qrString}
+                  isExpired={isExpired}
+                />
               ) : null}
 
               <div className="mt-4 text-center">
