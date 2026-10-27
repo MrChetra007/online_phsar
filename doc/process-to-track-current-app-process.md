@@ -2,7 +2,7 @@
 
 Last updated: 2026-10-27
 Branch: `main`
-Latest feature commit: `7edfeac feat: add store workspace sidebar`
+Latest feature commit: `c02acd5 feat: add admin workspace sidebar`
 
 This is the working handoff document. Read it first when resuming the project.
 Update it at the end of every build step, commit, deployment, or blocker.
@@ -898,6 +898,12 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
 - Added product search autosuggestions with a 250 ms debounce, thumbnail, store,
   price, keyboard navigation, ARIA combobox/listbox behavior, and bilingual
   states; committed as `9442dff feat: add search autosuggestions`.
+- Redesigned login and signup around a shared `AuthShell`: dark brand panel with
+  workspace messaging and three feature highlights, plus a white form card.
+  Added bilingual auth workspace copy without changing form validation or auth
+  behavior.
+- Auth redesign is uncommitted. Passed typecheck, lint, 74 tests, Prettier, and
+  production build; the main-chunk warning remains.
 - Added a dedicated responsive admin workspace outside the public shell with a
   collapsible desktop sidebar persisted as `kos.adminSidebarCollapsed`, mobile
   drawer, admin identity card, super-admin badge, storefront shortcut, language,

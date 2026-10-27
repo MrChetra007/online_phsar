@@ -7,6 +7,7 @@ import { LoadingState } from '../../components/LoadingState'
 import { authErrorKey } from '../../lib/authErrors'
 import { useI18n, type TranslationKey } from '../../lib/i18n'
 import { homeForRole } from '../../lib/roles'
+import { AuthShell } from './AuthShell'
 import { useAuth } from './context'
 
 export function SignUpPage() {
@@ -92,87 +93,82 @@ export function SignUpPage() {
   }
 
   return (
-    <section className="mx-auto w-full max-w-md">
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <h1 className="text-2xl font-bold text-slate-900">
-          {t('auth.signupTitle')}
-        </h1>
-        <p className="mt-2 text-sm text-slate-600">
-          {t('auth.signupSubtitle')}
-        </p>
-
-        {noticeKey ? (
-          <p
-            role="status"
-            className="mt-4 rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800"
-          >
-            {t(noticeKey)}
-          </p>
-        ) : null}
-
-        <form className="mt-6 space-y-4" onSubmit={handleSubmit} noValidate>
-          <Input
-            label={t('auth.fullName')}
-            type="text"
-            name="fullName"
-            autoComplete="name"
-            value={fullName}
-            onChange={(event) => setFullName(event.target.value)}
-            required
-          />
-          <Input
-            label={t('auth.email')}
-            type="email"
-            name="email"
-            autoComplete="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-          />
-          <Input
-            label={t('auth.password')}
-            type="password"
-            name="password"
-            autoComplete="new-password"
-            hint={t('auth.passwordHint')}
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-          />
-          <Input
-            label={t('auth.confirmPassword')}
-            type="password"
-            name="confirmPassword"
-            autoComplete="new-password"
-            value={confirmPassword}
-            onChange={(event) => setConfirmPassword(event.target.value)}
-            required
-          />
-
-          {errorKey ? (
-            <p
-              role="alert"
-              className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700"
-            >
-              {t(errorKey)}
-            </p>
-          ) : null}
-
-          <Button type="submit" className="w-full" disabled={submitting}>
-            {submitting ? t('common.loading') : t('auth.signupAction')}
-          </Button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-slate-600">
+    <AuthShell
+      title={t('auth.signupTitle')}
+      subtitle={t('auth.signupSubtitle')}
+      footer={
+        <p className="text-center text-sm text-slate-600">
           {t('auth.haveAccount')}{' '}
           <Link
             to="/login"
-            className="font-medium text-emerald-700 hover:underline"
+            className="font-semibold text-emerald-700 hover:underline"
           >
             {t('nav.login')}
           </Link>
         </p>
-      </div>
-    </section>
+      }
+    >
+      {noticeKey ? (
+        <p
+          role="status"
+          className="mb-4 rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800"
+        >
+          {t(noticeKey)}
+        </p>
+      ) : null}
+
+      <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+        <Input
+          label={t('auth.fullName')}
+          type="text"
+          name="fullName"
+          autoComplete="name"
+          value={fullName}
+          onChange={(event) => setFullName(event.target.value)}
+          required
+        />
+        <Input
+          label={t('auth.email')}
+          type="email"
+          name="email"
+          autoComplete="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          required
+        />
+        <Input
+          label={t('auth.password')}
+          type="password"
+          name="password"
+          autoComplete="new-password"
+          hint={t('auth.passwordHint')}
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          required
+        />
+        <Input
+          label={t('auth.confirmPassword')}
+          type="password"
+          name="confirmPassword"
+          autoComplete="new-password"
+          value={confirmPassword}
+          onChange={(event) => setConfirmPassword(event.target.value)}
+          required
+        />
+
+        {errorKey ? (
+          <p
+            role="alert"
+            className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700"
+          >
+            {t(errorKey)}
+          </p>
+        ) : null}
+
+        <Button type="submit" className="w-full" disabled={submitting}>
+          {submitting ? t('common.loading') : t('auth.signupAction')}
+        </Button>
+      </form>
+    </AuthShell>
   )
 }
