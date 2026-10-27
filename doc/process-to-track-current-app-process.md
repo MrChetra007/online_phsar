@@ -2,7 +2,7 @@
 
 Last updated: 2026-10-27
 Branch: `main`
-Latest commit: `7d7bf93 perf: split routes and harden runtime`
+Latest feature commit: `7d7bf93 perf: split routes and harden runtime`
 
 This is the working handoff document. Read it first when resuming the project.
 Update it at the end of every build step, commit, deployment, or blocker.
