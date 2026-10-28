@@ -52,6 +52,87 @@ type VariantDraft = {
   isActive: boolean
 }
 
+type OptionValueDraft = {
+  key: string
+  label: string
+}
+
+type OptionGroupDraft = {
+  key: string
+  name: string
+  values: OptionValueDraft[]
+}
+
+const optionPresets = {
+  size: { nameKey: 'store.optionsPresetSize', values: ['S', 'M', 'L', 'XL'] },
+  color: {
+    nameKey: 'store.optionsPresetColor',
+    values: ['Black', 'White', 'Red', 'Blue'],
+  },
+  custom: { nameKey: null, values: [] as string[] },
+} as const
+
+function combinationLabels(groups: OptionGroupDraft[]): string[] {
+  const active = groups
+    .map((group) =>
+      group.values
+        .map((value) => value.label.trim())
+        .filter((label) => label.length > 0),
+    )
+    .filter((values) => values.length > 0)
+
+  if (active.length === 0) return []
+
+  let combinations: string[][] = [[]]
+  for (const values of active) {
+    combinations = combinations.flatMap((combination) =>
+      values.map((value) => [...combination, value]),
+    )
+  }
+
+  return combinations.map((combination) => combination.join(' / '))
+}
+
+function splitLabel(label: string): string[] {
+  return label
+    .split('/')
+    .map((part) => part.trim().toLowerCase())
+    .filter((part) => part.length > 0)
+}
+
+function mergeCombinationVariants(
+  labels: string[],
+  current: VariantDraft[],
+): VariantDraft[] {
+  const byLabel = new Map(
+    current.map((variant) => [variant.label.trim().toLowerCase(), variant]),
+  )
+  const existing = current.map((variant) => ({
+    variant,
+    parts: splitLabel(variant.label),
+  }))
+
+  return labels.map((label) => {
+    const exact = byLabel.get(label.trim().toLowerCase())
+    if (exact) return { ...exact, label }
+
+    const parts = splitLabel(label)
+    let matched: VariantDraft | null = null
+    let matchedScore = 0
+
+    for (const entry of existing) {
+      if (entry.parts.length === 0) continue
+      if (!entry.parts.every((part) => parts.includes(part))) continue
+      if (entry.parts.length > matchedScore) {
+        matched = entry.variant
+        matchedScore = entry.parts.length
+      }
+    }
+
+    return matched ? { ...matched, label } : blankVariant(label)
+  })
+}
+
 type PendingImage = {
   key: string
   file: File
@@ -135,6 +216,11 @@ export function ProductEditorPage() {
   const [description, setDescription] = useState('')
   const [status, setStatus] = useState<ProductStatus>('draft')
   const [variants, setVariants] = useState<VariantDraft[]>([])
+  const [optionGroups, setOptionGroups] = useState<OptionGroupDraft[]>([])
+  const [optionValueInputs, setOptionValueInputs] = useState<
+    Record<string, string>
+  >({})
+  const [optionsError, setOptionsError] = useState<string | null>(null)
   const [images, setImages] = useState<ProductImage[]>([])
   const [pendingImages, setPendingImages] = useState<PendingImage[]>([])
   const [errors, setErrors] = useState<FormErrors>(emptyErrors)
@@ -202,6 +288,9 @@ export function ProductEditorPage() {
           setDescription('')
           setStatus('draft')
           setVariants([blankVariant(defaultVariantLabelRef.current)])
+          setOptionGroups([])
+          setOptionValueInputs({})
+          setOptionsError(null)
           setImages([])
           setPendingImages([])
           setErrors(emptyErrors())
@@ -289,6 +378,105 @@ export function ProductEditorPage() {
   function removeVariant(key: string) {
     setVariants((current) =>
       current.filter((variant) => variant.key !== key || variant.id),
+    )
+  }
+
+  function applyOptions(next: OptionGroupDraft[]): boolean {
+    const labels = combinationLabels(next)
+
+    if (labels.length > 20) {
+      setOptionsError(t('store.optionsLimit'))
+      return false
+    }
+
+    setOptionsError(null)
+    setOptionGroups(next)
+
+    if (labels.length === 0) return true
+
+    setVariants((current) => mergeCombinationVariants(labels, current))
+    setErrors((current) => ({
+      ...current,
+      variants: undefined,
+      activeVariants: undefined,
+    }))
+    return true
+  }
+
+  function addOptionGroup(kind: keyof typeof optionPresets) {
+    if (optionGroups.length >= 3) return
+    const preset = optionPresets[kind]
+
+    applyOptions([
+      ...optionGroups,
+      {
+        key: crypto.randomUUID(),
+        name: preset.nameKey ? t(preset.nameKey) : '',
+        values: preset.values.map((label) => ({
+          key: crypto.randomUUID(),
+          label,
+        })),
+      },
+    ])
+  }
+
+  function renameOptionGroup(key: string, name: string) {
+    setOptionGroups((current) =>
+      current.map((group) => (group.key === key ? { ...group, name } : group)),
+    )
+  }
+
+  function removeOptionGroup(key: string) {
+    applyOptions(optionGroups.filter((group) => group.key !== key))
+    setOptionValueInputs((current) => {
+      const next = { ...current }
+      delete next[key]
+      return next
+    })
+  }
+
+  function addOptionValue(groupKey: string) {
+    const value = (optionValueInputs[groupKey] ?? '').trim()
+    if (!value) return
+
+    const group = optionGroups.find((entry) => entry.key === groupKey)
+    if (!group) return
+    if (
+      group.values.some(
+        (entry) => entry.label.trim().toLowerCase() === value.toLowerCase(),
+      )
+    ) {
+      return
+    }
+
+    const applied = applyOptions(
+      optionGroups.map((entry) =>
+        entry.key === groupKey
+          ? {
+              ...entry,
+              values: [
+                ...entry.values,
+                { key: crypto.randomUUID(), label: value },
+              ],
+            }
+          : entry,
+      ),
+    )
+    if (applied) {
+      setOptionValueInputs((current) => ({ ...current, [groupKey]: '' }))
+    }
+  }
+
+  function removeOptionValue(groupKey: string, valueKey: string) {
+    applyOptions(
+      optionGroups.map((entry) =>
+        entry.key === groupKey
+          ? {
+              ...entry,
+              values: entry.values.filter((value) => value.key !== valueKey),
+            }
+          : entry,
+      ),
     )
   }
 
@@ -654,6 +842,168 @@ export function ProductEditorPage() {
             </Select>
           </div>
         </div>
+
+        {isNew ? (
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900">
+                  {t('store.options')}
+                </h2>
+                <p className="mt-1 text-sm text-slate-600">
+                  {t('store.optionsHint')}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => addOptionGroup('size')}
+                disabled={locked || saving || optionGroups.length >= 3}
+              >
+                + {t('store.optionsPresetSize')}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => addOptionGroup('color')}
+                disabled={locked || saving || optionGroups.length >= 3}
+              >
+                + {t('store.optionsPresetColor')}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => addOptionGroup('custom')}
+                disabled={locked || saving || optionGroups.length >= 3}
+              >
+                + {t('store.optionsPresetCustom')}
+              </Button>
+            </div>
+
+            {optionsError ? (
+              <p
+                role="alert"
+                className="mt-3 rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700"
+              >
+                {optionsError}
+              </p>
+            ) : null}
+
+            {optionGroups.length === 0 ? (
+              <p className="mt-3 text-sm text-slate-500">
+                {t('store.optionsEmpty')}
+              </p>
+            ) : null}
+
+            <div className="mt-4 space-y-3">
+              {optionGroups.map((group) => (
+                <div
+                  key={group.key}
+                  className="rounded-xl border border-slate-200 p-3.5"
+                >
+                  <div className="flex items-start gap-2">
+                    <div className="min-w-0 flex-1">
+                      <Input
+                        label={t('store.optionsGroupName')}
+                        name={`option-name-${group.key}`}
+                        value={group.name}
+                        onChange={(event) =>
+                          renameOptionGroup(group.key, event.target.value)
+                        }
+                        placeholder={t('store.optionsGroupNamePlaceholder')}
+                        maxLength={40}
+                        disabled={locked || saving}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeOptionGroup(group.key)}
+                      disabled={locked || saving}
+                      className="mt-7 shrink-0 text-sm font-medium text-red-700 hover:underline disabled:opacity-50"
+                    >
+                      {t('store.optionsRemoveGroup')}
+                    </button>
+                  </div>
+
+                  <p className="mt-3 text-sm font-medium text-slate-700">
+                    {t('store.optionsValues')}
+                  </p>
+
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {group.values.map((value) => (
+                      <span
+                        key={value.key}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-sm font-medium text-emerald-800"
+                      >
+                        {value.label}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeOptionValue(group.key, value.key)
+                          }
+                          disabled={locked || saving}
+                          aria-label={t('store.optionsRemoveValue')}
+                          className="grid size-4 place-items-center rounded-full text-emerald-700 hover:bg-emerald-200 disabled:opacity-50"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                    {group.values.length === 0 ? (
+                      <span className="text-sm text-slate-500">
+                        {t('store.optionsNoValues')}
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-2 flex gap-2">
+                    <input
+                      value={optionValueInputs[group.key] ?? ''}
+                      onChange={(event) =>
+                        setOptionValueInputs((current) => ({
+                          ...current,
+                          [group.key]: event.target.value,
+                        }))
+                      }
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                          event.preventDefault()
+                          addOptionValue(group.key)
+                        }
+                      }}
+                      placeholder={t('store.optionsValuePlaceholder')}
+                      maxLength={40}
+                      disabled={locked || saving}
+                      className="block w-full rounded-2xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-100/70"
+                    />
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => addOptionValue(group.key)}
+                      disabled={
+                        locked ||
+                        saving ||
+                        (optionValueInputs[group.key] ?? '').trim().length === 0
+                      }
+                    >
+                      {t('store.optionsAddValue')}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {combinationLabels(optionGroups).length > 0 ? (
+              <p className="mt-3 text-sm text-emerald-700">
+                {combinationLabels(optionGroups).length} / 20{' '}
+                {t('store.optionsCombinations')}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">

@@ -84,7 +84,9 @@ export async function createStore(
       province: input.province || null,
       delivery_fee_local: input.deliveryFeeLocal,
       delivery_fee_other: input.deliveryFeeOther,
-    })
+      facebook_url: input.facebookUrl || null,
+      telegram_username: input.telegramUsername || null,
+    } as any)
     .select('*')
     .single()
 
@@ -186,4 +188,17 @@ export async function createTelegramLinkCode(storeId: string): Promise<string> {
   }
 
   return data
+}
+
+export async function getStoreTelegramChatId(
+  storeId: string,
+): Promise<number | null> {
+  const { data, error } = await supabase
+    .from('store_private')
+    .select('telegram_chat_id')
+    .eq('store_id', storeId)
+    .maybeSingle()
+
+  if (error) throw error
+  return data?.telegram_chat_id ?? null
 }

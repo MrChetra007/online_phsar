@@ -20,11 +20,27 @@ const invalidText = [
   '<i>This code is invalid or expired. Generate a new code in your store dashboard.</i>',
 ].join('\n')
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+}
+
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
+}
+
+function botUsername(): string | null {
+  const raw =
+    Deno.env.get('VITE_TELEGRAM_BOT_USERNAME') ??
+    Deno.env.get('TELEGRAM_BOT_USERNAME') ??
+    ''
+  const username = raw.trim().replace(/^@/, '')
+  return username.length > 0 ? username : null
 }
 
 function extractCode(text: string): string | null {
@@ -43,6 +59,14 @@ function isHelpRequest(text: string): boolean {
 }
 
 Deno.serve(async (request) => {
+  if (request.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  if (request.method === 'GET') {
+    return json({ ok: true, bot_username: botUsername() })
+  }
+
   if (request.method !== 'POST') {
     return json({ ok: false, reason: 'method_not_allowed' }, 405)
   }

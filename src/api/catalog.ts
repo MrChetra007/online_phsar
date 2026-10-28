@@ -5,11 +5,21 @@ import { supabase } from './client'
 type Product = Database['public']['Tables']['products']['Row']
 type ProductVariant = Database['public']['Tables']['product_variants']['Row']
 type ProductImage = Database['public']['Tables']['product_images']['Row']
+type ProductOptionGroup =
+  Database['public']['Tables']['product_option_groups']['Row']
+type ProductOption = Database['public']['Tables']['product_options']['Row']
 
 export type PublicCategory = {
   name_km: string
   name_en: string
   slug: string
+}
+
+export type PublicOptionGroup = Pick<
+  ProductOptionGroup,
+  'id' | 'name_en' | 'name_km' | 'sort_order'
+> & {
+  options: Pick<ProductOption, 'id' | 'value_en' | 'value_km' | 'sort_order'>[]
 }
 
 export type PublicProduct = Pick<
@@ -23,6 +33,7 @@ export type PublicProduct = Pick<
   images: Pick<ProductImage, 'id' | 'url' | 'sort_order'>[]
   category: PublicCategory | null
   store: { name: string; slug: string } | null
+  optionGroups: PublicOptionGroup[]
 }
 
 type PublicProductRow = PublicProduct & {
@@ -30,7 +41,12 @@ type PublicProductRow = PublicProduct & {
   product_images: PublicProduct['images'] | null
   categories: PublicCategory | null
   stores: PublicProduct['store']
-}
+  product_option_groups?:
+    | (PublicOptionGroup & {
+        product_options: PublicOptionGroup['options'] | null
+      })[]
+    | null
+} | any
 
 type ListPublicProductsOptions = {
   storeId?: string
@@ -61,9 +77,26 @@ type ProductSuggestionRow = {
 }
 
 const PUBLIC_PRODUCT_SELECT =
-  'id, store_id, name, description, category_id, created_at, categories(name_km, name_en, slug), stores(name, slug), product_variants(id, label, price, stock, is_active, created_at), product_images(id, url, sort_order)'
+  'id, store_id, name, description, category_id, created_at, categories(name_km, name_en, slug), stores(name, slug), product_variants(id, label, price, stock, is_active, created_at), product_images(id, url, sort_order), product_option_groups(id, name_en, name_km, sort_order, product_options(id, value_en, value_km, sort_order))'
 
 function mapPublicProduct(row: PublicProductRow): PublicProduct {
+  const rawGroups = ((row as any).product_option_groups ?? []) as any[]
+  const optionGroups = [...rawGroups]
+    .map((group: any) => ({
+      id: group.id,
+      name_en: group.name_en,
+      name_km: group.name_km,
+      sort_order: group.sort_order,
+      options: [...(group.product_options ?? [])].sort((a: any, b: any) => {
+        if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order
+        return String(a.id).localeCompare(String(b.id))
+      }),
+    }))
+    .sort((a, b) => {
+      if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order
+      return a.id.localeCompare(b.id)
+    })
+
   return {
     id: row.id,
     store_id: row.store_id,
@@ -79,6 +112,7 @@ function mapPublicProduct(row: PublicProductRow): PublicProduct {
     ),
     category: row.categories,
     store: row.stores,
+    optionGroups,
   }
 }
 

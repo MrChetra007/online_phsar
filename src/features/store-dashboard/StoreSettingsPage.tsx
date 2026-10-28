@@ -101,7 +101,10 @@ export function StoreSettingsPage() {
           }
         />
 
-        <TelegramConnectSection storeId={store.id} />
+        <TelegramConnectSection
+          storeId={store.id}
+          telegramChatId={data?.privateInfo?.telegram_chat_id ?? null}
+        />
       </div>
     </section>
   )

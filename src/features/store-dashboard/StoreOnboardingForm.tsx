@@ -91,6 +91,8 @@ export function StoreOnboardingForm({
         province: trimmedProvince,
         deliveryFeeLocal: localCents ?? 0,
         deliveryFeeOther: otherCents ?? 0,
+        facebookUrl: '',
+        telegramUsername: '',
       })
       showToast(t('store.created'), { tone: 'success' })
       onCreated()
