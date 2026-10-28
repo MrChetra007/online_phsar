@@ -6,8 +6,8 @@ import { ErrorState } from '../../components/ErrorState'
 import { ProductCard } from '../../components/ProductCard'
 import { ProductGridSkeleton } from '../../components/ProductGrid'
 import { HeartIcon } from '../../components/icons'
-import { useFavorites } from '../../features/favorites'
-import { useToast } from '../../features/toast'
+import { useFavorites } from './context'
+import { useToast } from '../toast'
 import { useI18n } from '../../lib/i18n'
 
 type LoadState =
@@ -15,7 +15,7 @@ type LoadState =
   | { status: 'ready'; products: PublicProduct[] }
   | { status: 'error' }
 
-export function AccountFavoritesPage() {
+export function FavoritesPage() {
   const { t } = useI18n()
   const { favoriteIds, ready, setFavorite } = useFavorites()
   const { showToast } = useToast()

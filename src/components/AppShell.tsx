@@ -5,6 +5,7 @@ import { useI18n } from '../lib/i18n'
 import { homeForRole } from '../lib/roles'
 import { useAuth } from '../features/auth/context'
 import { useCart } from '../features/cart'
+import { useFavorites } from '../features/favorites'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { LoadingState } from './LoadingState'
 import { SearchBar } from './SearchBar'
@@ -13,6 +14,7 @@ import brandImg from '../assets/brand.jpg'
 import {
   ArrowRightIcon,
   CartIcon,
+  HeartIcon,
   HomeIcon,
   SearchIcon,
   StoreIcon,
@@ -25,6 +27,7 @@ export function AppShell() {
   const { t, language } = useI18n()
   const { profile, logout } = useAuth()
   const { itemCount } = useCart()
+  const { favoriteIds, canFavorite } = useFavorites()
   const navigate = useNavigate()
   const location = useLocation()
   const isHome = location.pathname === '/'
@@ -109,6 +112,28 @@ export function AppShell() {
             )}
 
             <div className="ml-auto flex items-center gap-1.5">
+              {canFavorite ? (
+                <Link
+                  to="/favorites"
+                  aria-label={
+                    favoriteIds.length > 0
+                      ? `${t('account.favorites')}, ${favoriteIds.length}`
+                      : t('account.favorites')
+                  }
+                  className="relative grid size-10 place-items-center rounded-full text-slate-700 transition-colors hover:bg-stone-100"
+                >
+                  <HeartIcon className="size-5" />
+                  {favoriteIds.length > 0 ? (
+                    <span
+                      aria-hidden="true"
+                      className="absolute right-0 top-0 grid min-w-5 place-items-center rounded-full bg-rose-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white"
+                    >
+                      {favoriteIds.length > 99 ? '99+' : favoriteIds.length}
+                    </span>
+                  ) : null}
+                </Link>
+              ) : null}
+
               <Link
                 to="/cart"
                 aria-label={
@@ -252,6 +277,13 @@ export function AppShell() {
                   {t('nav.cart')}
                 </Link>
               </li>
+              {canFavorite ? (
+                <li>
+                  <Link to="/favorites" className="hover:text-emerald-700">
+                    {t('account.favorites')}
+                  </Link>
+                </li>
+              ) : null}
             </ul>
           </div>
 

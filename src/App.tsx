@@ -5,9 +5,9 @@ import { RequireAuth } from './features/auth/RequireAuth'
 import { RequireRole } from './features/auth/RequireRole'
 import { HomePage } from './pages/HomePage'
 
-const AccountFavoritesPage = lazy(() =>
-  import('./features/account/AccountFavoritesPage').then((module) => ({
-    default: module.AccountFavoritesPage,
+const FavoritesPage = lazy(() =>
+  import('./features/favorites/FavoritesPage').then((module) => ({
+    default: module.FavoritesPage,
   })),
 )
 const AccountLayout = lazy(() =>
@@ -210,6 +210,7 @@ function App() {
         <Route path="privacy" element={<PrivacyPage />} />
         <Route path="terms" element={<TermsPage />} />
         <Route path="contact" element={<ContactPage />} />
+        <Route path="favorites" element={<FavoritesPage />} />
 
         <Route path="*" element={<NotFoundPage />} />
       </Route>
@@ -223,7 +224,7 @@ function App() {
               path="orders/:orderId"
               element={<AccountOrderDetailPage />}
             />
-            <Route path="favorites" element={<AccountFavoritesPage />} />
+            <Route path="favorites" element={<FavoritesPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Route>
