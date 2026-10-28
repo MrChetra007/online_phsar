@@ -4,8 +4,38 @@
   --font-sans:
     'Noto Sans Khmer', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
     Roboto, sans-serif;
-  --color-canvas: #f5f6f1;
-  --color-ink: #10231a;
+  --font-display:
+    'Playfair Display', 'Noto Serif Khmer', ui-serif, Georgia, Cambria,
+    'Times New Roman', serif;
+
+  --color-canvas: #f6f5f1;
+  --color-ink: #0a0a09;
+
+  /* Monochrome theme: the emerald accent scale is remapped to warm blacks. */
+  --color-emerald-50: #f7f7f6;
+  --color-emerald-100: #efeeec;
+  --color-emerald-200: #dedcd8;
+  --color-emerald-300: #c4c1bb;
+  --color-emerald-400: #9a9790;
+  --color-emerald-500: #6f6c65;
+  --color-emerald-600: #44423d;
+  --color-emerald-700: #1c1b18;
+  --color-emerald-800: #12110f;
+  --color-emerald-900: #0a0a09;
+  --color-emerald-950: #000000;
+
+  /* Warm neutral scale instead of the default blue-tinted slate. */
+  --color-slate-50: #fafaf8;
+  --color-slate-100: #f4f3f0;
+  --color-slate-200: #e7e5e1;
+  --color-slate-300: #d6d3ce;
+  --color-slate-400: #a8a49d;
+  --color-slate-500: #78746c;
+  --color-slate-600: #57544e;
+  --color-slate-700: #44413c;
+  --color-slate-800: #292724;
+  --color-slate-900: #171512;
+  --color-slate-950: #0a0a09;
 }
 
 @layer base {
@@ -18,12 +48,20 @@
     @apply bg-canvas text-slate-800 antialiased;
   }
 
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
   ::selection {
-    @apply bg-emerald-200 text-emerald-950;
+    @apply bg-ink text-white;
   }
 
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-emerald-600;
+    @apply outline-2 outline-offset-2 outline-ink;
   }
 }
 

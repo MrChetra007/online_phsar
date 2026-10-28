@@ -51,10 +51,10 @@ const orderStatusLabels: Record<OrderStatus, TranslationKey> = {
 
 const orderStatusTones: Record<OrderStatus, string> = {
   pending: 'bg-amber-50 text-amber-700',
-  confirmed: 'bg-sky-50 text-sky-700',
+  confirmed: 'bg-stone-100 text-stone-700',
   rejected: 'bg-red-50 text-red-700',
   cancelled: 'bg-slate-100 text-slate-600',
-  shipped: 'bg-indigo-50 text-indigo-700',
+  shipped: 'bg-stone-100 text-stone-700',
   delivered: 'bg-emerald-50 text-emerald-700',
   completed: 'bg-emerald-50 text-emerald-700',
   paid_out: 'bg-emerald-50 text-emerald-700',

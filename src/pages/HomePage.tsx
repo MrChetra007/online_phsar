@@ -100,7 +100,7 @@ export function HomePage() {
         />
         <div
           aria-hidden="true"
-          className="absolute -bottom-40 left-1/3 size-96 rounded-full bg-lime-300/10 blur-3xl"
+          className="absolute -bottom-40 left-1/3 size-96 rounded-full bg-white/5 blur-3xl"
         />
 
         <div className="relative grid gap-10 px-6 py-10 sm:px-10 sm:py-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-16">

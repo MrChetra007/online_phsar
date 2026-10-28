@@ -85,13 +85,13 @@ export function AppShell() {
                 src={iconImg}
                 alt=""
                 aria-hidden="true"
-                className="size-10 rounded-xl object-cover shadow-md shadow-emerald-900/20 sm:hidden"
+                className="size-10 rounded-xl object-cover grayscale contrast-125 shadow-md shadow-emerald-900/20 sm:hidden"
               />
               {/* Full wordmark — visible on sm+ */}
               <img
                 src={brandImg}
                 alt={t('app.name')}
-                className="hidden h-10 w-auto object-contain sm:block"
+                className="hidden h-10 w-auto object-contain grayscale contrast-125 sm:block"
               />
             </Link>
 
@@ -222,7 +222,7 @@ export function AppShell() {
               <img
                 src={brandImg}
                 alt={t('app.name')}
-                className="h-10 w-auto object-contain"
+                className="h-10 w-auto object-contain grayscale contrast-125"
               />
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-500">
