@@ -322,7 +322,7 @@ export function HomePage() {
               </p>
             </div>
             <Link
-              to="/signup"
+              to="/signup?role=store_owner"
               className="mt-6 inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-emerald-950 transition-colors hover:bg-emerald-50 lg:mt-0"
             >
               {t('home.sellerCta')}

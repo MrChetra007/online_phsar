@@ -2,7 +2,7 @@ import { createContext, useContext } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import type { Profile } from '../../api/auth'
 import type { TranslationKey } from '../../lib/i18n/translations'
-import type { UserRole } from '../../lib/roles'
+import type { SignupRole, UserRole } from '../../lib/roles'
 
 export type RegisterResult = {
   role: UserRole | null
@@ -20,6 +20,7 @@ export type AuthContextValue = {
     fullName: string
     email: string
     password: string
+    accountType: SignupRole
   }) => Promise<RegisterResult>
   logout: () => Promise<void>
   refreshProfile: () => Promise<void>

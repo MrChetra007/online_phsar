@@ -57,7 +57,10 @@ export function LoginPage() {
       const role = await login(email.trim(), password)
       const from = (location.state as { from?: string } | null)?.from
       const target =
-        from && (from.startsWith('/store') || from.startsWith('/admin'))
+        from &&
+        (from.startsWith('/store') ||
+          from.startsWith('/admin') ||
+          from.startsWith('/account'))
           ? from
           : homeForRole(role)
       navigate(target, { replace: true })

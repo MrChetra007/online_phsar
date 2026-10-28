@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getPublicProduct, type PublicProduct } from '../api/catalog'
 import { Button } from '../components/Button'
@@ -9,10 +9,12 @@ import { Skeleton } from '../components/Skeleton'
 import {
   ArrowRightIcon,
   CheckIcon,
+  HeartIcon,
   StoreIcon,
   TruckIcon,
 } from '../components/icons'
 import { useCart } from '../features/cart'
+import { useFavorites } from '../features/favorites'
 import { useToast } from '../features/toast'
 import { categoryName } from '../lib/categories'
 import type { CartItemInput, CartStore } from '../lib/cart'
@@ -35,6 +37,7 @@ type PendingAdd = {
 
 export function ProductPage() {
   const { t, language } = useI18n()
+  const { ready, canFavorite, isFavorite, toggleFavorite } = useFavorites()
   const { cart, addItem, replaceWithItem } = useCart()
   const { showToast } = useToast()
   const { productId } = useParams<{ productId: string }>()
@@ -46,6 +49,7 @@ export function ProductPage() {
   const [quantity, setQuantity] = useState(1)
   const [addStatus, setAddStatus] = useState<'added' | 'sold_out' | null>(null)
   const [pendingAdd, setPendingAdd] = useState<PendingAdd | null>(null)
+  const [favoriteBusy, setFavoriteBusy] = useState(false)
   const [state, setState] = useState<ProductState>({
     requestKey: '',
     status: 'ready',
@@ -79,6 +83,8 @@ export function ProductPage() {
       active = false
     }
   }, [productId, version])
+
+  const favorite = state.product ? isFavorite(state.product.id) : false
 
   if (!productId) return null
 
@@ -213,6 +219,23 @@ export function ProductPage() {
     }
   }
 
+  async function handleToggleFavorite() {
+    if (!state.product || !canFavorite || favoriteBusy) return
+
+    setFavoriteBusy(true)
+
+    try {
+      const next = await toggleFavorite(state.product.id)
+      showToast(t(next ? 'account.favoriteAdded' : 'account.favoriteRemoved'), {
+        tone: 'success',
+      })
+    } catch {
+      showToast(t('common.errorText'), { tone: 'error' })
+    } finally {
+      setFavoriteBusy(false)
+    }
+  }
+
   return (
     <section>
       <nav
@@ -255,6 +278,24 @@ export function ProductPage() {
                 {product.name.trim().slice(0, 1).toUpperCase()}
               </div>
             )}
+
+            {canFavorite ? (
+              <button
+                type="button"
+                onClick={() => void handleToggleFavorite()}
+                disabled={favoriteBusy || !ready}
+                aria-pressed={favorite}
+                aria-label={t(
+                  favorite ? 'account.removeFavorite' : 'account.favorite',
+                )}
+                className="absolute right-4 top-4 grid size-11 place-items-center rounded-full bg-white/90 text-slate-900 shadow-sm backdrop-blur transition hover:bg-white disabled:opacity-50"
+              >
+                <HeartIcon
+                  className="size-5"
+                  fill={favorite ? 'currentColor' : 'none'}
+                />
+              </button>
+            ) : null}
           </div>
 
           {product.images.length > 1 ? (
@@ -323,7 +364,7 @@ export function ProductPage() {
             {selectedVariant
               ? formatMoney(selectedVariant.price)
               : range
-                ? `${formatMoney(range.min)} â€“ ${formatMoney(range.max)}`
+                ? `${formatMoney(range.min)} Ã¢â‚¬â€œ ${formatMoney(range.max)}`
                 : null}
           </p>
 
@@ -478,7 +519,7 @@ export function ProductPage() {
           <p>{t('cart.differentStoreText')}</p>
           {cart ? (
             <p className="mt-2 font-medium text-slate-800">
-              {cart.name} Â· {pendingAdd.store.name}
+              {cart.name} Ã‚Â· {pendingAdd.store.name}
             </p>
           ) : null}
         </ConfirmDialog>

@@ -9,4 +9,8 @@ describe('homeForRole', () => {
   it('sends the super admin to the admin area', () => {
     expect(homeForRole('super_admin')).toBe('/admin')
   })
+
+  it('sends shoppers to the account area', () => {
+    expect(homeForRole('customer')).toBe('/account')
+  })
 })

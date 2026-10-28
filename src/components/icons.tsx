@@ -294,3 +294,11 @@ export function LogOutIcon({ className = 'size-5', ...props }: IconProps) {
     </svg>
   )
 }
+
+export function HeartIcon({ className = 'size-5', ...props }: IconProps) {
+  return (
+    <svg {...iconProps(className, props)}>
+      <path d="M12 20.5s-7-4.6-7-9.1A4.1 4.1 0 0 1 12 8a4.1 4.1 0 0 1 7 3.4c0 4.5-7 9.1-7 9.1Z" />
+    </svg>
+  )
+}

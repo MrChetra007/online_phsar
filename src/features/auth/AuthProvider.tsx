@@ -100,11 +100,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       fullName: string
       email: string
       password: string
+      accountType: 'customer' | 'store_owner'
     }): Promise<RegisterResult> => {
       const data = await signUpWithEmail(
         input.fullName,
         input.email,
         input.password,
+        input.accountType,
       )
 
       if (!data.session || !data.user) {

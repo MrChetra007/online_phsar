@@ -61,6 +61,39 @@ export type Database = {
           },
         ]
       }
+      customer_favorites: {
+        Row: {
+          created_at: string
+          customer_id: string
+          product_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id?: string
+          product_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_favorites_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_favorites_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ledger_entries: {
         Row: {
           affects_balance: boolean
@@ -265,6 +298,7 @@ export type Database = {
           courier_name: string | null
           created_at: string
           customer_confirmed_at: string | null
+          customer_id: string | null
           customer_name: string
           customer_phone: string
           customer_phone_norm: string | null
@@ -305,6 +339,7 @@ export type Database = {
           courier_name?: string | null
           created_at?: string
           customer_confirmed_at?: string | null
+          customer_id?: string | null
           customer_name: string
           customer_phone: string
           customer_phone_norm?: string | null
@@ -345,6 +380,7 @@ export type Database = {
           courier_name?: string | null
           created_at?: string
           customer_confirmed_at?: string | null
+          customer_id?: string | null
           customer_name?: string
           customer_phone?: string
           customer_phone_norm?: string | null
@@ -377,6 +413,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_store_id_fkey"
             columns: ["store_id"]
@@ -438,6 +481,115 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_option_groups: {
+        Row: {
+          created_at: string
+          id: string
+          name_en: string
+          name_km: string | null
+          product_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name_en: string
+          name_km?: string | null
+          product_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name_en?: string
+          name_km?: string | null
+          product_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_option_groups_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_options: {
+        Row: {
+          created_at: string
+          group_id: string
+          id: string
+          sort_order: number
+          updated_at: string
+          value_en: string
+          value_km: string | null
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          id?: string
+          sort_order?: number
+          updated_at?: string
+          value_en: string
+          value_km?: string | null
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          id?: string
+          sort_order?: number
+          updated_at?: string
+          value_en?: string
+          value_km?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_options_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "product_option_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_variant_options: {
+        Row: {
+          created_at: string
+          option_id: string
+          variant_id: string
+        }
+        Insert: {
+          created_at?: string
+          option_id: string
+          variant_id: string
+        }
+        Update: {
+          created_at?: string
+          option_id?: string
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variant_options_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "product_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variant_options_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
             referencedColumns: ["id"]
           },
         ]
@@ -973,6 +1125,10 @@ export type Database = {
         Args: { p_event_id: string; p_provider: string; p_result: string }
         Returns: undefined
       }
+      get_my_order: {
+        Args: { p_order_id: string }
+        Returns: Json
+      }
       get_settlement_summary: {
         Args: never
         Returns: {
@@ -992,6 +1148,21 @@ export type Database = {
       link_telegram_chat: {
         Args: { p_chat_id: number; p_code: string }
         Returns: string
+      }
+      list_my_orders: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          item_count: number
+          order_code: string
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          status: Database["public"]["Enums"]["order_status"]
+          store_name: string
+          store_slug: string
+          total_amount: number
+        }[]
       }
       mark_order_paid: {
         Args: { p_amount: number; p_order_id: string; p_reference: string }
@@ -1114,7 +1285,7 @@ export type Database = {
       product_status: "draft" | "active" | "hidden"
       settlement_direction: "platform_pays" | "store_pays"
       store_status: "pending" | "active" | "suspended"
-      user_role: "super_admin" | "store_owner"
+      user_role: "super_admin" | "store_owner" | "customer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1281,7 +1452,7 @@ export const Constants = {
       product_status: ["draft", "active", "hidden"],
       settlement_direction: ["platform_pays", "store_pays"],
       store_status: ["pending", "active", "suspended"],
-      user_role: ["super_admin", "store_owner"],
+      user_role: ["super_admin", "store_owner", "customer"],
     },
   },
 } as const

@@ -1,12 +1,12 @@
 import { useState, type FormEvent } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '../../components/Button'
 import { ErrorState } from '../../components/ErrorState'
 import { Input } from '../../components/Input'
 import { LoadingState } from '../../components/LoadingState'
 import { authErrorKey } from '../../lib/authErrors'
 import { useI18n, type TranslationKey } from '../../lib/i18n'
-import { homeForRole } from '../../lib/roles'
+import { homeForRole, type SignupRole } from '../../lib/roles'
 import { AuthShell } from './AuthShell'
 import { useAuth } from './context'
 
@@ -21,7 +21,11 @@ export function SignUpPage() {
     refreshProfile,
   } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 
+  const [accountType, setAccountType] = useState<SignupRole>(
+    searchParams.get('role') === 'store_owner' ? 'store_owner' : 'customer',
+  )
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -77,6 +81,7 @@ export function SignUpPage() {
         fullName: fullName.trim(),
         email: email.trim(),
         password,
+        accountType,
       })
 
       if (result.needsEmailConfirmation || !result.role) {
@@ -118,6 +123,56 @@ export function SignUpPage() {
       ) : null}
 
       <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+        <fieldset>
+          <legend className="mb-2 text-sm font-medium text-slate-700">
+            {t('auth.accountType')}
+          </legend>
+          <div
+            className="grid grid-cols-2 gap-2"
+            role="radiogroup"
+            aria-label={t('auth.accountType')}
+          >
+            {(['customer', 'store_owner'] as const).map((role) => {
+              const selected = accountType === role
+              return (
+                <button
+                  key={role}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => setAccountType(role)}
+                  className={
+                    selected
+                      ? 'rounded-xl border border-slate-900 bg-slate-900 px-3 py-2.5 text-left text-white'
+                      : 'rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-slate-700 hover:border-slate-400'
+                  }
+                >
+                  <span className="block text-sm font-semibold">
+                    {t(
+                      role === 'customer'
+                        ? 'auth.accountCustomer'
+                        : 'auth.accountSeller',
+                    )}
+                  </span>
+                  <span
+                    className={
+                      selected
+                        ? 'mt-0.5 block text-xs text-white/70'
+                        : 'mt-0.5 block text-xs text-slate-500'
+                    }
+                  >
+                    {t(
+                      role === 'customer'
+                        ? 'auth.accountCustomerHint'
+                        : 'auth.accountSellerHint',
+                    )}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </fieldset>
+
         <Input
           label={t('auth.fullName')}
           type="text"

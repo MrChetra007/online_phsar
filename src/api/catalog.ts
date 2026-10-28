@@ -36,17 +36,19 @@ export type PublicProduct = Pick<
   optionGroups: PublicOptionGroup[]
 }
 
-type PublicProductRow = PublicProduct & {
-  product_variants: PublicProduct['variants'] | null
-  product_images: PublicProduct['images'] | null
-  categories: PublicCategory | null
-  stores: PublicProduct['store']
-  product_option_groups?:
-    | (PublicOptionGroup & {
-        product_options: PublicOptionGroup['options'] | null
-      })[]
-    | null
-} | any
+type PublicProductRow =
+  | (PublicProduct & {
+      product_variants: PublicProduct['variants'] | null
+      product_images: PublicProduct['images'] | null
+      categories: PublicCategory | null
+      stores: PublicProduct['store']
+      product_option_groups?:
+        | (PublicOptionGroup & {
+            product_options: PublicOptionGroup['options'] | null
+          })[]
+        | null
+    })
+  | any
 
 type ListPublicProductsOptions = {
   storeId?: string
@@ -196,6 +198,24 @@ export async function listFeaturedProducts(
   limit = 8,
 ): Promise<PublicProduct[]> {
   return listPublicProducts({ limit })
+}
+
+export async function listPublicProductsByIds(
+  productIds: string[],
+): Promise<PublicProduct[]> {
+  if (productIds.length === 0) return []
+
+  const { data, error } = await supabase
+    .from('products')
+    .select(PUBLIC_PRODUCT_SELECT)
+    .in('id', productIds)
+    .eq('status', 'active')
+
+  if (error) throw error
+
+  return ((data ?? []) as unknown as PublicProductRow[])
+    .map(mapPublicProduct)
+    .filter((product) => product.variants.length > 0)
 }
 
 export async function getPublicProduct(

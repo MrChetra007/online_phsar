@@ -5,6 +5,31 @@ import { RequireAuth } from './features/auth/RequireAuth'
 import { RequireRole } from './features/auth/RequireRole'
 import { HomePage } from './pages/HomePage'
 
+const AccountFavoritesPage = lazy(() =>
+  import('./features/account/AccountFavoritesPage').then((module) => ({
+    default: module.AccountFavoritesPage,
+  })),
+)
+const AccountLayout = lazy(() =>
+  import('./features/account/AccountLayout').then((module) => ({
+    default: module.AccountLayout,
+  })),
+)
+const AccountOrderDetailPage = lazy(() =>
+  import('./features/account/AccountOrderDetailPage').then((module) => ({
+    default: module.AccountOrderDetailPage,
+  })),
+)
+const AccountOrdersPage = lazy(() =>
+  import('./features/account/AccountOrdersPage').then((module) => ({
+    default: module.AccountOrdersPage,
+  })),
+)
+const AccountOverviewPage = lazy(() =>
+  import('./features/account/AccountOverviewPage').then((module) => ({
+    default: module.AccountOverviewPage,
+  })),
+)
 const AdminCategoriesPage = lazy(() =>
   import('./features/admin/AdminCategoriesPage').then((module) => ({
     default: module.AdminCategoriesPage,
@@ -187,6 +212,21 @@ function App() {
         <Route path="contact" element={<ContactPage />} />
 
         <Route path="*" element={<NotFoundPage />} />
+      </Route>
+
+      <Route element={<RequireAuth />}>
+        <Route element={<RequireRole role="customer" />}>
+          <Route path="account" element={<AccountLayout />}>
+            <Route index element={<AccountOverviewPage />} />
+            <Route path="orders" element={<AccountOrdersPage />} />
+            <Route
+              path="orders/:orderId"
+              element={<AccountOrderDetailPage />}
+            />
+            <Route path="favorites" element={<AccountFavoritesPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
+        </Route>
       </Route>
 
       <Route element={<RequireAuth />}>

@@ -37,9 +37,12 @@ export function AppShell() {
     location.pathname.startsWith('/track') ||
     location.pathname.startsWith('/pay/')
   const isSell = location.pathname === '/signup'
+  const isAccount = location.pathname.startsWith('/account')
   const isKhmer = language === 'km'
 
-  const [platformContacts, setPlatformContacts] = useState<Record<string, string>>({})
+  const [platformContacts, setPlatformContacts] = useState<
+    Record<string, string>
+  >({})
 
   useEffect(() => {
     void getPublicSettings()
@@ -61,7 +64,9 @@ export function AppShell() {
   const dashboardLabel =
     profile?.role === 'super_admin'
       ? t('nav.adminPanel')
-      : t('nav.storeDashboard')
+      : profile?.role === 'customer'
+        ? t('nav.myAccount')
+        : t('nav.storeDashboard')
 
   return (
     <div className="flex min-h-dvh flex-col pb-16 md:pb-0">
@@ -193,7 +198,7 @@ export function AppShell() {
               {t('nav.track')}
             </Link>
             <Link
-              to="/signup"
+              to="/signup?role=store_owner"
               className="ml-auto inline-flex items-center gap-1 rounded-full px-3 py-1.5 font-semibold text-emerald-700 transition-colors hover:bg-emerald-50"
             >
               {t('nav.sell')}
@@ -215,10 +220,7 @@ export function AppShell() {
       <footer className="border-t border-stone-200 bg-white">
         <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link
-              to="/"
-              className="inline-flex items-center"
-            >
+            <Link to="/" className="inline-flex items-center">
               <img
                 src={brandImg}
                 alt={t('app.name')}
@@ -284,7 +286,7 @@ export function AppShell() {
                   </li>
                   <li>
                     <Link to="/signup" className="hover:text-emerald-700">
-                      {t('nav.sell')}
+                      {t('nav.signup')}
                     </Link>
                   </li>
                 </>
@@ -350,7 +352,12 @@ export function AppShell() {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 rounded-full border border-stone-200 px-3.5 py-1.5 transition-colors hover:border-[#1877F2]/40 hover:text-[#1877F2]"
                   >
-                    <svg className="size-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg
+                      className="size-4"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
                       <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                     </svg>
                     {isKhmer ? 'Facebook' : 'Facebook'}
@@ -363,10 +370,17 @@ export function AppShell() {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 rounded-full border border-stone-200 px-3.5 py-1.5 transition-colors hover:border-[#229ED9]/40 hover:text-[#229ED9]"
                   >
-                    <svg className="size-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg
+                      className="size-4"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
                       <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
                     </svg>
-                    {telegramUsername.startsWith('@') ? telegramUsername : `@${telegramUsername}`}
+                    {telegramUsername.startsWith('@')
+                      ? telegramUsername
+                      : `@${telegramUsername}`}
                   </a>
                 ) : null}
               </div>
@@ -424,15 +438,29 @@ export function AppShell() {
             <TruckIcon className="size-5" />
             {t('nav.track')}
           </Link>
-          <Link
-            to="/signup"
-            className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-semibold transition-colors ${
-              isSell ? 'text-emerald-700' : 'text-slate-500'
-            }`}
-          >
-            <StoreIcon className="size-5" />
-            {t('nav.sell')}
-          </Link>
+          {dashboardPath ? (
+            <Link
+              to={dashboardPath}
+              className={`flex min-w-0 flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-semibold transition-colors ${
+                isAccount ? 'text-emerald-700' : 'text-slate-500'
+              }`}
+            >
+              <StoreIcon className="size-5" />
+              <span className="w-full truncate px-1 text-center">
+                {dashboardLabel}
+              </span>
+            </Link>
+          ) : (
+            <Link
+              to="/signup"
+              className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-semibold transition-colors ${
+                isSell ? 'text-emerald-700' : 'text-slate-500'
+              }`}
+            >
+              <StoreIcon className="size-5" />
+              {t('nav.signup')}
+            </Link>
+          )}
         </div>
       </nav>
     </div>

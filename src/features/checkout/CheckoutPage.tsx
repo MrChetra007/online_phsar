@@ -17,6 +17,7 @@ import {
   ShieldCheckIcon,
   StoreIcon,
 } from '../../components/icons'
+import { useAuth } from '../auth/context'
 import { useCart } from '../cart'
 import { clearOrderSource, getOrderSource } from '../../lib/attribution'
 import { errorCodeFrom, getErrorMessage } from '../../lib/errors'
@@ -67,6 +68,7 @@ const initialValues: FormValues = {
 
 export function CheckoutPage() {
   const { t, language } = useI18n()
+  const { session, profile } = useAuth()
   const { cart, subtotal, clearCart } = useCart()
   const navigate = useNavigate()
   const [version, setVersion] = useState(0)
@@ -85,6 +87,24 @@ export function CheckoutPage() {
 
   const cartId = cart?.id
   const cartSlug = cart?.slug
+
+  useEffect(() => {
+    if (!session || !profile) return
+
+    let active = true
+    queueMicrotask(() => {
+      if (!active) return
+      setValues((current) => ({
+        ...current,
+        name: current.name || profile.full_name || '',
+        phone: current.phone || profile.phone || '',
+      }))
+    })
+
+    return () => {
+      active = false
+    }
+  }, [session, profile])
 
   useEffect(() => {
     if (!cartId || !cartSlug) return
@@ -450,9 +470,7 @@ export function CheckoutPage() {
                 </div>
               </div>
 
-              <label
-                className="flex cursor-pointer gap-3 rounded-2xl border-2 border-emerald-600 bg-emerald-50/60 p-4 transition"
-              >
+              <label className="flex cursor-pointer gap-3 rounded-2xl border-2 border-emerald-600 bg-emerald-50/60 p-4 transition">
                 <input
                   type="radio"
                   name="paymentMethod"

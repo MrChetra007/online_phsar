@@ -9,11 +9,12 @@ export async function signUpWithEmail(
   fullName: string,
   email: string,
   password: string,
+  accountType: 'customer' | 'store_owner' = 'customer',
 ) {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName } },
+    options: { data: { full_name: fullName, account_type: accountType } },
   })
 
   if (error) throw error
