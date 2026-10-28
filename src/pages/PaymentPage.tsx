@@ -199,12 +199,14 @@ export function PaymentPage() {
       setCheckDelayed(false)
     }
 
-    const check = async () => {
+    const check = async (checkProvider: boolean) => {
       if (checking.current) return
       checking.current = true
 
       try {
-        const result = await verifyKhqrPayment(context.orderId)
+        const result = await verifyKhqrPayment(context.orderId, {
+          checkProvider,
+        })
         apply(result)
         if (active) setCheckDelayed(false)
       } catch {
@@ -214,13 +216,29 @@ export function PaymentPage() {
       }
     }
 
-    const first = window.setTimeout(() => void check(), 2000)
-    const interval = window.setInterval(() => void check(), 5000)
+    // Read the local order every 2s; ask KHQR.dev only every 4th tick.
+    let ticks = 0
+    const tick = () => {
+      ticks += 1
+      void check(ticks % 4 === 0)
+    }
+
+    const first = window.setTimeout(tick, 800)
+    const interval = window.setInterval(tick, 2000)
+
+    // Customers leave the tab to pay in their banking app, then come back.
+    const checkNow = () => {
+      if (document.visibilityState === 'visible') void check(true)
+    }
+    document.addEventListener('visibilitychange', checkNow)
+    window.addEventListener('focus', checkNow)
 
     return () => {
       active = false
       window.clearTimeout(first)
       window.clearInterval(interval)
+      document.removeEventListener('visibilitychange', checkNow)
+      window.removeEventListener('focus', checkNow)
     }
   }, [context, payment, status])
 

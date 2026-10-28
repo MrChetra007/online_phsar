@@ -39,7 +39,10 @@ function asInteger(value: unknown): number {
   throw new Error('INVALID_PAYMENT_RESPONSE')
 }
 
-async function invoke<T>(name: string, body: { order_id: string }): Promise<T> {
+async function invoke<T>(
+  name: string,
+  body: Record<string, unknown>,
+): Promise<T> {
   const { data, error } = await supabase.functions.invoke(name, { body })
 
   if (error) {
@@ -83,9 +86,11 @@ export async function generateKhqr(orderId: string): Promise<KhqrPayment> {
 
 export async function verifyKhqrPayment(
   orderId: string,
+  options: { checkProvider?: boolean } = {},
 ): Promise<PaymentCheck> {
   const data = await invoke<Record<string, unknown>>('verify_khqr_payment', {
     order_id: orderId,
+    check_provider: options.checkProvider !== false,
   })
 
   return {

@@ -57,6 +57,7 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: 'INVALID_REQUEST' }, 400)
   }
 
+  const checkProvider = body.check_provider !== false
   const service = createClient(supabaseUrl, serviceKey)
   let { data: order, error: orderError } = await service
     .from('orders')
@@ -78,6 +79,13 @@ Deno.serve(async (request) => {
     order.status !== 'pending' ||
     !order.khqr_md5
   ) {
+    return jsonResponse(snapshot(order))
+  }
+
+  // Fast path: read the local order only. The webhook (or a previous provider
+  // check) updates the row, so clients can poll this cheaply between the
+  // slower KHQR.dev provider checks.
+  if (!checkProvider) {
     return jsonResponse(snapshot(order))
   }
 
