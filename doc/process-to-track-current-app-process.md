@@ -1,8 +1,9 @@
 # Process Tracker: Current App State
 
-Last updated: 2026-10-27
+Last updated: 2026-10-28
 Branch: `main`
-Latest feature commit: `4d60f37 feat: add printable invoices and province selector`
+Latest feature commits: `54c8e18 fix: make favorites page accessible to guests`,
+then `d1029fe feat: add customer accounts, order history, and favorites`
 
 This is the working handoff document. Read it first when resuming the project.
 Update it at the end of every build step, commit, deployment, or blocker.
@@ -56,15 +57,18 @@ local checks pass, mark it **Implemented, live acceptance pending**.
 
 A curated Cambodian marketplace starting in Battambang. Guests browse stores,
 place orders, pay by KHQR or cash on delivery, and track orders with an order
-code plus phone number. Store owners manage products and orders. A super admin
-runs categories, stores, payments, disputes, settings, and settlements.
+code plus phone number. Guests can also save favorites locally; signing in as a
+customer syncs them and exposes order history. Store owners manage products and
+orders. A super admin runs categories, stores, payments, disputes, settings, and
+settlements.
 
 - Stack: React, TypeScript, Vite, Tailwind v4, Supabase.
 - Languages: English and Khmer.
-- Roles: `super_admin`, `store_owner`, guest customer.
+- Roles: `super_admin`, `store_owner`, `customer`, guest.
 - Commission: 30% default, server-computed.
 - Payments: one platform KHQR.dev merchant account for all stores.
 - Money: integer USD cents everywhere.
+- Favorites: local-first for guests; database-backed for customers.
 
 ---
 
@@ -72,9 +76,11 @@ runs categories, stores, payments, disputes, settings, and settlements.
 
 Known recent commits:
 
-| Commit    | Scope                              |
-| --------- | ---------------------------------- |
-| `7d7bf93` | Route splitting and error boundary |
+| Commit    | Scope                                      |
+| --------- | ------------------------------------------ |
+| `54c8e18` | Public guest favorites route and links     |
+| `d1029fe` | Customer accounts, order history, favorites |
+| `7d7bf93` | Route splitting and error boundary         |
 | `3471c2f` | Hardening checks and runbook        |
 | `4fe2607` | Scheduled jobs                     |
 | `410ad24` | Telegram notifications             |
@@ -103,6 +109,11 @@ Implemented routes:
 | `/c/:slug`                    | Category page                            |
 | `/p/:productId`               | Product page                             |
 | `/s/:slug`                    | Public store page                        |
+| `/favorites`                  | Public favorites page (guest local storage) |
+| `/account`                    | Customer overview                        |
+| `/account/orders`             | Customer order history                   |
+| `/account/orders/:orderId`    | Customer order detail                    |
+| `/account/favorites`          | Customer favorites page                  |
 | `/store`                      | Store dashboard                           |
 | `/store/orders`               | Store order list and status tabs          |
 | `/store/orders/:orderId`      | Store order detail and actions            |
@@ -121,6 +132,11 @@ Implemented routes:
 Implemented behavior:
 
 - Auth, role guards, and store onboarding.
+- Shopper accounts created from signup, with a customer overview, order history,
+  and order detail restricted to the signed-in customer.
+- Local-first favorites: guests save to `localStorage`, customers save to
+  `customer_favorites`, and guest favorites merge on customer login. The public
+  `/favorites` page and header/footer links are available without login.
 - Categories, products, variants, images, and public catalog.
 - Cart and COD checkout with server-computed delivery fee, totals, and a
   searchable bilingual province selector.
@@ -164,6 +180,7 @@ Implemented behavior:
 | 12   | Telegram notifications         | Implemented locally; live acceptance pending |
 | 13   | Scheduled jobs                 | Implemented locally; live acceptance pending |
 | 14   | Hardening, tests, deploy       | Local hardening complete; deploy pending   |
+| 15   | Customer accounts and favorites | Implemented locally; live acceptance pending |
 
 ---
 
@@ -669,6 +686,95 @@ has not been tested.
 
 ---
 
+## 6g. Step 15 customer accounts and favorites details
+
+### What was built
+
+Database:
+
+- `supabase/migrations/008_customer_role.sql` adds `customer` to `user_role`.
+  It is a separate migration because a new enum value cannot be used in the
+  same transaction that adds it.
+- `supabase/migrations/009_customer_accounts.sql`:
+  - Sets the profile role default to `customer`.
+  - Adds `orders.customer_id` with `default auth.uid()` and an index. Existing
+    rows stay unlinked; there is no backfill.
+  - Creates `customer_favorites` with one row per customer/product and RLS
+    policies that only allow a user to select, insert, and delete their own rows.
+  - Restricts `stores_owner_insert` to users whose profile role is
+    `store_owner`.
+  - Replaces `handle_new_user()` so signup metadata can only choose `customer`
+    or `store_owner`; `super_admin` cannot come from client metadata.
+  - Adds security-definer `list_my_orders()` and `get_my_order(uuid)`, filtered
+    by `auth.uid()`, for customer order history and detail.
+
+Frontend:
+
+- Signup now has a customer/seller role choice. Customers go to `/account`;
+  sellers can preselect with `/signup?role=store_owner`.
+- Customer account area: `/account`, `/account/orders`,
+  `/account/orders/:orderId`, and `/account/favorites`.
+- `src/features/favorites/FavoritesProvider.tsx` manages guest and customer
+  favorites, optimistic toggles, and rollback on failure.
+- `src/features/favorites/storage.ts` stores guest IDs under
+  `khmeronlineshop.guest-favorites.v1`, validates them, deduplicates them, and
+  tolerates unavailable storage.
+- On customer login, guest IDs are upserted into `customer_favorites`, the
+  database IDs are loaded, and successfully synced local IDs are removed. If
+  sync fails, the guest IDs remain usable locally.
+- `ProductCard` and `ProductPage` show hearts for guests and customers. Store
+  owners and super admins do not see the favorite controls.
+- `FavoritesPage` is shared by `/account/favorites` and the public `/favorites`
+  route, so guests can view and remove locally saved favorites without login.
+  The public shell adds a header heart with count and a footer link.
+- `src/api/customer.ts` wraps order-history RPCs and favorite queries,
+  including a bulk upsert for the login merge.
+- `src/lib/database.types.ts` was patched manually for the customer role,
+  `orders.customer_id`, `customer_favorites`, and the two new RPCs because the
+  environment had no Supabase access token for type generation.
+
+### Behavior and limitations
+
+- Guests can save and remove favorites without an account; no network call is
+  made.
+- Customers use the database and see the same favorites across devices.
+- Orders placed while signed in receive `customer_id = auth.uid()`. Guest orders
+  and older orders are not retroactively claimed; guests continue using order
+  code plus phone tracking.
+- Customer order history is limited by the RPC's `auth.uid()` filter, not by
+  browser-side filtering.
+- Favorite controls are hidden for store owners and super admins, but
+  `customer_favorites` RLS enforces row ownership rather than role. A direct
+  authenticated API call could still create a favorite row for a non-customer;
+  this is a UI guard, not a database role constraint.
+
+### Local verification
+
+Last run: 2026-10-28
+
+- `npm run typecheck`: passed
+- `npm run lint`: passed with the existing `KhqrCard.tsx` fast-refresh warning
+- `npm run test`: 22 files, 87 tests passed
+- `npm run build`: passed
+- Changed files pass Prettier. Repo-wide `npm run format:check` still reports 9
+  unrelated files, so it is not green as a whole.
+
+### Commits
+
+- `d1029fe feat: add customer accounts, order history, and favorites`
+- `54c8e18 fix: make favorites page accessible to guests`
+
+### Acceptance status
+
+| Acceptance check                                      | Status                                      |
+| ----------------------------------------------------- | ------------------------------------------- |
+| Guest can save, view, and remove favorites offline    | UI/local path ready; live browser pending   |
+| Customer login merges guest favorites into the database | Code path ready; live DB pending           |
+| Customer can only read their own orders               | RPC path ready; live acceptance pending     |
+| Favorite UI is hidden for store owners and admins     | UI path ready; direct API still allowed     |
+
+---
+
 ## 7. Remote and environment state
 
 Last known Supabase project:
@@ -684,8 +790,10 @@ Last known Supabase project:
 Last known remote status:
 
 - Migration `004_khqr_payments.sql` and `005_scheduled_jobs.sql`: schema applied
-  manually by the owner on 2026-10-27. Migration history is still empty, so
-  repair `001`–`005` as applied before any future `db push`.
+  manually by the owner on 2026-10-27. Migration history was still empty on that
+  date. The owner reports the customer migrations `008`/`009` were run on
+  2026-10-28; this session did not verify the remote schema or history. Confirm
+  and repair `001`–`009` as applied before any future `db push`.
 - Edge Functions: five active v1 deployments (`generate_khqr`, `khqr_webhook`,
   `verify_khqr_payment`, `notify`, `telegram_webhook`). Redeploy `notify` and
   `telegram_webhook` after the secret setup because their current deployments
@@ -700,6 +808,9 @@ Last known remote status:
   needs Docker, so remote schema inspection is limited.
 - `deno` is not installed globally, but `npx -y deno check` works and the Step
   12 functions pass it.
+- `.env.local` has no `SUPABASE_ACCESS_TOKEN`; `database.types.ts` was patched
+  manually for customer accounts/favorites and still needs regeneration against
+  the hosted schema.
 - The Docker daemon is not running; local integration tests were deferred by the
   owner.
 - Anon permission probes on 2026-10-27 blocked `orders`, `ledger_entries`,
@@ -725,8 +836,21 @@ These values may have changed. Verify before relying on them.
 
 ### Preferred next action
 
+Step 15 customer accounts and favorites is implemented locally. Before the
+deploy run:
+
+1. Confirm migrations `008`/`009` are applied remotely and that
+   `customer_favorites`, `orders.customer_id`, `list_my_orders()`, and
+   `get_my_order(uuid)` exist.
+2. Live-test guest favorites, login merge, customer order history, and removal
+   as a guest and as a customer.
+3. Decide whether `customer_favorites` should enforce the customer role in RLS;
+   currently it enforces row ownership only.
+4. Regenerate `database.types.ts` when `SUPABASE_ACCESS_TOKEN` is available and
+   reconcile it with the manual patches.
+
 Step 14 local hardening is complete; Docker integration tests are deferred by
-owner decision. The owner applied all five schemas manually. Remaining deploy
+owner decision. The owner applied the earlier schemas manually. Remaining deploy
 work:
 
 1. Run the Supabase security and performance advisors; fix findings.
@@ -736,7 +860,8 @@ work:
 4. Run the full two-store happy path through settlement.
 5. Update this document with the results.
 
-Do not mark Step 14 complete until the deployed acceptance run passes.
+Do not mark Step 14 or Step 15 complete until the deployed acceptance run
+passes.
 
 Step 13 live acceptance remains pending:
 
@@ -809,6 +934,19 @@ supabase functions deploy khqr_webhook --no-verify-jwt --project-ref wdbelxrhvki
 
 ## 9. Known open items
 
+- Step 15 customer accounts/favorites is implemented locally; live remote and
+  browser acceptance is pending.
+- Guest favorites live only in `localStorage` until a customer signs in. There is
+  no merge for guest orders, and no guest-order claim/backfill flow.
+- The owner reports migrations `008`/`009` were run remotely, but this session
+  did not verify the schema or migration history.
+- `customer_favorites` RLS checks row ownership, not the `customer` role; the
+  heart controls are hidden for store owners/admins, but a direct authenticated
+  API call could still write a favorite row.
+- `database.types.ts` is manually patched for customer accounts/favorites
+  because `SUPABASE_ACCESS_TOKEN` is unavailable; regenerate when possible.
+- Repo-wide `npm run format:check` reports 9 unrelated files. The files changed
+  for customer accounts/favorites pass Prettier.
 - Live KHQR acceptance is blocked by missing provider secrets and webhook
   registration; the schema and functions are deployed.
 - Step 9 acceptance is pending; the RLS and UI paths are implemented.
@@ -892,6 +1030,27 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
 ---
 
 ## 11. Update log
+
+### 2026-10-28
+
+- Added shopper/customer accounts: signup role choice, default customer role,
+  customer overview, order history/detail, and `/account` routes.
+- Added migrations `008_customer_role.sql` and `009_customer_accounts.sql`:
+  customer enum/default, `orders.customer_id`, `customer_favorites` RLS,
+  store-owner insert restriction, safe `handle_new_user()`, and
+  `list_my_orders()`/`get_my_order(uuid)`.
+- Added local-first favorites: guest `localStorage`, customer database rows,
+  merge on login, optimistic toggles with rollback, and hidden controls for
+  store owners/admins.
+- Added the public `/favorites` route with header/footer links; the account
+  favorites route shares the same page. Guest orders are not claimed by later
+  login.
+- Committed the feature as `d1029fe` and the guest-access fix as `54c8e18`.
+- Passed typecheck, lint (existing `KhqrCard` warning), 87 tests in 22 files, and
+  build. Repo-wide `format:check` still reports 9 unrelated files.
+- The owner reports migrations `008`/`009` were run remotely; this session did
+  not verify them. `database.types.ts` remains manually patched because no
+  `SUPABASE_ACCESS_TOKEN` is configured.
 
 ### 2026-10-27
 
