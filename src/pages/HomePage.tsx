@@ -1,51 +1,30 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { listActiveCategories, type Category } from '../api/categories'
 import { listFeaturedProducts, type PublicProduct } from '../api/catalog'
 import { EmptyState } from '../components/EmptyState'
 import { ErrorState } from '../components/ErrorState'
 import { ProductGrid, ProductGridSkeleton } from '../components/ProductGrid'
 import { SearchBar } from '../components/SearchBar'
-import { Skeleton } from '../components/Skeleton'
 import {
   ArrowRightIcon,
   CheckIcon,
+  ChevronDownIcon,
   ShieldCheckIcon,
   SparklesIcon,
   StoreIcon,
   TruckIcon,
 } from '../components/icons'
-import { buildCategoryTree, categoryName } from '../lib/categories'
+import {
+  buildCategoryTree,
+  categoryName,
+  flattenCategoryTree,
+} from '../lib/categories'
 import { useI18n } from '../lib/i18n'
-
-function CategoryGridSkeleton() {
-  const { t } = useI18n()
-
-  return (
-    <div role="status" aria-live="polite">
-      <span className="sr-only">{t('common.loading')}</span>
-      <div
-        className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"
-        aria-hidden="true"
-      >
-        {Array.from({ length: 4 }, (_, index) => (
-          <div
-            key={index}
-            className="overflow-hidden rounded-3xl border border-stone-200 bg-white"
-          >
-            <Skeleton className="aspect-[4/3]" />
-            <div className="p-4">
-              <Skeleton className="h-4 w-2/3 rounded" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
 
 export function HomePage() {
   const { t, language } = useI18n()
+  const navigate = useNavigate()
   const [categories, setCategories] = useState<Category[] | null>(null)
   const [products, setProducts] = useState<PublicProduct[] | null>(null)
   const [failed, setFailed] = useState(false)
@@ -69,7 +48,9 @@ export function HomePage() {
     }
   }, [version])
 
-  const categoryTree = categories ? buildCategoryTree(categories) : []
+  const flatCategories = categories
+    ? flattenCategoryTree(buildCategoryTree(categories))
+    : []
   const heroImages =
     products?.flatMap((product) => product.images.slice(0, 1)).slice(0, 3) ?? []
 
@@ -231,55 +212,40 @@ export function HomePage() {
               </div>
             </div>
 
-            <div className="mt-5">
+            <div className="mt-5 max-w-sm">
               {categories === null ? (
-                <CategoryGridSkeleton />
-              ) : categoryTree.length === 0 ? (
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="h-12 animate-pulse rounded-xl bg-stone-200/70"
+                >
+                  <span className="sr-only">{t('common.loading')}</span>
+                </div>
+              ) : flatCategories.length === 0 ? (
                 <EmptyState>{t('home.categoriesEmpty')}</EmptyState>
               ) : (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                  {categoryTree.map((category) => (
-                    <Link
-                      key={category.id}
-                      to={`/c/${category.slug}`}
-                      className="group relative overflow-hidden rounded-3xl bg-ink shadow-sm"
-                    >
-                      <div className="aspect-[4/3] overflow-hidden">
-                        {category.image_url ? (
-                          <img
-                            src={category.image_url}
-                            alt=""
-                            loading="lazy"
-                            decoding="async"
-                            className="size-full object-cover opacity-90 transition duration-500 group-hover:scale-105 group-hover:opacity-100"
-                          />
-                        ) : (
-                          <div className="grid size-full place-items-center bg-gradient-to-br from-emerald-700 to-ink">
-                            <span
-                              aria-hidden="true"
-                              className="text-4xl font-bold text-emerald-100/70"
-                            >
-                              {categoryName(category, language)
-                                .trim()
-                                .slice(0, 1)}
-                            </span>
-                          </div>
-                        )}
-                        <div
-                          aria-hidden="true"
-                          className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent"
-                        />
-                        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 p-4">
-                          <span className="min-w-0 truncate text-sm font-semibold text-white drop-shadow">
-                            {categoryName(category, language)}
-                          </span>
-                          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-white/15 text-white backdrop-blur transition group-hover:bg-emerald-400 group-hover:text-emerald-950">
-                            <ArrowRightIcon className="size-4" />
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+                <div className="relative">
+                  <select
+                    value=""
+                    onChange={(event) => {
+                      const slug = event.target.value
+                      if (slug) navigate(`/c/${slug}`)
+                    }}
+                    aria-label={t('home.categoriesSelect')}
+                    className="block w-full appearance-none rounded-xl border border-stone-300 bg-white py-3 pl-4 pr-11 text-sm font-medium text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100/70"
+                  >
+                    <option value="">{t('home.categoriesSelect')}</option>
+                    {flatCategories.map(({ category, depth }) => (
+                      <option key={category.id} value={category.slug}>
+                        {'— '.repeat(depth)}
+                        {categoryName(category, language)}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDownIcon
+                    aria-hidden="true"
+                    className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+                  />
                 </div>
               )}
             </div>
