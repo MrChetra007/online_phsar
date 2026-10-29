@@ -1053,6 +1053,7 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
   changed-file Prettier, and build. Migration `010` is not applied remotely
   yet; the new table is accessed through `as any` until types are
   regenerated.
+- Committed as `1a23ca7 feat: add private dropshipping product link`.
 
 ### 2026-10-28
 
