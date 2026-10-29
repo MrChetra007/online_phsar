@@ -8,8 +8,12 @@ import { ProductGrid, ProductGridSkeleton } from '../components/ProductGrid'
 import { SearchBar } from '../components/SearchBar'
 import {
   ArrowRightIcon,
+  CartIcon,
   CheckIcon,
   ChevronDownIcon,
+  ClipboardListIcon,
+  CreditCardIcon,
+  SearchIcon,
   ShieldCheckIcon,
   SparklesIcon,
   StoreIcon,
@@ -70,6 +74,41 @@ export function HomePage() {
       text: t('home.trustTrackingText'),
       icon: TruckIcon,
     },
+  ]
+
+  const steps = [
+    {
+      title: t('home.howStep1Title'),
+      text: t('home.howStep1Text'),
+      icon: SearchIcon,
+    },
+    {
+      title: t('home.howStep2Title'),
+      text: t('home.howStep2Text'),
+      icon: CreditCardIcon,
+    },
+    {
+      title: t('home.howStep3Title'),
+      text: t('home.howStep3Text'),
+      icon: TruckIcon,
+    },
+    {
+      title: t('home.howStep4Title'),
+      text: t('home.howStep4Text'),
+      icon: ClipboardListIcon,
+    },
+  ]
+
+  const shopperPoints = [
+    t('home.shopperPoint1'),
+    t('home.shopperPoint2'),
+    t('home.shopperPoint3'),
+  ]
+
+  const ownerPoints = [
+    t('home.ownerPoint1'),
+    t('home.ownerPoint2'),
+    t('home.ownerPoint3'),
   ]
 
   return (
@@ -184,6 +223,123 @@ export function HomePage() {
         })}
       </section>
 
+      <section className="mt-12 sm:mt-16">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">
+            {t('home.howEyebrow')}
+          </p>
+          <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+            {t('home.howTitle')}
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm text-slate-600 sm:text-base">
+            {t('home.howSubtitle')}
+          </p>
+        </div>
+
+        <ol className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {steps.map((step, index) => {
+            const Icon = step.icon
+            return (
+              <li
+                key={step.title}
+                className="relative rounded-3xl border border-stone-200/80 bg-white p-5 shadow-sm"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="grid size-10 place-items-center rounded-2xl bg-emerald-50 text-emerald-700">
+                    <Icon className="size-5" />
+                  </span>
+                  <span className="text-sm font-bold text-stone-300">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                </div>
+                <h3 className="mt-4 text-sm font-semibold text-slate-900">
+                  {step.title}
+                </h3>
+                <p className="mt-1 text-sm leading-relaxed text-slate-500">
+                  {step.text}
+                </p>
+              </li>
+            )
+          })}
+        </ol>
+      </section>
+
+      <section className="mt-12 sm:mt-16">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">
+            {t('home.rolesEyebrow')}
+          </p>
+          <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+            {t('home.rolesTitle')}
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm text-slate-600 sm:text-base">
+            {t('home.rolesSubtitle')}
+          </p>
+        </div>
+
+        <div className="mt-5 grid gap-3 lg:grid-cols-2">
+          <div className="rounded-[2rem] border border-stone-200/80 bg-white p-6 shadow-sm sm:p-8">
+            <span className="grid size-11 place-items-center rounded-2xl bg-emerald-50 text-emerald-700">
+              <CartIcon className="size-5" />
+            </span>
+            <h3 className="mt-4 text-xl font-bold tracking-tight text-slate-900">
+              {t('home.shopperTitle')}
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-slate-600">
+              {t('home.shopperText')}
+            </p>
+            <ul className="mt-5 space-y-2.5">
+              {shopperPoints.map((point) => (
+                <li
+                  key={point}
+                  className="flex items-start gap-2.5 text-sm text-slate-700"
+                >
+                  <CheckIcon className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+                  {point}
+                </li>
+              ))}
+            </ul>
+            <Link
+              to="/search"
+              className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-700"
+            >
+              {t('home.shopperCta')}
+              <ArrowRightIcon className="size-4" />
+            </Link>
+          </div>
+
+          <div className="rounded-[2rem] bg-emerald-950 p-6 text-white shadow-xl shadow-emerald-950/10 sm:p-8">
+            <span className="grid size-11 place-items-center rounded-2xl bg-white/10 text-emerald-200">
+              <StoreIcon className="size-5" />
+            </span>
+            <h3 className="mt-4 text-xl font-bold tracking-tight">
+              {t('home.ownerTitle')}
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-emerald-50/70">
+              {t('home.ownerText')}
+            </p>
+            <ul className="mt-5 space-y-2.5">
+              {ownerPoints.map((point) => (
+                <li
+                  key={point}
+                  className="flex items-start gap-2.5 text-sm text-emerald-50/85"
+                >
+                  <CheckIcon className="mt-0.5 size-4 shrink-0 text-emerald-300" />
+                  {point}
+                </li>
+              ))}
+            </ul>
+            <Link
+              to="/signup?role=store_owner"
+              className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-emerald-950 transition-colors hover:bg-emerald-50"
+            >
+              {t('home.ownerCta')}
+              <ArrowRightIcon className="size-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {failed ? (
         <div className="mt-10">
           <ErrorState
@@ -273,27 +429,6 @@ export function HomePage() {
                 <ProductGrid products={products} showStore />
               )}
             </div>
-          </section>
-
-          <section className="mt-12 overflow-hidden rounded-[2rem] bg-emerald-950 px-6 py-8 text-white shadow-xl shadow-emerald-950/10 sm:mt-16 sm:px-10 sm:py-10 lg:flex lg:items-center lg:justify-between lg:gap-10">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-emerald-300">
-                {t('home.sellerEyebrow')}
-              </p>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
-                {t('home.sellerTitle')}
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-emerald-50/70 sm:text-base">
-                {t('home.sellerText')}
-              </p>
-            </div>
-            <Link
-              to="/signup?role=store_owner"
-              className="mt-6 inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-emerald-950 transition-colors hover:bg-emerald-50 lg:mt-0"
-            >
-              {t('home.sellerCta')}
-              <ArrowRightIcon className="size-4" />
-            </Link>
           </section>
         </>
       )}

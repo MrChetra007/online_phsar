@@ -1066,6 +1066,10 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
 - Home page category grid replaced with a single dropdown that navigates to
   `/c/:slug`, including indented child categories. Removed the unused grid
   skeleton.
+- Home page expanded into a landing page: added a 4-step "How it works" section
+  (browse, pay COD/KHQR, store ships in 1-3 days, track order) and a two-role
+  section for shoppers and store owners with CTAs. Removed the old seller
+  banner. Added EN/KM keys and removed the unused `home.seller*` keys.
 - Committed as `9b77af7 feat: add filters and default results to search page`.
 
 ### 2026-10-28
