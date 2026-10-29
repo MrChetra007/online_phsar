@@ -1063,6 +1063,7 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
 - Added English/Khmer search filter copy.
 - Passed typecheck, lint (existing `KhqrCard` warning), 23 files / 89 tests,
   Prettier, and build.
+- Committed as `9b77af7 feat: add filters and default results to search page`.
 
 ### 2026-10-28
 
