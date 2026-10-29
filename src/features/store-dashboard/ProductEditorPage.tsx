@@ -13,8 +13,10 @@ import {
   createVariant,
   deleteProductImage,
   getMyProduct,
+  getProductLink,
   getStoreCommissionPercent,
   productErrorKey,
+  saveProductLink,
   updateProduct,
   updateVariant,
   type ProductImage,
@@ -24,6 +26,7 @@ import {
 } from '../../api/products'
 import { getMyStore, type Store } from '../../api/stores'
 import { Button } from '../../components/Button'
+import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { ErrorState } from '../../components/ErrorState'
 import { Input } from '../../components/Input'
 import { LoadingState } from '../../components/LoadingState'
@@ -39,6 +42,7 @@ import type { TranslationKey } from '../../lib/i18n/translations'
 import { compressProductImage, validateProductImageFile } from '../../lib/image'
 import { centsToInput, formatMoney, parseMoneyToCents } from '../../lib/money'
 import { payoutCents } from '../../lib/products'
+import { isHttpUrl } from '../../lib/url'
 import { useAuth } from '../auth/context'
 import { useToast } from '../toast'
 
@@ -149,6 +153,7 @@ type FormErrors = {
   name?: string
   category?: string
   description?: string
+  productLink?: string
   variants?: string
   activeVariants?: string
   variantFields: Record<string, VariantFieldErrors>
@@ -214,6 +219,7 @@ export function ProductEditorPage() {
   const [name, setName] = useState('')
   const [categoryId, setCategoryId] = useState('')
   const [description, setDescription] = useState('')
+  const [productLink, setProductLink] = useState('')
   const [status, setStatus] = useState<ProductStatus>('draft')
   const [variants, setVariants] = useState<VariantDraft[]>([])
   const [optionGroups, setOptionGroups] = useState<OptionGroupDraft[]>([])
@@ -226,6 +232,7 @@ export function ProductEditorPage() {
   const [errors, setErrors] = useState<FormErrors>(emptyErrors)
   const [formError, setFormError] = useState<TranslationKey | null>(null)
   const [imageError, setImageError] = useState<TranslationKey | null>(null)
+  const [showLinkConfirm, setShowLinkConfirm] = useState(false)
   const [loadedKey, setLoadedKey] = useState<string | null>(null)
   const [failedKey, setFailedKey] = useState<string | null>(null)
   const [notFoundKey, setNotFoundKey] = useState<string | null>(null)
@@ -286,6 +293,7 @@ export function ProductEditorPage() {
           setName('')
           setCategoryId('')
           setDescription('')
+          setProductLink('')
           setStatus('draft')
           setVariants([blankVariant(defaultVariantLabelRef.current)])
           setOptionGroups([])
@@ -297,7 +305,10 @@ export function ProductEditorPage() {
           return
         }
 
-        const productData = await getMyProduct(productId)
+        const [productData, link] = await Promise.all([
+          getMyProduct(productId),
+          getProductLink(productId).catch(() => null),
+        ])
         if (!active) return
         if (!productData) {
           setNotFoundKey(loadKey)
@@ -311,6 +322,7 @@ export function ProductEditorPage() {
         setName(productData.name)
         setCategoryId(productData.category_id ?? '')
         setDescription(productData.description ?? '')
+        setProductLink(link ?? '')
         setStatus(productData.status)
         setVariants(
           productData.variants.length > 0
@@ -555,6 +567,10 @@ export function ProductEditorPage() {
     if (trimmedDescription.length > 4000) {
       next.description = t('store.errorProductDescription')
     }
+    const trimmedLink = productLink.trim()
+    if (trimmedLink.length > 0 && !isHttpUrl(trimmedLink)) {
+      next.productLink = t('store.errorProductLink')
+    }
     if (variants.length === 0) {
       next.variants = t('store.errorVariantRequired')
     }
@@ -599,6 +615,7 @@ export function ProductEditorPage() {
       !next.name &&
       !next.category &&
       !next.description &&
+      !next.productLink &&
       !next.variants &&
       !next.activeVariants &&
       Object.keys(next.variantFields).length === 0
@@ -615,13 +632,24 @@ export function ProductEditorPage() {
     )
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!store || locked || saving) return
     setFormError(null)
     setImageError(null)
 
     if (!validateForm()) return
+
+    if (productLink.trim() === '') {
+      setShowLinkConfirm(true)
+      return
+    }
+
+    void persistProduct()
+  }
+
+  async function persistProduct() {
+    if (!store || locked || saving) return
 
     setSaving(true)
     setUploading(false)
@@ -637,6 +665,8 @@ export function ProductEditorPage() {
       const saved = product
         ? await updateProduct(product.id, productInput)
         : await createProduct({ storeId: store.id, ...productInput })
+
+      await saveProductLink(saved.id, productLink.trim())
 
       for (const variant of variants) {
         const input = variantToInput(variant)
@@ -819,6 +849,26 @@ export function ProductEditorPage() {
               hint={t('store.productDescriptionHint')}
               maxLength={4000}
               rows={5}
+              disabled={locked || saving}
+            />
+
+            <Input
+              label={t('store.productLink')}
+              name="productLink"
+              type="url"
+              value={productLink}
+              onChange={(event) => {
+                setProductLink(event.target.value)
+                setFormError(null)
+                setErrors((current) => ({
+                  ...current,
+                  productLink: undefined,
+                }))
+              }}
+              error={errors.productLink}
+              hint={t('store.productLinkHint')}
+              placeholder={t('store.productLinkPlaceholder')}
+              maxLength={2000}
               disabled={locked || saving}
             />
 
@@ -1282,6 +1332,21 @@ export function ProductEditorPage() {
           </Link>
         </div>
       </form>
+
+      {showLinkConfirm ? (
+        <ConfirmDialog
+          title={t('store.noLinkConfirmTitle')}
+          confirmLabel={t('store.noLinkConfirmSave')}
+          cancelLabel={t('store.noLinkConfirmCancel')}
+          onConfirm={() => {
+            setShowLinkConfirm(false)
+            void persistProduct()
+          }}
+          onCancel={() => setShowLinkConfirm(false)}
+        >
+          {t('store.noLinkConfirmBody')}
+        </ConfirmDialog>
+      ) : null}
     </section>
   )
 }

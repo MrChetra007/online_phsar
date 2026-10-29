@@ -19,9 +19,11 @@ export type ProductOption =
 export type ProductVariantOption =
   Database['public']['Tables']['product_variant_options']['Row']
 
-export type ProductOptionGroupWithOptions = ProductOptionGroup & {
-  options: ProductOption[]
-} | any
+export type ProductOptionGroupWithOptions =
+  | (ProductOptionGroup & {
+      options: ProductOption[]
+    })
+  | any
 
 export type VariantOptionInput = {
   variantId: string
@@ -250,6 +252,45 @@ export async function deleteProductImage(image: {
   if (error) throw error
 }
 
+export async function getProductLink(
+  productId: string,
+): Promise<string | null> {
+  const { data, error } = await (supabase as any)
+    .from('product_links')
+    .select('product_link')
+    .eq('product_id', productId)
+    .maybeSingle()
+
+  if (error) throw error
+  return (data as { product_link: string } | null)?.product_link ?? null
+}
+
+export async function saveProductLink(
+  productId: string,
+  productLink: string,
+): Promise<void> {
+  const link = productLink.trim()
+
+  if (link === '') {
+    const { error } = await (supabase as any)
+      .from('product_links')
+      .delete()
+      .eq('product_id', productId)
+
+    if (error) throw error
+    return
+  }
+
+  const { error } = await (supabase as any)
+    .from('product_links')
+    .upsert(
+      { product_id: productId, product_link: link },
+      { onConflict: 'product_id' },
+    )
+
+  if (error) throw error
+}
+
 export async function getStoreCommissionPercent(): Promise<number> {
   const { data, error } = await supabase.rpc('get_store_commission_percent')
   if (error) throw error
@@ -274,9 +315,11 @@ export async function listProductOptionGroups(
 
   if (error) throw error
 
-  const groups = ((data ?? []) as unknown as Array<
-    ProductOptionGroup & { product_options: ProductOption[] | null }
-  >).map((group) => ({
+  const groups = (
+    (data ?? []) as unknown as Array<
+      ProductOptionGroup & { product_options: ProductOption[] | null }
+    >
+  ).map((group) => ({
     ...group,
     options: [...(group.product_options ?? [])].sort((a, b) => {
       if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order

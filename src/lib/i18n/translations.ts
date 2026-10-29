@@ -249,6 +249,10 @@ export const en = {
   'store.hiddenCategory': 'Current category (hidden)',
   'store.productDescription': 'Product description',
   'store.productDescriptionHint': 'Optional. Up to 4,000 characters.',
+  'store.productLink': 'Original product link',
+  'store.productLinkHint':
+    'Optional. Where this product is sourced from. Only you and the admin can see it.',
+  'store.productLinkPlaceholder': 'https://example.com/product',
   'store.productVisibility': 'Visibility',
   'store.options': 'Options',
   'store.optionsHint':
@@ -295,6 +299,13 @@ export const en = {
   'store.errorProductCategory': 'Choose a category.',
   'store.errorProductDescription':
     'Keep the description under 4,000 characters.',
+  'store.errorProductLink':
+    'Enter a valid link starting with http:// or https://.',
+  'store.noLinkConfirmTitle': 'Save without a product link?',
+  'store.noLinkConfirmBody':
+    'No original product link was added. You can add it later. Save the product anyway?',
+  'store.noLinkConfirmSave': 'Save anyway',
+  'store.noLinkConfirmCancel': 'Add link',
   'store.errorVariantLabel': 'Each variant needs a label.',
   'store.errorVariantDuplicate': 'Variant labels must be unique.',
   'store.errorVariantPrice': 'Enter a valid price for every variant.',
@@ -1128,6 +1139,10 @@ export const km: Record<TranslationKey, string> = {
   'store.hiddenCategory': 'ប្រភេទបច្ចុប្បន្ន (បានលាក់)',
   'store.productDescription': 'ការពិពណ៌នាទំនិញ',
   'store.productDescriptionHint': 'ស្រេចចិត្ត។ រហូតដល់ ៤,០០០ តួអក្សរ។',
+  'store.productLink': 'តំណផលិតផលដើម',
+  'store.productLinkHint':
+    'ស្រេចចិត្ត។ ប្រភពដើមនៃផលិតផលនេះ។ មានតែអ្នក និងអ្នកគ្រប់គ្រងប៉ុណ្ណោះដែលអាចមើលឃើញ។',
+  'store.productLinkPlaceholder': 'https://example.com/product',
   'store.productVisibility': 'ការបង្ហាញ',
   'store.options': 'ជម្រើសទំនិញ',
   'store.optionsHint':
@@ -1172,6 +1187,13 @@ export const km: Record<TranslationKey, string> = {
   'store.errorProductName': 'សូមបញ្ចូលឈ្មោះទំនិញចាប់ពី ២ ដល់ ១៥០ តួអក្សរ។',
   'store.errorProductCategory': 'សូមជ្រើសរើសប្រភេទ។',
   'store.errorProductDescription': 'សូមរក្សាការពិពណ៌នាឱ្យតិចជាង ៤,០០០ តួអក្សរ។',
+  'store.errorProductLink':
+    'សូមបញ្ចូលតំណត្រឹមត្រូវដែលចាប់ផ្តើមដោយ http:// ឬ https://។',
+  'store.noLinkConfirmTitle': 'រក្សាទុកដោយគ្មានតំណផលិតផលដើម?',
+  'store.noLinkConfirmBody':
+    'មិនបានបញ្ចូលតំណផលិតផលដើមទេ។ អ្នកអាចបន្ថែមវានៅពេលក្រោយ។ រក្សាទុកទំនិញទៅហើយ?',
+  'store.noLinkConfirmSave': 'រក្សាទុកយ៉ាងណាក៏ដោយ',
+  'store.noLinkConfirmCancel': 'បន្ថែមតំណ',
   'store.errorVariantLabel': 'ជម្រើសនីមួយៗត្រូវមានស្លាក។',
   'store.errorVariantDuplicate': 'ស្លាកជម្រើសត្រូវតែមានតែមួយ។',
   'store.errorVariantPrice': 'សូមបញ្ចូលតម្លៃត្រឹមត្រូវសម្រាប់ជម្រើសនីមួយៗ។',

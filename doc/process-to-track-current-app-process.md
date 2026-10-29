@@ -1,6 +1,6 @@
 # Process Tracker: Current App State
 
-Last updated: 2026-10-28
+Last updated: 2026-10-29
 Branch: `main`
 Latest feature commits: `54c8e18 fix: make favorites page accessible to guests`,
 then `d1029fe feat: add customer accounts, order history, and favorites`
@@ -934,6 +934,12 @@ supabase functions deploy khqr_webhook --no-verify-jwt --project-ref wdbelxrhvki
 
 ## 9. Known open items
 
+- Migration `010_product_links.sql` (private dropshipping product link) is
+  written locally but not applied remotely. Apply it before using the new
+  product-link field; until then saving a link fails.
+- `product_links` is queried through `(supabase as any)` because
+  `database.types.ts` does not include the new table; regenerate types after
+  applying migration 010.
 - Step 15 customer accounts/favorites is implemented locally; live remote and
   browser acceptance is pending.
 - Guest favorites live only in `localStorage` until a customer signs in. There is
@@ -1030,6 +1036,23 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
 ---
 
 ## 11. Update log
+
+### 2026-10-29
+
+- Added an optional original/supplier product link for dropshipping.
+- Added migration `010_product_links.sql` with a private `product_links`
+  table (product owner and super admin only) instead of a column on the
+  publicly readable `products` table, so the link is never exposed to
+  customers or competitors.
+- Product editor now has an "Original product link" field with http/https
+  validation. Saving without a link shows a confirmation dialog ("Save
+  without a product link?") with "Save anyway" / "Add link".
+- Added `getProductLink`/`saveProductLink` API wrappers, `isHttpUrl` helper
+  and tests, and English/Khmer copy.
+- Passed typecheck, lint (existing `KhqrCard` warning), 23 files / 89 tests,
+  changed-file Prettier, and build. Migration `010` is not applied remotely
+  yet; the new table is accessed through `as any` until types are
+  regenerated.
 
 ### 2026-10-28
 
