@@ -1054,6 +1054,15 @@ supabase secrets list --project-ref wdbelxrhvkikrncsgshg
   yet; the new table is accessed through `as any` until types are
   regenerated.
 - Committed as `1a23ca7 feat: add private dropshipping product link`.
+- Reworked `/search`: it now loads products immediately instead of waiting for
+  a query, with a desktop filter sidebar and a mobile filter panel.
+- Filters: category (including child categories), min/max price, in-stock only,
+  sort by newest/price, a live result count, clear-filters action, and an empty
+  state for over-narrow filters. Query search still uses the server-side name
+  match; price/sort/stock filtering is display-only in the browser.
+- Added English/Khmer search filter copy.
+- Passed typecheck, lint (existing `KhqrCard` warning), 23 files / 89 tests,
+  Prettier, and build.
 
 ### 2026-10-28
 
